@@ -4,7 +4,7 @@ import google.generativeai as genai
 import io
 
 # ---------------------------
-# CONFIGURE THE STREAMLIT PAGE
+# CONFIGURE STREAMLIT PAGE
 # ---------------------------
 st.set_page_config(page_title="AI Plant Doctor", page_icon="🌿", layout="wide")
 st.title("🌿 AI Plant Doctor – Universal Plant Disease Detector")
@@ -13,7 +13,7 @@ st.write("Upload a plant leaf image to detect diseases using Google Gemini Visio
 # ---------------------------
 # CONFIGURE GEMINI API
 # ---------------------------
-GEMINI_API_KEY = "AIzaSyAGalJ5dy6xxDxLPcvlvzB5KxpVdVEzcRc"  # <-- paste your key here
+GEMINI_API_KEY = "YOUR_API_KEY_HERE"   # Replace with your key
 genai.configure(api_key=GEMINI_API_KEY)
 
 model = genai.GenerativeModel("gemini-2.0-flash")
@@ -29,10 +29,16 @@ if uploaded_file:
 
     st.subheader("🔍 AI Diagnosis")
 
-    # Convert image to bytes
-    img_bytes = io.BytesIO()
-    image.save(img_bytes, format="PNG")
-    img_bytes = img_bytes.getvalue()
+    # Convert image to PNG bytes
+    img_buffer = io.BytesIO()
+    image.save(img_buffer, format="PNG")
+    img_bytes = img_buffer.getvalue()
+
+    # Gemini expects image as a dict → {mime_type, data}
+    image_part = {
+        "mime_type": "image/png",
+        "data": img_bytes
+    }
 
     # ---------------------------
     # PROMPT FOR GEMINI
@@ -53,10 +59,15 @@ if uploaded_file:
     """
 
     # ---------------------------
-    # SEND TO GEMINI VISION
+    # SEND IMAGE + PROMPT TO GEMINI
     # ---------------------------
     with st.spinner("Diagnosing the leaf..."):
-        response = model.generate_content([prompt, img_bytes])
+        response = model.generate_content(
+            [
+                prompt,
+                image_part
+            ]
+        )
 
     st.success("Diagnosis Complete!")
     st.write(response.text)
