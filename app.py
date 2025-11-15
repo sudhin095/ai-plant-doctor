@@ -2,6 +2,7 @@ import streamlit as st
 from PIL import Image
 import io
 import google.generativeai as genai
+import tempfile
 
 # ---------------------------
 # STREAMLIT PAGE CONFIG
@@ -28,19 +29,18 @@ if uploaded_file:
 
     st.subheader("🔍 AI Diagnosis")
 
-    # Save uploaded image to bytes
-    buffer = io.BytesIO()
-    image.save(buffer, format="PNG")
-    img_bytes = buffer.getvalue()
+    # ---------------------------
+    # SAVE IMAGE TO A TEMP FILE
+    # ---------------------------
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
+        image.save(tmp.name, format="PNG")
+        temp_path = tmp.name
 
     # ---------------------------
-    # UPLOAD IMAGE TO GEMINI
+    # UPLOAD IMAGE (OLD SDK FORMAT)
     # ---------------------------
     with st.spinner("Uploading image..."):
-        uploaded = genai.upload_file(
-            file=io.BytesIO(img_bytes),
-            mime_type="image/png"
-        )
+        uploaded = genai.upload_file(path=temp_path)
 
     # ---------------------------
     # PROMPT
@@ -57,15 +57,10 @@ if uploaded_file:
     """
 
     # ---------------------------
-    # SEND TO GEMINI
+    # SEND TO GEMINI - PASS FILE REFERENCE
     # ---------------------------
     with st.spinner("Diagnosing the leaf..."):
-        response = model.generate_content(
-            [
-                prompt,
-                uploaded  # <-- USE THE UPLOADED FILE REFERENCE
-            ]
-        )
+        response = model.generate_content([prompt, uploaded])
 
     st.success("Diagnosis Complete!")
     st.write(response.text)
