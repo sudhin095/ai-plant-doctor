@@ -52,26 +52,13 @@ if uploaded_file:
     """
 
     # ---------------------------
-    # SEND TO GEMINI USING MESSAGES API
-    # (Stable for Streamlit Cloud)
+    # SEND TO GEMINI (CORRECT FORMAT)
     # ---------------------------
     with st.spinner("Diagnosing the leaf..."):
-        response = model.generate_content(
-            contents=[
-                {
-                    "role": "user",
-                    "parts": [
-                        {"text": prompt},
-                        {
-                            "inline_data": {
-                                "mime_type": "image/png",
-                                "data": img_bytes
-                            }
-                        }
-                    ]
-                }
-            ]
-        )
+        response = model.generate_content([
+            {"text": prompt},
+            {"inline_data": {"mime_type": "image/png", "data": img_bytes}}
+        ])
 
     st.success("Diagnosis Complete!")
     st.write(response.text)
