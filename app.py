@@ -11,11 +11,10 @@ st.title("🌿 AI Plant Doctor – Universal Plant Disease Detector")
 st.write("Upload a plant leaf image to detect diseases using Google Gemini Vision AI.")
 
 # ---------------------------
-# GEMINI SETUP (PUT YOUR KEY)
+# GEMINI CONFIG
 # ---------------------------
 genai.configure(api_key="YOUR_API_KEY_HERE")
 
-# Supported Model
 model = genai.GenerativeModel("gemini-1.5-flash-latest")
 
 # ---------------------------
@@ -30,16 +29,16 @@ if uploaded_file:
     st.subheader("🔍 AI Diagnosis")
 
     # Convert image to bytes
-    img_buffer = io.BytesIO()
-    image.save(img_buffer, format="PNG")
-    img_bytes = img_buffer.getvalue()
+    buffer = io.BytesIO()
+    image.save(buffer, format="PNG")
+    img_bytes = buffer.getvalue()
 
     # ---------------------------
-    # PROMPT (SAFE TRIPLE SINGLE QUOTES)
+    # PROMPT
     # ---------------------------
     prompt = '''
     You are a plant disease expert.
-    Analyze the leaf image and provide the following:
+    Analyze the leaf image and provide:
 
     1. Plant Name
     2. Disease Name (or say "Healthy")
@@ -49,26 +48,19 @@ if uploaded_file:
     6. Natural/Organic Remedies
     7. Prevention Tips
 
-    Keep the answer clean and structured in bullet points.
+    Present the response in clean bullet points.
     '''
 
     # ---------------------------
-    # SEND TO GEMINI (CORRECT IMAGE FORMAT)
+    # SEND TO GEMINI (CORRECT FORMAT)
     # ---------------------------
     with st.spinner("Diagnosing the leaf..."):
         response = model.generate_content(
             [
+                {"text": prompt},
                 {
-                    "role": "user",
-                    "parts": [
-                        {"text": prompt},
-                        genai.types.Part(
-                            inline_data=genai.types.Blob(
-                                mime_type="image/png",
-                                data=img_bytes
-                            )
-                        )
-                    ]
+                    "mime_type": "image/png",
+                    "data": img_bytes
                 }
             ]
         )
