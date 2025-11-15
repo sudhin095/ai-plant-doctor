@@ -29,36 +29,42 @@ if uploaded_file:
     st.subheader("🔍 AI Diagnosis")
 
     # Convert image to bytes
-    img_bytes = io.BytesIO()
-    image.save(img_bytes, format="PNG")
-    img_bytes = img_bytes.getvalue()
+    img_bytes_io = io.BytesIO()
+    image.save(img_bytes_io, format="PNG")
+    img_bytes = img_bytes_io.getvalue()
 
-    # ---------------------------
-    # PROMPT
-    # ---------------------------
     prompt = """
     You are a plant disease expert.
     Analyze the leaf image and provide:
 
     - Plant Name
-    - Disease Name (or state 'Healthy')
+    - Disease Name (or say 'Healthy')
     - Severity Level
     - Likely Cause
     - Treatment Steps
-    - Natural/Organic Remedies
+    - Organic Remedies
     - Prevention Tips
 
-    Give a clear, structured response.
+    Give a short and clear structured answer.
     """
 
-    # ---------------------------
-    # SEND TO GEMINI (CORRECT FORMAT)
-    # ---------------------------
     with st.spinner("Diagnosing the leaf..."):
-        response = model.generate_content([
-            {"text": prompt},
-            {"inline_data": {"mime_type": "image/png", "data": img_bytes}}
-        ])
+        response = model.generate_content(
+            [
+                {
+                    "role": "user",
+                    "parts": [
+                        {"text": prompt},
+                        {
+                            "inline_data": {
+                                "mime_type": "image/png",
+                                "data": img_bytes
+                            }
+                        }
+                    ]
+                }
+            ]
+        )
 
     st.success("Diagnosis Complete!")
     st.write(response.text)
