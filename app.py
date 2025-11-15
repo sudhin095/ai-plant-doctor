@@ -1,23 +1,19 @@
 import streamlit as st
 from PIL import Image
-import google.generativeai as genai
 import io
+from google import genai
 
 # ---------------------------
-# CONFIGURE THE STREAMLIT PAGE
+# PAGE CONFIG
 # ---------------------------
 st.set_page_config(page_title="AI Plant Doctor", page_icon="🌿", layout="wide")
 st.title("🌿 AI Plant Doctor – Universal Plant Disease Detector")
 st.write("Upload a plant leaf image to detect diseases using Google Gemini Vision AI.")
 
 # ---------------------------
-# CONFIGURE GEMINI API
+# GEMINI CLIENT SETUP
 # ---------------------------
-GEMINI_API_KEY = "YOUR_API_KEY_HERE"   # <-- replace with your real key
-genai.configure(api_key=GEMINI_API_KEY)
-
-# Use a vision-enabled model (Fix #1)
-model = genai.GenerativeModel("gemini-1.5-flash")
+client = genai.Client(api_key="YOUR_API_KEY_HERE")   # <-- your key
 
 # ---------------------------
 # IMAGE UPLOADER
@@ -30,13 +26,13 @@ if uploaded_file:
 
     st.subheader("🔍 AI Diagnosis")
 
-    # Convert image to bytes (Fix #2)
-    img_bytes = io.BytesIO()
-    image.save(img_bytes, format="PNG")
-    img_bytes = img_bytes.getvalue()
+    # Convert image → bytes
+    img_bytes_io = io.BytesIO()
+    image.save(img_bytes_io, format="PNG")
+    img_bytes = img_bytes_io.getvalue()
 
     # ---------------------------
-    # PROMPT FOR GEMINI
+    # PROMPT
     # ---------------------------
     prompt = """
     You are an expert plant disease identification AI.
@@ -50,17 +46,20 @@ if uploaded_file:
     6. Organic/Natural Remedies
     7. Prevention Tips
 
-    Give the answer in a clean, readable format.
+    Format neatly.
     """
 
     # ---------------------------
-    # SEND IMAGE + PROMPT TO GEMINI
+    # SEND TO GEMINI (NEW API)
     # ---------------------------
     with st.spinner("Diagnosing the leaf..."):
-        response = model.generate_content(
-            [
-                {"text": prompt},
-                {"mime_type": "image/png", "data": img_bytes}
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=[
+                {"role": "user", "parts": [
+                    {"text": prompt},
+                    {"inline_data": {"mime_type": "image/png", "data": img_bytes}}
+                ]}
             ]
         )
 
