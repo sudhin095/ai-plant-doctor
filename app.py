@@ -2,6 +2,7 @@ import streamlit as st
 from PIL import Image
 import io
 import google.generativeai as genai
+from google.generativeai.types import content_types
 
 # ---------------------------
 # STREAMLIT PAGE CONFIG
@@ -15,7 +16,7 @@ st.write("Upload a plant leaf image to detect diseases using Google Gemini Visio
 # ---------------------------
 genai.configure(api_key="YOUR_API_KEY_HERE")
 
-model = genai.GenerativeModel("gemini-1.5-flash")  # Valid model
+model = genai.GenerativeModel("gemini-1.5-flash-001")   # STABLE vision model
 
 # ---------------------------
 # IMAGE UPLOADER
@@ -33,13 +34,11 @@ if uploaded_file:
     image.save(buffer, format="PNG")
     img_bytes = buffer.getvalue()
 
-    # CORRECT IMAGE PART FORMAT
-    image_part = {
-        "inline_data": {
-            "mime_type": "image/png",
-            "data": img_bytes
-        }
-    }
+    # Convert to Gemini Part (IMPORTANT)
+    image_part = content_types.to_part(
+        data=img_bytes,
+        mime_type="image/png"
+    )
 
     # ---------------------------
     # PROMPT
@@ -64,14 +63,9 @@ if uploaded_file:
     # ---------------------------
     with st.spinner("Diagnosing the leaf..."):
         response = model.generate_content(
-            contents=[
-                {
-                    "role": "user",
-                    "parts": [
-                        {"text": prompt},
-                        image_part
-                    ]
-                }
+            [
+                {"text": prompt},
+                image_part   # CORRECT format
             ]
         )
 
