@@ -13,9 +13,9 @@ st.write("Upload a plant leaf image to detect diseases using Google Gemini Visio
 # ---------------------------
 # GEMINI SETUP (PUT YOUR KEY)
 # ---------------------------
-genai.configure(api_key="AIzaSyCum7bIDBLFAynHfwOv2DLJEUoym89eI5k")
+genai.configure(api_key="YOUR_API_KEY_HERE")
 
-# Stable & Supported Model on v1beta
+# Supported Model
 model = genai.GenerativeModel("gemini-1.5-flash-latest")
 
 # ---------------------------
@@ -29,25 +29,49 @@ if uploaded_file:
 
     st.subheader("🔍 AI Diagnosis")
 
-    # Convert image to bytes (PNG always works)
+    # Convert image to bytes
     img_buffer = io.BytesIO()
     image.save(img_buffer, format="PNG")
     img_bytes = img_buffer.getvalue()
 
     # ---------------------------
-    # PROMPT
+    # PROMPT (SAFE TRIPLE SINGLE QUOTES)
     # ---------------------------
-    prompt = """
+    prompt = '''
     You are a plant disease expert.
     Analyze the leaf image and provide the following:
 
     1. Plant Name
     2. Disease Name (or say "Healthy")
-    3. Severity Level (Low / Medium / High)
+    3. Severity (Low / Medium / High)
     4. Likely Cause
     5. Step-by-step Treatment
     6. Natural/Organic Remedies
     7. Prevention Tips
 
-    Provide the answer in clean bullet points.
-    "
+    Keep the answer clean and structured in bullet points.
+    '''
+
+    # ---------------------------
+    # SEND TO GEMINI (CORRECT IMAGE FORMAT)
+    # ---------------------------
+    with st.spinner("Diagnosing the leaf..."):
+        response = model.generate_content(
+            [
+                {
+                    "role": "user",
+                    "parts": [
+                        {"text": prompt},
+                        genai.types.Part(
+                            inline_data=genai.types.Blob(
+                                mime_type="image/png",
+                                data=img_bytes
+                            )
+                        )
+                    ]
+                }
+            ]
+        )
+
+    st.success("Diagnosis Complete!")
+    st.write(response.text)
