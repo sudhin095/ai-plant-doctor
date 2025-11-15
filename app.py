@@ -2,7 +2,6 @@ import streamlit as st
 from PIL import Image
 import io
 import google.generativeai as genai
-from google.generativeai.types import content_types
 
 # ---------------------------
 # STREAMLIT PAGE CONFIG
@@ -16,7 +15,7 @@ st.write("Upload a plant leaf image to detect diseases using Google Gemini Visio
 # ---------------------------
 genai.configure(api_key="YOUR_API_KEY_HERE")
 
-model = genai.GenerativeModel("gemini-1.5-flash-001")   # STABLE vision model
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 # ---------------------------
 # IMAGE UPLOADER
@@ -29,33 +28,32 @@ if uploaded_file:
 
     st.subheader("🔍 AI Diagnosis")
 
-    # Convert image to bytes
+    # Save uploaded image to bytes
     buffer = io.BytesIO()
     image.save(buffer, format="PNG")
     img_bytes = buffer.getvalue()
 
-    # Convert to Gemini Part (IMPORTANT)
-    image_part = content_types.to_part(
-        data=img_bytes,
-        mime_type="image/png"
-    )
+    # ---------------------------
+    # UPLOAD IMAGE TO GEMINI
+    # ---------------------------
+    with st.spinner("Uploading image..."):
+        uploaded = genai.upload_file(
+            file=io.BytesIO(img_bytes),
+            mime_type="image/png"
+        )
 
     # ---------------------------
     # PROMPT
     # ---------------------------
     prompt = """
-    You are a plant disease expert.
-    Analyze the leaf image and provide:
-
-    1. Plant Name
-    2. Disease Name (or say "Healthy")
-    3. Severity (Low / Medium / High)
-    4. Likely Cause
-    5. Step-by-step Treatment
-    6. Natural/Organic Remedies
-    7. Prevention Tips
-
-    Present the response in clean bullet points.
+    You are a plant disease expert. Analyze the leaf image and provide:
+    - Plant Name
+    - Disease Name or 'Healthy'
+    - Severity
+    - Likely Cause
+    - Treatment
+    - Organic Remedies
+    - Prevention Tips
     """
 
     # ---------------------------
@@ -64,8 +62,8 @@ if uploaded_file:
     with st.spinner("Diagnosing the leaf..."):
         response = model.generate_content(
             [
-                {"text": prompt},
-                image_part   # CORRECT format
+                prompt,
+                uploaded  # <-- USE THE UPLOADED FILE REFERENCE
             ]
         )
 
