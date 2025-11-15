@@ -13,7 +13,7 @@ st.write("Upload a plant leaf image to detect diseases using Google Gemini Visio
 # ---------------------------
 # GEMINI SETUP
 # ---------------------------
-genai.configure(api_key="YOUR_API_KEY_HERE")
+genai.configure(api_key="AIzaSyCum7bIDBLFAynHfwOv2DLJEUoym89eI5k")
 
 model = genai.GenerativeModel("gemini-1.5-flash")
 
@@ -68,3 +68,4 @@ if uploaded_file:
 
     st.success("Diagnosis Complete!")
     st.write(response.text)
+
