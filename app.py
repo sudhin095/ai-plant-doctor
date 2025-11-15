@@ -4,7 +4,7 @@ import google.generativeai as genai
 import io
 
 # ---------------------------
-# CONFIGURE STREAMLIT PAGE
+# CONFIGURE THE STREAMLIT PAGE
 # ---------------------------
 st.set_page_config(page_title="AI Plant Doctor", page_icon="🌿", layout="wide")
 st.title("🌿 AI Plant Doctor – Universal Plant Disease Detector")
@@ -13,10 +13,11 @@ st.write("Upload a plant leaf image to detect diseases using Google Gemini Visio
 # ---------------------------
 # CONFIGURE GEMINI API
 # ---------------------------
-GEMINI_API_KEY = "YOUR_API_KEY_HERE"   # Replace with your key
+GEMINI_API_KEY = "YOUR_API_KEY_HERE"   # <-- replace with your real key
 genai.configure(api_key=GEMINI_API_KEY)
 
-model = genai.GenerativeModel("gemini-2.0-flash")
+# Use a vision-enabled model (Fix #1)
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 # ---------------------------
 # IMAGE UPLOADER
@@ -29,16 +30,10 @@ if uploaded_file:
 
     st.subheader("🔍 AI Diagnosis")
 
-    # Convert image to PNG bytes
-    img_buffer = io.BytesIO()
-    image.save(img_buffer, format="PNG")
-    img_bytes = img_buffer.getvalue()
-
-    # Gemini expects image as a dict → {mime_type, data}
-    image_part = {
-        "mime_type": "image/png",
-        "data": img_bytes
-    }
+    # Convert image to bytes (Fix #2)
+    img_bytes = io.BytesIO()
+    image.save(img_bytes, format="PNG")
+    img_bytes = img_bytes.getvalue()
 
     # ---------------------------
     # PROMPT FOR GEMINI
@@ -55,7 +50,7 @@ if uploaded_file:
     6. Organic/Natural Remedies
     7. Prevention Tips
 
-    Give a clean and readable explanation.
+    Give the answer in a clean, readable format.
     """
 
     # ---------------------------
@@ -64,8 +59,8 @@ if uploaded_file:
     with st.spinner("Diagnosing the leaf..."):
         response = model.generate_content(
             [
-                prompt,
-                image_part
+                {"text": prompt},
+                {"mime_type": "image/png", "data": img_bytes}
             ]
         )
 
