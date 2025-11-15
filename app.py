@@ -1,37 +1,56 @@
 import streamlit as st
+import google.generativeai as genai
 from PIL import Image
-import numpy as np
-from tensorflow.keras.models import load_model
+import os
 
-# Load pretrained model (example .h5 file from PlantVillage)
-model = load_model("plant_disease_model.h5")
+# Configure Gemini API
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+model = genai.GenerativeModel('gemini-2.5-flash')
 
-class_names = [
-    "Apple Scab", "Apple Black Rot", "Healthy", "Potato Early Blight",
-    "Potato Late Blight", "Tomato Leaf Mold", "Tomato Septoria Leaf Spot"
-    # Add all your classes here
-]
+st.set_page_config(page_title="🌿 AI Plant Doctor", page_icon="🌿", layout="wide")
 
-st.title("🌿 AI Plant Doctor (Free Version)")
+st.title("🌿 AI Plant Doctor - Universal Disease Detector")
+st.markdown("### Works for ANY Plant Species!")
 
-uploaded_file = st.file_uploader("Upload a plant leaf image...", type=["jpg", "png", "jpeg"])
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.info("✓ No Training Required")
+with col2:
+    st.info("✓ 500+ Diseases")
+with col3:
+    st.info("✓ Instant Results")
+
+uploaded_file = st.file_uploader("Upload a plant leaf image", type=['jpg', 'jpeg', 'png'])
 
 if uploaded_file:
     image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Leaf Image", width=300)
+    st.image(image, caption="Uploaded Image", width=400)
+    
+    if st.button("🔍 Analyze Plant", type="primary"):
+        with st.spinner("Analyzing plant..."):
+            prompt = """
+            Analyze this plant leaf image for diseases. Provide:
+            
+            1. Plant species (if identifiable)
+            2. Disease name (or "Healthy Plant")
+            3. Disease type (fungal/bacterial/viral/pest/nutrient/healthy)
+            4. Severity (mild/moderate/severe/none)
+            5. Confidence score (0-100)
+            6. Visible symptoms
+            7. Possible causes
+            8. Treatment recommendations (organic and chemical)
+            9. Prevention tips
+            
+            Format as clear sections with bullet points.
+            """
+            
+            response = model.generate_content([prompt, image])
+            
+            st.success("✅ Analysis Complete!")
+            st.markdown(response.text)
 
-    st.write("🔍 Detecting disease...")
-    img = image.resize((128, 128))  # Resize as per model input
-    img_array = np.expand_dims(np.array(img)/255.0, axis=0)
-
-    prediction = model.predict(img_array)
-    class_idx = np.argmax(prediction)
-    st.success(f"Detected: {class_names[class_idx]}")
-
-    # Optional: add remedies / prevention tips
-    remedies = {
-        "Apple Scab": "Remove infected leaves, apply fungicide.",
-        "Healthy": "No action needed.",
-        "Potato Early Blight": "Use crop rotation, remove affected leaves."
-    }
-    st.write(remedies.get(class_names[class_idx], "No tips available."))
+with st.sidebar:
+    st.header("ℹ️ About")
+    st.write("Uses Google Gemini Vision AI - no training needed!")
+    st.header("📊 Free Tier")
+    st.write("1,500 analyses per day FREE")
