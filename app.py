@@ -1,7 +1,7 @@
 import streamlit as st
 from PIL import Image
 import io
-from google import genai
+import google.generativeai as genai
 
 # ---------------------------
 # PAGE CONFIG
@@ -11,9 +11,11 @@ st.title("🌿 AI Plant Doctor – Universal Plant Disease Detector")
 st.write("Upload a plant leaf image to detect diseases using Google Gemini Vision AI.")
 
 # ---------------------------
-# GEMINI CLIENT SETUP
+# GEMINI SETUP
 # ---------------------------
-client = genai.Client(api_key="YOUR_API_KEY_HERE")   # <-- your key
+genai.configure(api_key="YOUR_API_KEY_HERE")
+
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 # ---------------------------
 # IMAGE UPLOADER
@@ -26,40 +28,48 @@ if uploaded_file:
 
     st.subheader("🔍 AI Diagnosis")
 
-    # Convert image → bytes
-    img_bytes_io = io.BytesIO()
-    image.save(img_bytes_io, format="PNG")
-    img_bytes = img_bytes_io.getvalue()
+    # Convert image to bytes
+    img_bytes = io.BytesIO()
+    image.save(img_bytes, format="PNG")
+    img_bytes = img_bytes.getvalue()
 
     # ---------------------------
     # PROMPT
     # ---------------------------
     prompt = """
-    You are an expert plant disease identification AI.
+    You are a plant disease expert.
     Analyze the leaf image and provide:
 
-    1. Plant Name
-    2. Disease Name (or say Healthy)
-    3. Severity (Low / Medium / High)
-    4. Likely Cause
-    5. Step-by-step Treatment
-    6. Organic/Natural Remedies
-    7. Prevention Tips
+    - Plant Name
+    - Disease Name (or state 'Healthy')
+    - Severity Level
+    - Likely Cause
+    - Treatment Steps
+    - Natural/Organic Remedies
+    - Prevention Tips
 
-    Format neatly.
+    Give a clear, structured response.
     """
 
     # ---------------------------
-    # SEND TO GEMINI (NEW API)
+    # SEND TO GEMINI USING MESSAGES API
+    # (Stable for Streamlit Cloud)
     # ---------------------------
     with st.spinner("Diagnosing the leaf..."):
-        response = client.models.generate_content(
-            model="gemini-1.5-flash",
+        response = model.generate_content(
             contents=[
-                {"role": "user", "parts": [
-                    {"text": prompt},
-                    {"inline_data": {"mime_type": "image/png", "data": img_bytes}}
-                ]}
+                {
+                    "role": "user",
+                    "parts": [
+                        {"text": prompt},
+                        {
+                            "inline_data": {
+                                "mime_type": "image/png",
+                                "data": img_bytes
+                            }
+                        }
+                    ]
+                }
             ]
         )
 
