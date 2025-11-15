@@ -1,56 +1,80 @@
 import streamlit as st
 import google.generativeai as genai
-from PIL import Image
+from PIL import Image, ImageDraw
 import os
+import json
+from datetime import datetime
 
-# Configure Gemini API
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-model = genai.GenerativeModel('gemini-2.5-flash')
+# ============================================================================
+# PAGE CONFIGURATION
+# ============================================================================
 
-st.set_page_config(page_title="🌿 AI Plant Doctor", page_icon="🌿", layout="wide")
+st.set_page_config(
+    page_title="🌿 AI Plant Doctor",
+    page_icon="🌿",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-st.title("🌿 AI Plant Doctor - Universal Disease Detector")
-st.markdown("### Works for ANY Plant Species!")
+# ============================================================================
+# CUSTOM CSS FOR PREMIUM DESIGN
+# ============================================================================
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.info("✓ No Training Required")
-with col2:
-    st.info("✓ 500+ Diseases")
-with col3:
-    st.info("✓ Instant Results")
-
-uploaded_file = st.file_uploader("Upload a plant leaf image", type=['jpg', 'jpeg', 'png'])
-
-if uploaded_file:
-    image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Image", width=400)
+st.markdown("""
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
     
-    if st.button("🔍 Analyze Plant", type="primary"):
-        with st.spinner("Analyzing plant..."):
-            prompt = """
-            Analyze this plant leaf image for diseases. Provide:
-            
-            1. Plant species (if identifiable)
-            2. Disease name (or "Healthy Plant")
-            3. Disease type (fungal/bacterial/viral/pest/nutrient/healthy)
-            4. Severity (mild/moderate/severe/none)
-            5. Confidence score (0-100)
-            6. Visible symptoms
-            7. Possible causes
-            8. Treatment recommendations (organic and chemical)
-            9. Prevention tips
-            
-            Format as clear sections with bullet points.
-            """
-            
-            response = model.generate_content([prompt, image])
-            
-            st.success("✅ Analysis Complete!")
-            st.markdown(response.text)
-
-with st.sidebar:
-    st.header("ℹ️ About")
-    st.write("Uses Google Gemini Vision AI - no training needed!")
-    st.header("📊 Free Tier")
-    st.write("1,500 analyses per day FREE")
+    /* Main Background */
+    .stApp {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+    
+    /* Header Styles */
+    .header-container {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        padding: 40px 20px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #ffffff;
+        text-align: center;
+        margin-bottom: 10px;
+        letter-spacing: 1px;
+    }
+    
+    .header-subtitle {
+        font-size: 1.1rem;
+        color: #e0e7ff;
+        text-align: center;
+    }
+    
+    /* Feature Cards */
+    .feature-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        transition: transform 0.3s ease;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    /* Upload Section */
+    .upload-container {
+        background: white;
+        padding: 30px;
+        border-
