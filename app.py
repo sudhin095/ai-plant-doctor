@@ -4,18 +4,19 @@ import io
 import google.generativeai as genai
 
 # ---------------------------
-# PAGE CONFIG
+# STREAMLIT PAGE CONFIG
 # ---------------------------
 st.set_page_config(page_title="AI Plant Doctor", page_icon="🌿", layout="wide")
 st.title("🌿 AI Plant Doctor – Universal Plant Disease Detector")
 st.write("Upload a plant leaf image to detect diseases using Google Gemini Vision AI.")
 
 # ---------------------------
-# GEMINI SETUP
+# GEMINI SETUP (PUT YOUR KEY)
 # ---------------------------
 genai.configure(api_key="AIzaSyCum7bIDBLFAynHfwOv2DLJEUoym89eI5k")
 
-model = genai.GenerativeModel("gemini-1.5-flash")
+# Stable & Supported Model on v1beta
+model = genai.GenerativeModel("gemini-1.5-flash-latest")
 
 # ---------------------------
 # IMAGE UPLOADER
@@ -28,44 +29,25 @@ if uploaded_file:
 
     st.subheader("🔍 AI Diagnosis")
 
-    # Convert image to bytes
-    img_bytes_io = io.BytesIO()
-    image.save(img_bytes_io, format="PNG")
-    img_bytes = img_bytes_io.getvalue()
+    # Convert image to bytes (PNG always works)
+    img_buffer = io.BytesIO()
+    image.save(img_buffer, format="PNG")
+    img_bytes = img_buffer.getvalue()
 
+    # ---------------------------
+    # PROMPT
+    # ---------------------------
     prompt = """
     You are a plant disease expert.
-    Analyze the leaf image and provide:
+    Analyze the leaf image and provide the following:
 
-    - Plant Name
-    - Disease Name (or say 'Healthy')
-    - Severity Level
-    - Likely Cause
-    - Treatment Steps
-    - Organic Remedies
-    - Prevention Tips
+    1. Plant Name
+    2. Disease Name (or say "Healthy")
+    3. Severity Level (Low / Medium / High)
+    4. Likely Cause
+    5. Step-by-step Treatment
+    6. Natural/Organic Remedies
+    7. Prevention Tips
 
-    Give a short and clear structured answer.
-    """
-
-    with st.spinner("Diagnosing the leaf..."):
-        response = model.generate_content(
-            [
-                {
-                    "role": "user",
-                    "parts": [
-                        {"text": prompt},
-                        {
-                            "inline_data": {
-                                "mime_type": "image/png",
-                                "data": img_bytes
-                            }
-                        }
-                    ]
-                }
-            ]
-        )
-
-    st.success("Diagnosis Complete!")
-    st.write(response.text)
-
+    Provide the answer in clean bullet points.
+    "
