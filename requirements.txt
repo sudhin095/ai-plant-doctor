@@ -1,4 +1,10 @@
-streamlit
-google-generativeai
-Pillow
-python-dotenv
+# Updated Requirements for Plant Recognition Version
+# requirements.txt (for app_plants.py)
+streamlit==1.28.0
+transformers==4.30.0
+torch==2.0.1
+spacy==3.6.0
+requests==2.31.0
+numpy==1.24.3
+regex==2023.11.8
+Pillow==10.0.0
