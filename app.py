@@ -6,20 +6,12 @@ import json
 from datetime import datetime
 import re
 
-# ============================================================================
-# PAGE CONFIGURATION
-# ============================================================================
-
 st.set_page_config(
     page_title="🌿 AI Plant Doctor - Professional Edition",
     page_icon="🌿",
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
-# ============================================================================
-# CUSTOM CSS FOR PREMIUM DESIGN
-# ============================================================================
 
 st.markdown("""
 <style>
@@ -28,16 +20,30 @@ st.markdown("""
         padding: 0;
     }
     
+    /* DARK MODE */
     .stApp {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+        color: #e4e6eb;
     }
     
+    /* Main container background */
+    [data-testid="stAppViewContainer"] {
+        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+    }
+    
+    /* Text color adjustments */
+    p, span, div, label {
+        color: #e4e6eb;
+    }
+    
+    /* Header Styles */
     .header-container {
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        background: linear-gradient(135deg, #1a2a47 0%, #2d4a7a 100%);
         padding: 40px 20px;
         border-radius: 15px;
         margin-bottom: 30px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(102, 126, 234, 0.3);
     }
     
     .header-title {
@@ -51,10 +57,11 @@ st.markdown("""
     
     .header-subtitle {
         font-size: 1.1rem;
-        color: #e0e7ff;
+        color: #b0c4ff;
         text-align: center;
     }
     
+    /* Feature Cards */
     .feature-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
@@ -63,38 +70,45 @@ st.markdown("""
         text-align: center;
         font-weight: 600;
         font-size: 0.95rem;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
         transition: transform 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
     
     .feature-card:hover {
         transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.7);
     }
     
+    /* Upload Container */
     .upload-container {
-        background: white;
+        background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%);
         padding: 30px;
         border-radius: 15px;
         border: 2px dashed #667eea;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         margin: 20px 0;
     }
     
+    /* Result Container */
     .result-container {
-        background: white;
+        background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%);
         border-radius: 15px;
         padding: 30px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         margin: 20px 0;
+        border: 1px solid rgba(102, 126, 234, 0.2);
     }
     
+    /* Disease Header */
     .disease-header {
         background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         color: white;
         padding: 25px;
         border-radius: 12px;
         margin-bottom: 25px;
-        box-shadow: 0 4px 20px rgba(245, 87, 108, 0.3);
+        box-shadow: 0 4px 20px rgba(245, 87, 108, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
     
     .disease-name {
@@ -111,18 +125,20 @@ st.markdown("""
         flex-wrap: wrap;
     }
     
+    /* Info Sections */
     .info-section {
-        background: #f8f9fa;
+        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
         border-left: 5px solid #667eea;
         padding: 20px;
         border-radius: 8px;
         margin: 15px 0;
+        border: 1px solid rgba(102, 126, 234, 0.2);
     }
     
     .info-title {
         font-size: 1.2rem;
         font-weight: 700;
-        color: #1e3c72;
+        color: #b0c4ff;
         margin-bottom: 12px;
         display: flex;
         align-items: center;
@@ -130,24 +146,12 @@ st.markdown("""
     }
     
     .info-content {
-        color: #4a5568;
+        color: #d0d6e6;
         line-height: 1.8;
         font-size: 0.95rem;
     }
     
-    .info-item {
-        padding: 8px 0;
-        border-bottom: 1px solid #e2e8f0;
-    }
-    
-    .info-item:last-child {
-        border-bottom: none;
-    }
-    
-    .info-item strong {
-        color: #2d3748;
-    }
-    
+    /* Badges */
     .severity-badge {
         display: inline-block;
         padding: 8px 16px;
@@ -157,23 +161,23 @@ st.markdown("""
     }
     
     .severity-healthy {
-        background-color: #d4edda;
-        color: #155724;
+        background-color: #1b5e20;
+        color: #4caf50;
     }
     
     .severity-mild {
-        background-color: #d1ecf1;
-        color: #0c5460;
+        background-color: #004d73;
+        color: #4dd0e1;
     }
     
     .severity-moderate {
-        background-color: #fff3cd;
-        color: #856404;
+        background-color: #633d00;
+        color: #ffc107;
     }
     
     .severity-severe {
-        background-color: #f8d7da;
-        color: #721c24;
+        background-color: #5a1a1a;
+        color: #ff6b6b;
     }
     
     .type-badge {
@@ -185,16 +189,17 @@ st.markdown("""
         margin: 5px 5px 5px 0;
     }
     
-    .type-fungal { background-color: #e7d4f5; color: #6c2e8b; }
-    .type-bacterial { background-color: #d4e7f5; color: #1e3a8a; }
-    .type-viral { background-color: #f5d4d4; color: #7f1d1d; }
-    .type-pest { background-color: #f5ead4; color: #7c2d12; }
-    .type-nutrient { background-color: #d4f5e7; color: #1b4d3e; }
-    .type-healthy { background-color: #d4f5d4; color: #1b4d1b; }
+    .type-fungal { background-color: #4a148c; color: #ce93d8; }
+    .type-bacterial { background-color: #0d47a1; color: #64b5f6; }
+    .type-viral { background-color: #5c0b0b; color: #ef9a9a; }
+    .type-pest { background-color: #4d2600; color: #ffcc80; }
+    .type-nutrient { background-color: #0d3a1a; color: #81c784; }
+    .type-healthy { background-color: #0d3a1a; color: #81c784; }
     
+    /* Debug Box */
     .debug-box {
-        background: #f5f5f5;
-        border: 1px solid #ddd;
+        background: #0f1419;
+        border: 1px solid #667eea;
         border-radius: 8px;
         padding: 15px;
         margin: 10px 0;
@@ -202,78 +207,66 @@ st.markdown("""
         font-size: 0.85rem;
         max-height: 400px;
         overflow-y: auto;
-        color: #333;
+        color: #b0c4ff;
         white-space: pre-wrap;
     }
     
+    /* Alert Boxes */
     .warning-box {
-        background: #fff3cd;
+        background: linear-gradient(135deg, #4d2600 0%, #3d2000 100%);
         border: 1px solid #ffc107;
         border-radius: 8px;
         padding: 15px;
         margin: 10px 0;
-        color: #856404;
+        color: #ffcc80;
     }
     
     .success-box {
-        background: #d4edda;
-        border: 1px solid #28a745;
+        background: linear-gradient(135deg, #1b5e20 0%, #0d3a1a 100%);
+        border: 1px solid #4caf50;
         border-radius: 8px;
         padding: 15px;
         margin: 10px 0;
-        color: #155724;
+        color: #81c784;
     }
     
     .error-box {
-        background: #f8d7da;
-        border: 1px solid #f5c6cb;
+        background: linear-gradient(135deg, #5a1a1a 0%, #3d0d0d 100%);
+        border: 1px solid #ff6b6b;
         border-radius: 8px;
         padding: 15px;
         margin: 10px 0;
-        color: #721c24;
+        color: #ef9a9a;
     }
     
+    /* Button Styles */
     .stButton > button {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
         color: white !important;
-        border: none !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
         padding: 12px 30px !important;
         font-weight: 600 !important;
         border-radius: 8px !important;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
         transition: all 0.3s ease !important;
     }
     
     .stButton > button:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
     }
     
+    /* Image Container */
     .image-container {
         border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(102, 126, 234, 0.2);
     }
     
-    .zoom-controls {
-        background: #f8f9fa;
-        padding: 12px;
-        border-radius: 8px;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        margin: 10px 0;
-        border: 1px solid #e2e8f0;
-    }
-    
-    .zoom-label {
-        font-weight: 600;
-        color: #2d3748;
-        font-size: 0.9rem;
-    }
-    
+    /* Tips Card */
     .tips-card {
-        background: linear-gradient(135deg, #e0e7ff 0%, #f0e7ff 100%);
+        background: linear-gradient(135deg, #1a2a47 0%, #2d3050 100%);
         border: 2px solid #667eea;
         border-radius: 10px;
         padding: 15px;
@@ -282,26 +275,65 @@ st.markdown("""
     
     .tips-card-title {
         font-weight: 700;
-        color: #667eea;
+        color: #b0c4ff;
         margin-bottom: 10px;
     }
     
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+    }
+    
+    /* Metric styling */
+    [data-testid="metric-container"] {
+        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-radius: 8px;
+    }
+    
+    /* Expander styling */
+    [data-testid="stExpander"] {
+        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+    
+    .streamlit-expanderHeader {
+        color: #b0c4ff !important;
+    }
+    
+    /* Input fields */
+    input, textarea, select {
+        background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%) !important;
+        border: 1px solid rgba(102, 126, 234, 0.3) !important;
+        color: #e4e6eb !important;
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #0f1419;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #667eea;
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: #764ba2;
+    }
 </style>
 """, unsafe_allow_html=True)
-
-# ============================================================================
-# CONFIGURATION & API SETUP
-# ============================================================================
 
 try:
     genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 except:
     st.error("❌ GEMINI_API_KEY not found in environment variables!")
     st.stop()
-
-# ============================================================================
-# ENHANCED MASTER PROMPT - EXPERT LEVEL
-# ============================================================================
 
 EXPERT_PROMPT = """You are an expert plant pathologist with 30 years of experience diagnosing plant diseases globally.
 Your task is to provide accurate, practical plant disease diagnosis.
@@ -358,12 +390,7 @@ RESPOND WITH EXACTLY THIS JSON STRUCTURE:
   "similar_conditions": "Other conditions that might look similar"
 }"""
 
-# ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
-
 def get_type_badge_class(disease_type):
-    """Return CSS class for disease type badge"""
     type_lower = disease_type.lower() if disease_type else "healthy"
     if "fungal" in type_lower:
         return "type-fungal"
@@ -379,7 +406,6 @@ def get_type_badge_class(disease_type):
         return "type-healthy"
 
 def get_severity_badge_class(severity):
-    """Return CSS class for severity badge"""
     severity_lower = (severity.lower() if severity else "moderate")
     if "healthy" in severity_lower or "none" in severity_lower:
         return "severity-healthy"
@@ -392,12 +418,10 @@ def get_severity_badge_class(severity):
     return "severity-moderate"
 
 def resize_image(image, max_width=600, max_height=500):
-    """Resize image maintaining aspect ratio"""
     image.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
     return image
 
 def zoom_image(image, zoom_level):
-    """Apply zoom to image"""
     if zoom_level == 1.0:
         return image
     
@@ -414,17 +438,14 @@ def zoom_image(image, zoom_level):
     return cropped.resize((width, height), Image.Resampling.LANCZOS)
 
 def extract_json_robust(response_text):
-    """Robustly extract and parse JSON from response"""
     if not response_text:
         return None
     
-    # Try 1: Direct parsing
     try:
         return json.loads(response_text)
     except:
         pass
     
-    # Try 2: Remove markdown code blocks
     cleaned = response_text
     if "```json" in cleaned:
         cleaned = cleaned.split("```json")[1].split("```")[0]
@@ -436,7 +457,6 @@ def extract_json_robust(response_text):
     except:
         pass
     
-    # Try 3: Find JSON object with regex
     match = re.search(r'\{[\s\S]*\}', response_text)
     if match:
         try:
@@ -447,7 +467,6 @@ def extract_json_robust(response_text):
     return None
 
 def validate_json_result(data):
-    """Validate that JSON has required fields"""
     required_fields = [
         "disease_name", "disease_type", "severity", 
         "confidence", "symptoms", "probable_causes"
@@ -462,11 +481,6 @@ def validate_json_result(data):
     
     return True, "Valid"
 
-# ============================================================================
-# MAIN APP
-# ============================================================================
-
-# Header
 st.markdown("""
 <div class="header-container">
     <div class="header-title">🌿 AI Plant Doctor - Professional Edition</div>
@@ -474,15 +488,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Features
 col1, col2, col3, col4 = st.columns(4)
-features = [
-    ("Expert Diagnosis", "Expert Diagnosis"),
-    ("Image Zoom 🔍", "Image Zoom"),
-    ("Debug Mode 🐛", "Debug Mode"),
-    ("Pro Model 🚀", "Pro Model")
-]
-
 with col1:
     st.markdown('<div class="feature-card">✅ Expert Diagnosis</div>', unsafe_allow_html=True)
 with col2:
@@ -494,7 +500,6 @@ with col4:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# Sidebar Settings
 with st.sidebar:
     st.header("⚙️ Settings & Configuration")
     
@@ -553,7 +558,6 @@ with st.sidebar:
            - Solution: Switch to Pro model
         """)
 
-# Main Content Area
 col_upload, col_empty = st.columns([3, 1])
 
 with col_upload:
@@ -570,7 +574,6 @@ if uploaded_file:
     image = Image.open(uploaded_file)
     original_image = image.copy()
     
-    # Show tips if enabled
     if show_tips:
         st.markdown("""
         <div class="tips-card">
@@ -581,7 +584,6 @@ if uploaded_file:
     
     st.markdown("<div class='result-container'>", unsafe_allow_html=True)
     
-    # Image display with zoom
     col_img, col_zoom = st.columns([3, 1])
     
     with col_zoom:
@@ -608,14 +610,12 @@ if uploaded_file:
     
     st.markdown("</div>", unsafe_allow_html=True)
     
-    # Analyze button
     st.markdown("<br>", unsafe_allow_html=True)
     col_b1, col_b2, col_b3 = st.columns([1, 1, 1])
     
     with col_b2:
         analyze_btn = st.button("🔬 Analyze Plant", use_container_width=True, type="primary")
     
-    # Analysis Execution
     if analyze_btn:
         progress_placeholder = st.empty()
         
@@ -623,7 +623,6 @@ if uploaded_file:
             try:
                 progress_placeholder.info("📊 Processing image with AI...")
                 
-                # Select model
                 model_name = "Gemini 2.5 Pro" if "Pro" in model_choice else "Gemini 2.5 Flash"
                 model_id = 'gemini-2.5-pro' if "Pro" in model_choice else 'gemini-2.5-flash'
                 model = genai.GenerativeModel(model_id)
@@ -631,7 +630,6 @@ if uploaded_file:
                 if debug_mode:
                     st.info(f"📊 Using Model: {model_name}")
                 
-                # Generate response
                 response = model.generate_content([EXPERT_PROMPT, original_image])
                 raw_response = response.text
                 
@@ -642,7 +640,6 @@ if uploaded_file:
                         st.text(displayed_response)
                         st.markdown('</div>', unsafe_allow_html=True)
                 
-                # Parse JSON
                 result = extract_json_robust(raw_response)
                 
                 if result is None:
@@ -660,7 +657,6 @@ if uploaded_file:
                             st.text(raw_response)
                             st.markdown('</div>', unsafe_allow_html=True)
                 else:
-                    # Validate result
                     is_valid, validation_msg = validate_json_result(result)
                     
                     if not is_valid:
@@ -668,7 +664,6 @@ if uploaded_file:
                     
                     confidence = result.get("confidence", 0)
                     
-                    # Check confidence threshold
                     if confidence < confidence_min:
                         st.markdown('<div class="warning-box">', unsafe_allow_html=True)
                         st.warning(f"⚠️ **Low Confidence ({confidence}%)**")
@@ -676,14 +671,12 @@ if uploaded_file:
                         st.write("**Recommendation:** " + result.get("image_quality_tips", "Provide a clearer image"))
                         st.markdown('</div>', unsafe_allow_html=True)
                     
-                    # Check image quality
                     image_quality = result.get("image_quality", "")
                     if image_quality and ("Poor" in image_quality or "Fair" in image_quality):
                         st.markdown('<div class="warning-box">', unsafe_allow_html=True)
                         st.write(f"📸 **Image Quality Note:** {image_quality}")
                         st.markdown('</div>', unsafe_allow_html=True)
                     
-                    # Display Results
                     st.markdown("<div class='result-container'>", unsafe_allow_html=True)
                     
                     disease_name = result.get("disease_name", "Unknown")
@@ -694,7 +687,6 @@ if uploaded_file:
                     severity_class = get_severity_badge_class(severity)
                     type_class = get_type_badge_class(disease_type)
                     
-                    # Disease Header
                     st.markdown(f"""
                     <div class="disease-header">
                         <div class="disease-name">{disease_name}</div>
@@ -709,7 +701,6 @@ if uploaded_file:
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    # Quick Stats
                     col1, col2, col3, col4 = st.columns(4)
                     with col1:
                         st.metric("🌱 Plant", plant)
@@ -722,12 +713,9 @@ if uploaded_file:
                     
                     st.markdown("<br>", unsafe_allow_html=True)
                     
-                    # Two-Column Layout
                     col_left, col_right = st.columns(2)
                     
-                    # Left Column
                     with col_left:
-                        # Symptoms
                         st.markdown("""
                         <div class="info-section">
                             <div class="info-title">🔍 Symptoms Observed</div>
@@ -738,7 +726,6 @@ if uploaded_file:
                         
                         st.markdown("</div>", unsafe_allow_html=True)
                         
-                        # Causes
                         st.markdown("""
                         <div class="info-section">
                             <div class="info-title">⚠️ Probable Causes</div>
@@ -749,9 +736,7 @@ if uploaded_file:
                         
                         st.markdown("</div>", unsafe_allow_html=True)
                     
-                    # Right Column
                     with col_right:
-                        # Immediate Actions
                         st.markdown("""
                         <div class="info-section">
                             <div class="info-title">⚡ Immediate Actions</div>
@@ -762,7 +747,6 @@ if uploaded_file:
                         
                         st.markdown("</div>", unsafe_allow_html=True)
                     
-                    # Treatment Options
                     col_treat1, col_treat2 = st.columns(2)
                     
                     with col_treat1:
@@ -787,7 +771,6 @@ if uploaded_file:
                         
                         st.markdown("</div>", unsafe_allow_html=True)
                     
-                    # Prevention
                     st.markdown("""
                     <div class="info-section">
                         <div class="info-title">🛡️ Long-Term Prevention</div>
@@ -798,7 +781,6 @@ if uploaded_file:
                     
                     st.markdown("</div>", unsafe_allow_html=True)
                     
-                    # Similar Conditions
                     if result.get("similar_conditions"):
                         st.markdown("""
                         <div class="info-section">
@@ -809,7 +791,6 @@ if uploaded_file:
                     
                     st.markdown("</div>", unsafe_allow_html=True)
                     
-                    # Action Buttons
                     st.markdown("<br>", unsafe_allow_html=True)
                     col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 1])
                     
@@ -840,10 +821,6 @@ if uploaded_file:
                         st.markdown('</div>', unsafe_allow_html=True)
                 
                 progress_placeholder.empty()
-
-# ============================================================================
-# SIDEBAR ADDITIONAL INFO
-# ============================================================================
 
 with st.sidebar:
     st.markdown("---")
