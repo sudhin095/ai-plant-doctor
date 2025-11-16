@@ -4,6 +4,7 @@ from PIL import Image, ImageDraw
 import os
 import json
 from datetime import datetime
+import re
 
 # ============================================================================
 # PAGE CONFIGURATION
@@ -27,12 +28,10 @@ st.markdown("""
         padding: 0;
     }
     
-    /* Main Background */
     .stApp {
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     }
     
-    /* Header Styles */
     .header-container {
         background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         padding: 40px 20px;
@@ -56,7 +55,6 @@ st.markdown("""
         text-align: center;
     }
     
-    /* Feature Cards */
     .feature-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
@@ -73,7 +71,6 @@ st.markdown("""
         transform: translateY(-5px);
     }
     
-    /* Upload Section */
     .upload-container {
         background: white;
         padding: 30px;
@@ -83,7 +80,6 @@ st.markdown("""
         margin: 20px 0;
     }
     
-    /* Result Container */
     .result-container {
         background: white;
         border-radius: 15px;
@@ -92,7 +88,6 @@ st.markdown("""
         margin: 20px 0;
     }
     
-    /* Disease Name Card */
     .disease-header {
         background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         color: white;
@@ -116,13 +111,6 @@ st.markdown("""
         flex-wrap: wrap;
     }
     
-    .disease-meta-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    /* Info Section */
     .info-section {
         background: #f8f9fa;
         border-left: 4px solid #667eea;
@@ -141,26 +129,6 @@ st.markdown("""
         gap: 10px;
     }
     
-    .info-content {
-        color: #4a5568;
-        line-height: 1.8;
-        font-size: 0.95rem;
-    }
-    
-    .info-item {
-        padding: 8px 0;
-        border-bottom: 1px solid #e2e8f0;
-    }
-    
-    .info-item:last-child {
-        border-bottom: none;
-    }
-    
-    .info-item strong {
-        color: #2d3748;
-    }
-    
-    /* Severity Badge */
     .severity-badge {
         display: inline-block;
         padding: 8px 16px;
@@ -189,7 +157,6 @@ st.markdown("""
         color: #721c24;
     }
     
-    /* Type Badge */
     .type-badge {
         display: inline-block;
         padding: 6px 12px;
@@ -199,59 +166,44 @@ st.markdown("""
         margin: 5px 5px 5px 0;
     }
     
-    .type-fungal {
-        background-color: #e7d4f5;
-        color: #6c2e8b;
+    .type-fungal { background-color: #e7d4f5; color: #6c2e8b; }
+    .type-bacterial { background-color: #d4e7f5; color: #1e3a8a; }
+    .type-viral { background-color: #f5d4d4; color: #7f1d1d; }
+    .type-pest { background-color: #f5ead4; color: #7c2d12; }
+    .type-nutrient { background-color: #d4f5e7; color: #1b4d3e; }
+    .type-healthy { background-color: #d4f5d4; color: #1b4d1b; }
+    
+    .debug-box {
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px 0;
+        font-family: monospace;
+        font-size: 0.85rem;
+        max-height: 300px;
+        overflow-y: auto;
+        color: #333;
     }
     
-    .type-bacterial {
-        background-color: #d4e7f5;
-        color: #1e3a8a;
+    .warning-box {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px 0;
+        color: #856404;
     }
     
-    .type-viral {
-        background-color: #f5d4d4;
-        color: #7f1d1d;
+    .success-box {
+        background: #d4edda;
+        border: 1px solid #28a745;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px 0;
+        color: #155724;
     }
     
-    .type-pest {
-        background-color: #f5ead4;
-        color: #7c2d12;
-    }
-    
-    .type-nutrient {
-        background-color: #d4f5e7;
-        color: #1b4d3e;
-    }
-    
-    .type-healthy {
-        background-color: #d4f5d4;
-        color: #1b4d1b;
-    }
-    
-    /* Bullet List */
-    .bullet-list {
-        list-style: none;
-        padding: 0;
-    }
-    
-    .bullet-list li {
-        padding: 8px 0 8px 30px;
-        position: relative;
-        color: #4a5568;
-        line-height: 1.6;
-    }
-    
-    .bullet-list li:before {
-        content: "▸";
-        position: absolute;
-        left: 0;
-        color: #667eea;
-        font-weight: bold;
-        font-size: 1.2rem;
-    }
-    
-    /* Button Styles */
     .stButton > button {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
         color: white !important;
@@ -268,47 +220,10 @@ st.markdown("""
         box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
     }
     
-    /* Sidebar */
-    .sidebar .sidebar-content {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    }
-    
-    /* Confidence Meter */
-    .confidence-meter {
-        margin: 15px 0;
-    }
-    
-    .confidence-label {
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 8px;
-        display: flex;
-        justify-content: space-between;
-    }
-    
-    /* Image Container */
     .image-container {
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-    
-    /* Zoom Controls */
-    .zoom-controls {
-        background: #f8f9fa;
-        padding: 12px;
-        border-radius: 8px;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        margin: 10px 0;
-        border: 1px solid #e2e8f0;
-    }
-    
-    .zoom-label {
-        font-weight: 600;
-        color: #2d3748;
-        font-size: 0.9rem;
     }
     
 </style>
@@ -319,7 +234,68 @@ st.markdown("""
 # ============================================================================
 
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-model = genai.GenerativeModel('gemini-2.5-flash')
+
+# ============================================================================
+# MASTER PROMPT - ENHANCED FOR ACCURACY
+# ============================================================================
+
+MASTER_PROMPT = """
+You are an expert plant pathologist with 25 years of experience in diagnosing plant diseases.
+Your role is to provide accurate, detailed plant disease analysis.
+
+CRITICAL INSTRUCTIONS:
+1. ALWAYS respond with ONLY valid JSON (no markdown, no explanations)
+2. If you cannot identify the plant or disease with confidence, set confidence to below 50
+3. Be specific and practical in your recommendations
+4. Consider ALL possibilities (fungal, bacterial, viral, pest, nutrient deficiency, environmental stress)
+
+ANALYSIS INSTRUCTIONS:
+- Look at leaf coloration, texture, spots, lesions, wilting patterns
+- Check for fungal growth, powdery coating, sticky residue (pest damage)
+- Identify if symptoms are uniform or localized
+- Consider environmental stress (water damage, sun scald, cold injury)
+
+RESPOND WITH THIS EXACT JSON STRUCTURE (no code blocks, no markdown):
+{
+  "plant_species": "Common name and Scientific name, or 'Unable to identify'",
+  "disease_name": "Specific disease name or 'Healthy Plant' or 'Environmental Stress' or 'Nutrient Deficiency'",
+  "scientific_name": "Scientific name of pathogen if applicable",
+  "disease_type": "fungal/bacterial/viral/pest/nutrient/environmental/healthy",
+  "severity": "healthy/mild/moderate/severe",
+  "confidence": 85,
+  "symptoms": [
+    "Specific symptom 1 - what you see",
+    "Specific symptom 2 - what you see",
+    "Specific symptom 3 - what you see"
+  ],
+  "causes": [
+    "Primary cause with condition",
+    "Secondary possible cause",
+    "Environmental factor"
+  ],
+  "immediate_action": [
+    "Action 1 - specific and practical",
+    "Action 2 - specific and practical"
+  ],
+  "organic_treatments": [
+    "Specific treatment with dosage/frequency",
+    "Alternative organic option",
+    "Prevention measure"
+  ],
+  "chemical_treatments": [
+    "Specific fungicide/pesticide name and usage",
+    "Alternative chemical option"
+  ],
+  "prevention": [
+    "Long-term prevention strategy 1",
+    "Long-term prevention strategy 2",
+    "Cultural practice to avoid this"
+  ],
+  "confidence_reason": "Why we are confident/not confident in this diagnosis",
+  "image_quality": "Good/Fair/Poor - explanation",
+  "recommendations_for_better_diagnosis": "What would help confirm this diagnosis"
+}
+"""
 
 # ============================================================================
 # HELPER FUNCTIONS
@@ -354,19 +330,6 @@ def get_severity_badge_class(severity):
         return "severity-severe"
     return "severity-moderate"
 
-def get_emoji_for_section(section_type):
-    """Return emoji for different sections"""
-    emojis = {
-        "symptoms": "🔍",
-        "causes": "⚠️",
-        "organic": "🌱",
-        "chemical": "💊",
-        "prevention": "🛡️",
-        "scientific": "🔬",
-        "confidence": "📊"
-    }
-    return emojis.get(section_type, "•")
-
 def resize_image_for_display(image, max_width=600, max_height=500):
     """Resize image while maintaining aspect ratio"""
     image.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
@@ -381,7 +344,6 @@ def zoom_image(image, zoom_level):
     new_width = int(width * zoom_level)
     new_height = int(height * zoom_level)
     
-    # Crop from center
     left = (width - new_width) / 2
     top = (height - new_height) / 2
     right = left + new_width
@@ -390,21 +352,66 @@ def zoom_image(image, zoom_level):
     cropped = image.crop((left, top, right, bottom))
     return cropped.resize((width, height), Image.Resampling.LANCZOS)
 
-def parse_analysis_response(response_text):
-    """Parse the AI response and extract structured data"""
+def extract_json_from_response(response_text):
+    """Robustly extract JSON from response, handling various formats"""
+    
+    # Try 1: Direct JSON parsing
     try:
-        # Try to extract JSON from markdown code blocks
-        if "```json" in response_text:
-            json_str = response_text.split("```json")[1].split("```")[0]
-        elif "```" in response_text:
-            json_str = response_text.split("```")[1].split("```")[0]
-        else:
-            json_str = response_text
-        
-        return json.loads(json_str)
+        return json.loads(response_text)
     except:
-        # If JSON parsing fails, return formatted text response
-        return {"raw_response": response_text}
+        pass
+    
+    # Try 2: Extract from markdown code blocks
+    if "```json" in response_text:
+        try:
+            json_str = response_text.split("```json")[1].split("```")[0].strip()
+            return json.loads(json_str)
+        except:
+            pass
+    
+    # Try 3: Extract from generic code blocks
+    if "```" in response_text:
+        try:
+            json_str = response_text.split("```")[1].split("```")[0].strip()
+            if json_str.startswith("{"):
+                return json.loads(json_str)
+        except:
+            pass
+    
+    # Try 4: Find JSON object in text using regex
+    json_match = re.search(r'\{[\s\S]*\}', response_text)
+    if json_match:
+        try:
+            return json.loads(json_match.group())
+        except:
+            pass
+    
+    # If all parsing fails, return None
+    return None
+
+def get_image_quality_tips():
+    """Return tips for better image quality"""
+    return """
+    📸 **TIPS FOR BETTER PLANT PHOTOS:**
+    
+    ✅ **DO THIS:**
+    • Use natural, even lighting (cloudy day is perfect)
+    • Focus on ONE symptomatic leaf
+    • Use plain white or neutral background
+    • Get close-up of the affected area
+    • Avoid shadows covering the leaf
+    • Take photo from directly above the leaf
+    • Show both sides of the leaf if possible
+    
+    ❌ **AVOID THIS:**
+    • Blurry or out-of-focus images
+    • Dark shadows or harsh sun glare
+    • Busy, cluttered backgrounds
+    • Photos of healthy leaves when diagnosing disease
+    • Wide shots showing whole plant
+    • Photos taken through windows
+    • Low light conditions
+    """
 
 # ============================================================================
 # MAIN APP
@@ -413,62 +420,69 @@ def parse_analysis_response(response_text):
 # Header Section
 st.markdown("""
 <div class="header-container">
-    <div class="header-title">🌿 AI Plant Doctor</div>
-    <div class="header-subtitle">Advanced Disease Detection & Analysis for Any Plant</div>
+    <div class="header-title">🌿 AI Plant Doctor v2</div>
+    <div class="header-subtitle">Advanced Disease Detection with Debug Tools</div>
 </div>
 """, unsafe_allow_html=True)
 
 # Features Section
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.markdown("""
-    <div class="feature-card">
-        ✓ Universal Detection
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">✓ Expert Diagnosis</div>', unsafe_allow_html=True)
 with col2:
-    st.markdown("""
-    <div class="feature-card">
-        ✓ 500+ Diseases
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">✓ Debug Mode</div>', unsafe_allow_html=True)
 with col3:
-    st.markdown("""
-    <div class="feature-card">
-        ✓ AI-Powered
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">✓ Model Selection</div>', unsafe_allow_html=True)
 with col4:
-    st.markdown("""
-    <div class="feature-card">
-        ✓ Instant Results
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">✓ Better Accuracy</div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
+# Settings Sidebar
+with st.sidebar:
+    st.header("⚙️ Settings")
+    
+    model_choice = st.radio(
+        "Choose AI Model",
+        ["Gemini 2.5 Flash (Faster)", "Gemini 2.5 Pro (More Accurate)"],
+        help="Pro is slower but more accurate for difficult diagnoses"
+    )
+    
+    debug_mode = st.checkbox(
+        "🐛 Debug Mode",
+        help="Show raw AI response and error details"
+    )
+    
+    confidence_threshold = st.slider(
+        "Minimum Confidence",
+        min_value=0,
+        max_value=100,
+        value=50,
+        help="Only show results above this confidence level"
+    )
+    
+    st.markdown("---")
+    
+    with st.expander("📸 Image Quality Guide"):
+        st.info(get_image_quality_tips())
+
 # Main Content
-col_upload, col_sidebar = st.columns([3, 1])
+col_upload, col_info = st.columns([3, 1])
 
 with col_upload:
     st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
     st.subheader("📤 Upload Plant Image")
     uploaded_file = st.file_uploader(
-        "Drag and drop or click to select your plant leaf image",
+        "Drag and drop or click to select",
         type=['jpg', 'jpeg', 'png'],
         label_visibility="collapsed"
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
-with col_sidebar:
-    st.markdown("### ⚙️ Settings")
-    model_choice = st.selectbox(
-        "AI Model",
-        ["Gemini 2.5 Flash", "GPT-4o Vision"],
-        help="Choose your preferred AI model"
-    )
+with col_info:
+    st.info("💡 **Tip:** Clear, well-lit photos with plain backgrounds give the best results!")
 
-# Image Display and Zoom Controls
+# Image Display and Zoom
 if uploaded_file:
     image = Image.open(uploaded_file)
     original_image = image.copy()
@@ -490,12 +504,9 @@ if uploaded_file:
     
     with col_img:
         st.subheader("📸 Plant Image Preview")
-        # Apply zoom
         display_image = original_image.copy()
         if zoom_level != 1.0:
             display_image = zoom_image(display_image, zoom_level)
-        
-        # Resize for display
         display_image = resize_image_for_display(display_image)
         
         st.markdown('<div class="image-container">', unsafe_allow_html=True)
@@ -504,8 +515,9 @@ if uploaded_file:
     
     st.markdown("</div>", unsafe_allow_html=True)
     
-    # Analyze Button
     st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Analyze Button
     col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 1])
     
     with col_btn2:
@@ -518,40 +530,62 @@ if uploaded_file:
     # Analysis Section
     if analyze_clicked:
         with st.spinner("🔄 Analyzing plant... Please wait"):
-            prompt = """
-            Analyze this plant leaf image and provide a comprehensive disease analysis.
-            
-            Return ONLY valid JSON (no markdown, no code blocks) with exactly these fields:
-            {
-              "plant_species": "identified species or 'Unable to identify'",
-              "disease_name": "disease name or 'Healthy Plant'",
-              "scientific_name": "scientific name if applicable",
-              "disease_type": "fungal/bacterial/viral/pest/nutrient/healthy",
-              "severity": "healthy/mild/moderate/severe",
-              "confidence": 85,
-              "symptoms": ["symptom 1", "symptom 2", "symptom 3"],
-              "causes": ["cause 1", "cause 2"],
-              "organic_treatments": ["treatment 1", "treatment 2"],
-              "chemical_treatments": ["treatment 1", "treatment 2"],
-              "prevention": ["tip 1", "tip 2", "tip 3"]
-            }
-            """
-            
             try:
-                response = model.generate_content([prompt, original_image])
-                result = parse_analysis_response(response.text)
-                
-                if "raw_response" in result:
-                    st.error("Could not parse AI response. Here's the raw analysis:")
-                    st.write(result["raw_response"])
+                # Select model
+                if "Flash" in model_choice:
+                    model = genai.GenerativeModel('gemini-2.5-flash')
+                    model_name = "Gemini 2.5 Flash"
                 else:
-                    # Disease Header
+                    model = genai.GenerativeModel('gemini-2.5-pro')
+                    model_name = "Gemini 2.5 Pro"
+                
+                if debug_mode:
+                    st.info(f"📊 Using model: {model_name}")
+                
+                # Generate content
+                response = model.generate_content([MASTER_PROMPT, original_image])
+                raw_response = response.text
+                
+                if debug_mode:
+                    st.markdown("### 🔍 Debug Information")
+                    with st.expander("Raw API Response"):
+                        st.markdown('<div class="debug-box">', unsafe_allow_html=True)
+                        st.text(raw_response[:2000] + "..." if len(raw_response) > 2000 else raw_response)
+                        st.markdown('</div>', unsafe_allow_html=True)
+                
+                # Parse response
+                result = extract_json_from_response(raw_response)
+                
+                if result is None:
+                    st.error("❌ Could not parse AI response as JSON")
+                    st.warning("This sometimes happens if the API response is malformed. Try again or check your image quality.")
+                    if debug_mode:
+                        st.markdown('<div class="debug-box">', unsafe_allow_html=True)
+                        st.text(raw_response)
+                        st.markdown('</div>', unsafe_allow_html=True)
+                else:
+                    # Check confidence
+                    confidence = result.get("confidence", 0)
+                    
+                    if confidence < confidence_threshold:
+                        st.warning(f"⚠️ **Low Confidence ({confidence}%)**")
+                        st.info(result.get("confidence_reason", "AI is not confident in this diagnosis."))
+                        st.write(result.get("recommendations_for_better_diagnosis", "Please provide a clearer image."))
+                    
+                    # Image Quality Alert
+                    image_quality = result.get("image_quality", "")
+                    if "Poor" in image_quality or "Fair" in image_quality:
+                        st.markdown('<div class="warning-box">', unsafe_allow_html=True)
+                        st.write(f"📸 **Image Quality:** {image_quality}")
+                        st.markdown('</div>', unsafe_allow_html=True)
+                    
+                    # Display Results
                     st.markdown("<div class='result-container'>", unsafe_allow_html=True)
                     
+                    # Disease Header
                     disease_name = result.get("disease_name", "Unknown")
                     disease_type = result.get("disease_type", "unknown").lower()
                     severity = result.get("severity", "unknown").lower()
-                    confidence = result.get("confidence", 0)
                     plant = result.get("plant_species", "Unknown")
                     
                     severity_class = get_severity_badge_class(severity)
@@ -561,10 +595,10 @@ if uploaded_file:
                     <div class="disease-header">
                         <div class="disease-name">{disease_name}</div>
                         <div class="disease-meta">
-                            <div class="disease-meta-item">
+                            <div style="margin-right: 10px;">
                                 <span class="severity-badge {severity_class}">{severity.title()}</span>
                             </div>
-                            <div class="disease-meta-item">
+                            <div>
                                 <span class="type-badge {type_class}">{disease_type.title()}</span>
                             </div>
                         </div>
@@ -573,96 +607,92 @@ if uploaded_file:
                     
                     # Quick Stats
                     col1, col2, col3, col4 = st.columns(4)
-                    
                     with col1:
-                        st.metric("Plant Species", plant)
+                        st.metric("Plant", plant)
                     with col2:
                         st.metric("Confidence", f"{confidence}%")
                     with col3:
-                        st.metric("Severity Level", severity.title())
+                        st.metric("Severity", severity.title())
                     with col4:
                         st.metric("Analysis Time", datetime.now().strftime("%H:%M"))
                     
                     st.markdown("<br>", unsafe_allow_html=True)
                     
-                    # Detailed Analysis - Two Columns
+                    # Symptoms
+                    st.markdown(f"""
+                    <div class="info-section">
+                        <div class="info-title">🔍 Symptoms Observed</div>
+                    """, unsafe_allow_html=True)
+                    
+                    for symptom in result.get("symptoms", []):
+                        st.write(f"• {symptom}")
+                    
+                    st.markdown("</div>", unsafe_allow_html=True)
+                    
+                    # Causes
+                    st.markdown(f"""
+                    <div class="info-section">
+                        <div class="info-title">⚠️ Causes</div>
+                    """, unsafe_allow_html=True)
+                    
+                    for cause in result.get("causes", []):
+                        st.write(f"• {cause}")
+                    
+                    st.markdown("</div>", unsafe_allow_html=True)
+                    
+                    # Immediate Action
+                    st.markdown(f"""
+                    <div class="info-section">
+                        <div class="info-title">⚡ Immediate Actions</div>
+                    """, unsafe_allow_html=True)
+                    
+                    for i, action in enumerate(result.get("immediate_action", []), 1):
+                        st.write(f"{i}. {action}")
+                    
+                    st.markdown("</div>", unsafe_allow_html=True)
+                    
+                    # Treatments - Two Columns
                     col_left, col_right = st.columns(2)
                     
                     with col_left:
-                        # Symptoms
                         st.markdown(f"""
                         <div class="info-section">
-                            <div class="info-title">{get_emoji_for_section('symptoms')} Symptoms Observed</div>
-                            <div class="info-content">
+                            <div class="info-title">🌱 Organic Treatments</div>
                         """, unsafe_allow_html=True)
                         
-                        symptoms = result.get("symptoms", [])
-                        for symptom in symptoms:
-                            st.markdown(f"• {symptom}")
+                        for treatment in result.get("organic_treatments", []):
+                            st.write(f"• {treatment}")
                         
-                        st.markdown("</div></div>", unsafe_allow_html=True)
-                        
-                        # Causes
-                        st.markdown(f"""
-                        <div class="info-section">
-                            <div class="info-title">{get_emoji_for_section('causes')} Possible Causes</div>
-                            <div class="info-content">
-                        """, unsafe_allow_html=True)
-                        
-                        causes = result.get("causes", [])
-                        for cause in causes:
-                            st.markdown(f"• {cause}")
-                        
-                        st.markdown("</div></div>", unsafe_allow_html=True)
+                        st.markdown("</div>", unsafe_allow_html=True)
                     
                     with col_right:
-                        # Organic Treatments
                         st.markdown(f"""
                         <div class="info-section">
-                            <div class="info-title">{get_emoji_for_section('organic')} Organic Treatments</div>
-                            <div class="info-content">
+                            <div class="info-title">💊 Chemical Treatments</div>
                         """, unsafe_allow_html=True)
                         
-                        organic = result.get("organic_treatments", [])
-                        for treatment in organic:
-                            st.markdown(f"• {treatment}")
+                        for treatment in result.get("chemical_treatments", []):
+                            st.write(f"• {treatment}")
                         
-                        st.markdown("</div></div>", unsafe_allow_html=True)
-                        
-                        # Chemical Treatments
-                        st.markdown(f"""
-                        <div class="info-section">
-                            <div class="info-title">{get_emoji_for_section('chemical')} Chemical Treatments</div>
-                            <div class="info-content">
-                        """, unsafe_allow_html=True)
-                        
-                        chemical = result.get("chemical_treatments", [])
-                        for treatment in chemical:
-                            st.markdown(f"• {treatment}")
-                        
-                        st.markdown("</div></div>", unsafe_allow_html=True)
+                        st.markdown("</div>", unsafe_allow_html=True)
                     
-                    # Prevention Tips (Full Width)
+                    # Prevention
                     st.markdown(f"""
                     <div class="info-section">
-                        <div class="info-title">{get_emoji_for_section('prevention')} Prevention Tips</div>
-                        <div class="info-content">
+                        <div class="info-title">🛡️ Prevention Tips</div>
                     """, unsafe_allow_html=True)
                     
-                    prevention = result.get("prevention", [])
-                    for tip in prevention:
-                        st.markdown(f"• {tip}")
+                    for tip in result.get("prevention", []):
+                        st.write(f"• {tip}")
                     
-                    st.markdown("</div></div>", unsafe_allow_html=True)
+                    st.markdown("</div>", unsafe_allow_html=True)
                     
                     # Scientific Info
                     if result.get("scientific_name") and result.get("scientific_name") != "Not applicable":
                         st.markdown(f"""
                         <div class="info-section">
-                            <div class="info-title">{get_emoji_for_section('scientific')} Scientific Information</div>
-                            <div class="info-content">
-                                <strong>Scientific Name:</strong> <em>{result.get("scientific_name")}</em>
-                            </div>
+                            <div class="info-title">🔬 Scientific Information</div>
+                            <strong>Scientific Name:</strong> <em>{result.get("scientific_name")}</em>
                         </div>
                         """, unsafe_allow_html=True)
                     
@@ -676,17 +706,17 @@ if uploaded_file:
                         if st.button("📸 Analyze Another Plant", use_container_width=True):
                             st.rerun()
                     
-                    with col_btn2:
-                        if st.button("💾 Save Analysis", use_container_width=True):
-                            st.success("Analysis saved! (Note: Download feature requires backend)")
-                    
                     with col_btn3:
                         if st.button("🔄 Reset", use_container_width=True):
                             st.rerun()
                             
             except Exception as e:
                 st.error(f"❌ Analysis failed: {str(e)}")
-                st.info("Please ensure your Gemini API key is valid and you have available quota.")
+                st.info("**What to try:**\n- Check your Gemini API key\n- Verify the image is a valid plant leaf\n- Try a clearer, better-lit image\n- Use the Gemini 2.5 Pro model for better accuracy")
+                if debug_mode:
+                    st.markdown('<div class="debug-box">', unsafe_allow_html=True)
+                    st.text(f"Error: {str(e)}")
+                    st.markdown('</div>', unsafe_allow_html=True)
 
 # ============================================================================
 # SIDEBAR
@@ -694,70 +724,68 @@ if uploaded_file:
 
 with st.sidebar:
     st.markdown("---")
-    st.header("ℹ️ About This App")
+    st.header("ℹ️ About v2 Updates")
     
     st.write("""
-    **AI Plant Doctor** uses advanced computer vision to detect plant diseases 
-    instantly without any training data needed.
+    ### What's New:
     
-    ### How It Works:
-    1. 📸 Upload a clear photo of the plant leaf
-    2. 🔍 Optionally zoom to examine details
-    3. 🔬 Click 'Analyze Plant'
-    4. 📊 Get instant disease identification
-    5. 💡 Review treatment recommendations
+    ✨ **Better Accuracy** - Improved prompt for more reliable diagnosis
     
-    ### Free Tier:
-    • 1,500 analyses per day
-    • No credit card required
-    • Commercial use allowed
+    🐛 **Debug Mode** - See raw AI responses and troubleshoot issues
+    
+    🚀 **Model Selection** - Choose between Fast (Flash) or Accurate (Pro)
+    
+    🎯 **Image Quality Tips** - Built-in guidance for better photos
+    
+    📊 **Confidence Settings** - Filter results by confidence threshold
+    """)
+    
+    st.markdown("---")
+    st.header("❓ Why Wrong Output?")
+    
+    st.write("""
+    **Top Reasons for Inaccurate Results:**
+    
+    1. 📸 **Image Quality**
+       - Blurry or dark image
+       - Busy background
+       - Poor lighting
+       - **Solution:** Use clear, well-lit photos on plain backgrounds
+    
+    2. 🎯 **Wrong Subject**
+       - Photo shows healthy leaf, not diseased one
+       - Multiple plants/leaves in frame
+       - **Solution:** Focus on ONE symptomatic leaf
+    
+    3. 🤖 **Model Limitations**
+       - Using Flash (fast but less accurate)
+       - **Solution:** Switch to Pro model for difficult cases
+    
+    4. 🌍 **Environmental Issues**
+       - Water damage, sun scald, cold injury
+       - **Solution:** Describe growing conditions
     """)
     
     st.markdown("---")
     
-    st.header("🎯 Features")
-    features = [
-        "✓ Works for ANY plant species",
-        "✓ Detects 500+ diseases",
-        "✓ No dataset needed",
-        "✓ 85-95% accuracy",
-        "✓ Organic & chemical treatments",
-        "✓ Prevention recommendations",
-        "✓ Image zoom controls",
-        "✓ Confidence scoring"
-    ]
-    for feature in features:
-        st.write(feature)
+    st.header("✅ Best Practices")
     
-    st.markdown("---")
+    with st.expander("📸 Perfect Photo Checklist"):
+        st.write("""
+        - [ ] Sharp, in-focus image
+        - [ ] Natural, even lighting
+        - [ ] Plain white/neutral background
+        - [ ] Single diseased leaf (close-up)
+        - [ ] Shows both top and bottom (if possible)
+        - [ ] Under 20MB file size
+        - [ ] JPG or PNG format
+        """)
     
-    st.header("📚 Supported Plants")
-    plants = [
-        "🍅 Tomatoes",
-        "🌹 Roses",
-        "🍎 Apple Trees",
-        "🌽 Corn",
-        "🥬 Vegetables",
-        "🌻 Flowers",
-        "🌴 Palms",
-        "...and 500+ more!"
-    ]
-    for plant in plants:
-        st.write(plant)
-    
-    st.markdown("---")
-    
-    st.header("⚠️ Disclaimer")
-    st.write("""
-    This analysis is AI-powered and should not replace professional 
-    agricultural advice. For critical plant health issues, consult 
-    a professional agronomist or plant pathologist.
-    """)
-    
-    st.markdown("---")
-    
-    st.header("🔐 Privacy")
-    st.write("""
-    Your uploaded images are processed by Google's Gemini API 
-    and are not stored permanently.
-    """)
+    with st.expander("🔧 Troubleshooting Steps"):
+        st.write("""
+        1. **Try a different image** - Same leaf, different angle/lighting
+        2. **Use Pro model** - Better for complex diagnoses
+        3. **Enable debug mode** - See what the AI actually sees
+        4. **Check image quality** - Follow the photo checklist
+        5. **Verify your API key** - Make sure it's valid and has quota
+        """)
