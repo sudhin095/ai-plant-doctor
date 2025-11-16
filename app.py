@@ -1,906 +1,607 @@
-import streamlit as st
-import google.generativeai as genai
-from PIL import Image
-import os
-import json
-from datetime import datetime
-import re
+# 🌱 AI Educational Assistant + Plant Recognition
+# app_plants.py - Updated version with plant identification
 
+import streamlit as st
+import json
+import random
+import re
+from collections import defaultdict
+
+# Page configuration
 st.set_page_config(
-    page_title="🌿 AI Plant Doctor - Professional Edition",
-    page_icon="🌿",
+    page_title="AI Educational & Plant Recognition Assistant",
+    page_icon="🌱",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
+# Custom CSS
 st.markdown("""
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-    }
-    
-    /* DARK MODE */
-    .stApp {
-        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
-        color: #e4e6eb;
-    }
-    
-    /* Main container background */
-    [data-testid="stAppViewContainer"] {
-        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
-    }
-    
-    /* LARGER FONT SIZES */
-    p, span, div, label {
-        color: #e4e6eb;
-        font-size: 1.1rem;
-    }
-    
-    /* Header Styles */
-    .header-container {
-        background: linear-gradient(135deg, #1a2a47 0%, #2d4a7a 100%);
-        padding: 40px 20px;
-        border-radius: 15px;
-        margin-bottom: 30px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(102, 126, 234, 0.3);
-    }
-    
-    .header-title {
-        font-size: 3rem;
-        font-weight: 700;
-        color: #ffffff;
-        text-align: center;
-        margin-bottom: 10px;
-        letter-spacing: 1px;
-    }
-    
-    .header-subtitle {
-        font-size: 1.4rem;
-        color: #b0c4ff;
-        text-align: center;
-    }
-    
-    /* Feature Cards */
-    .feature-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 15px 20px;
-        border-radius: 10px;
-        text-align: center;
-        font-weight: 600;
-        font-size: 1.1rem;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
-        transition: transform 0.3s ease;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .feature-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.7);
-    }
-    
-    /* Upload Container */
-    .upload-container {
-        background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%);
-        padding: 30px;
-        border-radius: 15px;
-        border: 2px dashed #667eea;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        margin: 20px 0;
-    }
-    
-    /* Result Container */
-    .result-container {
-        background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%);
-        border-radius: 15px;
-        padding: 30px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-        margin: 20px 0;
-        border: 1px solid rgba(102, 126, 234, 0.2);
-    }
-    
-    /* Disease Header */
-    .disease-header {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
-        padding: 25px;
-        border-radius: 12px;
-        margin-bottom: 25px;
-        box-shadow: 0 4px 20px rgba(245, 87, 108, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .disease-name {
-        font-size: 2.8rem;
-        font-weight: 700;
-        margin-bottom: 15px;
-    }
-    
-    .disease-meta {
-        font-size: 1.1rem;
-        opacity: 0.95;
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-    }
-    
-    /* Info Sections */
-    .info-section {
-        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
-        border-left: 5px solid #667eea;
-        padding: 20px;
-        border-radius: 8px;
-        margin: 15px 0;
-        border: 1px solid rgba(102, 126, 234, 0.2);
-    }
-    
-    .info-title {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #b0c4ff;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    
-    .info-content {
-        color: #d0d6e6;
-        line-height: 1.8;
-        font-size: 1.1rem;
-    }
-    
-    /* Badges */
-    .severity-badge {
-        display: inline-block;
-        padding: 10px 18px;
+    .main {padding: 2rem;}
+    .free-badge {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        padding: 15px 25px;
         border-radius: 20px;
-        font-weight: 600;
-        font-size: 1rem;
-    }
-    
-    .severity-healthy {
-        background-color: #1b5e20;
-        color: #4caf50;
-    }
-    
-    .severity-mild {
-        background-color: #004d73;
-        color: #4dd0e1;
-    }
-    
-    .severity-moderate {
-        background-color: #633d00;
-        color: #ffc107;
-    }
-    
-    .severity-severe {
-        background-color: #5a1a1a;
-        color: #ff6b6b;
-    }
-    
-    .type-badge {
+        color: white;
+        font-weight: bold;
         display: inline-block;
-        padding: 8px 14px;
-        border-radius: 15px;
-        font-weight: 600;
-        font-size: 0.95rem;
-        margin: 5px 5px 5px 0;
-    }
-    
-    .type-fungal { background-color: #4a148c; color: #ce93d8; }
-    .type-bacterial { background-color: #0d47a1; color: #64b5f6; }
-    .type-viral { background-color: #5c0b0b; color: #ef9a9a; }
-    .type-pest { background-color: #4d2600; color: #ffcc80; }
-    .type-nutrient { background-color: #0d3a1a; color: #81c784; }
-    .type-healthy { background-color: #0d3a1a; color: #81c784; }
-    
-    /* Debug Box */
-    .debug-box {
-        background: #0f1419;
-        border: 1px solid #667eea;
-        border-radius: 8px;
-        padding: 15px;
         margin: 10px 0;
-        font-family: monospace;
-        font-size: 0.95rem;
-        max-height: 400px;
-        overflow-y: auto;
-        color: #b0c4ff;
-        white-space: pre-wrap;
     }
-    
-    /* Alert Boxes */
-    .warning-box {
-        background: linear-gradient(135deg, #4d2600 0%, #3d2000 100%);
-        border: 1px solid #ffc107;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 10px 0;
-        color: #ffcc80;
-        font-size: 1.1rem;
-    }
-    
-    .success-box {
-        background: linear-gradient(135deg, #1b5e20 0%, #0d3a1a 100%);
-        border: 1px solid #4caf50;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 10px 0;
-        color: #81c784;
-        font-size: 1.1rem;
-    }
-    
-    .error-box {
-        background: linear-gradient(135deg, #5a1a1a 0%, #3d0d0d 100%);
-        border: 1px solid #ff6b6b;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 10px 0;
-        color: #ef9a9a;
-        font-size: 1.1rem;
-    }
-    
-    /* Button Styles */
-    .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: white !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        padding: 12px 30px !important;
-        font-weight: 600 !important;
-        font-size: 1.1rem !important;
-        border-radius: 8px !important;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
-        transition: all 0.3s ease !important;
-    }
-    
-    .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
-    }
-    
-    /* Image Container */
-    .image-container {
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(102, 126, 234, 0.2);
-    }
-    
-    /* Tips Card */
-    .tips-card {
-        background: linear-gradient(135deg, #1a2a47 0%, #2d3050 100%);
-        border: 2px solid #667eea;
+    .success-box {background: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;}
+    .info-box {background: #d1ecf1; padding: 15px; border-radius: 8px; border-left: 4px solid #17a2b8;}
+    .plant-card {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 20px;
         border-radius: 10px;
-        padding: 15px;
         margin: 10px 0;
-    }
-    
-    .tips-card-title {
-        font-weight: 700;
-        color: #b0c4ff;
-        margin-bottom: 10px;
-        font-size: 1.2rem;
-    }
-    
-    /* Sidebar styling */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
-    }
-    
-    /* Metric styling */
-    [data-testid="metric-container"] {
-        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
-        border: 1px solid rgba(102, 126, 234, 0.2);
-        border-radius: 8px;
-    }
-    
-    /* Expander styling */
-    [data-testid="stExpander"] {
-        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
-        border: 1px solid rgba(102, 126, 234, 0.2);
-    }
-    
-    .streamlit-expanderHeader {
-        color: #b0c4ff !important;
-        font-size: 1.1rem !important;
-    }
-    
-    /* Input fields */
-    input, textarea, select {
-        background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%) !important;
-        border: 1px solid rgba(102, 126, 234, 0.3) !important;
-        color: #e4e6eb !important;
-        font-size: 1.1rem !important;
-    }
-    
-    /* Subheader styling */
-    h2, h3, h4 {
-        font-size: 1.4rem !important;
-        color: #b0c4ff !important;
-    }
-    
-    /* Scrollbar styling */
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-    
-    ::-webkit-scrollbar-track {
-        background: #0f1419;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-        background: #667eea;
-        border-radius: 4px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-        background: #764ba2;
     }
 </style>
 """, unsafe_allow_html=True)
 
-try:
-    genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-except:
-    st.error("❌ GEMINI_API_KEY not found in environment variables!")
-    st.stop()
+# Session state initialization
+if 'processed_data' not in st.session_state:
+    st.session_state.processed_data = None
+if 'plant_data' not in st.session_state:
+    st.session_state.plant_data = None
 
-EXPERT_PROMPT = """You are an expert plant pathologist with 30 years of experience diagnosing plant diseases globally.
-Your task is to provide accurate, practical plant disease diagnosis.
+# Sample plant database
+PLANT_DATABASE = {
+    "Tomato": {
+        "scientific_name": "Solanum lycopersicum",
+        "family": "Solanaceae",
+        "description": "A widely cultivated plant with edible red fruits used in cooking and as a source of vitamins.",
+        "uses": ["Cooking", "Nutrition", "Medicine"],
+        "care": ["Full sunlight (6-8 hours daily)", "Well-drained soil", "Regular watering"],
+        "growth_time": "60-85 days"
+    },
+    "Spinach": {
+        "scientific_name": "Spinacia oleracea",
+        "family": "Amaranthaceae",
+        "description": "A leafy green vegetable rich in iron and nutrients, commonly used in salads and cooking.",
+        "uses": ["Salads", "Cooking", "Nutrition"],
+        "care": ["Partial shade", "Moist soil", "Cool climate"],
+        "growth_time": "40-50 days"
+    },
+    "Basil": {
+        "scientific_name": "Ocimum basilicum",
+        "family": "Lamiaceae",
+        "description": "An aromatic herb with strong fragrance used in cooking, especially in Italian cuisine.",
+        "uses": ["Cooking", "Garnish", "Aromatherapy"],
+        "care": ["Sunlight (6-8 hours)", "Well-drained soil", "Warm temperature"],
+        "growth_time": "30-40 days"
+    },
+    "Mint": {
+        "scientific_name": "Mentha piperita",
+        "family": "Lamiaceae",
+        "description": "A refreshing herb with cooling properties used in beverages, desserts, and medicinal preparations.",
+        "uses": ["Beverages", "Desserts", "Medicine"],
+        "care": ["Partial shade", "Moist soil", "Hardy perennial"],
+        "growth_time": "10-12 days to first harvest"
+    },
+    "Cucumber": {
+        "scientific_name": "Cucumis sativus",
+        "family": "Cucurbitaceae",
+        "description": "A creeping vine with long green fruits, commonly eaten fresh in salads or pickled.",
+        "uses": ["Salads", "Pickling", "Nutrition"],
+        "care": ["Full sunlight", "Warm temperature", "Trellis support"],
+        "growth_time": "50-70 days"
+    },
+    "Rose": {
+        "scientific_name": "Rosa spp.",
+        "family": "Rosaceae",
+        "description": "A flowering plant known for its beautiful blooms, used in gardens and as cut flowers.",
+        "uses": ["Ornamental", "Cut flowers", "Fragrance"],
+        "care": ["Full sunlight (6+ hours)", "Well-drained soil", "Regular pruning"],
+        "growth_time": "First bloom: 12-16 weeks"
+    },
+    "Sunflower": {
+        "scientific_name": "Helianthus annuus",
+        "family": "Asteraceae",
+        "description": "A tall plant with large yellow flowers that track the sun, producing seeds and oil.",
+        "uses": ["Ornamental", "Seeds", "Oil production"],
+        "care": ["Full sunlight", "Well-drained soil", "Support for tall varieties"],
+        "growth_time": "70-100 days"
+    },
+    "Lavender": {
+        "scientific_name": "Lavandula angustifolia",
+        "family": "Lamiaceae",
+        "description": "A fragrant flowering plant used in aromatherapy, perfumes, and culinary applications.",
+        "uses": ["Aromatherapy", "Culinary", "Ornamental"],
+        "care": ["Full sunlight", "Well-drained soil", "Low maintenance"],
+        "growth_time": "12-16 weeks"
+    }
+}
 
-CRITICAL RULES:
-1. RESPOND ONLY WITH VALID JSON - NO markdown, NO explanations, NO code blocks
-2. Start with { and end with } - nothing else
-3. If uncertain about plant species, say "Unknown plant - could be [possibilities]"
-4. If you cannot diagnose with >60% confidence, say so explicitly
-5. Consider fungal, bacterial, viral, pest, nutrient, and environmental causes
-6. Be specific: "tomato early blight" not just "leaf spot"
-7. Practical recommendations only - things the user can actually do
-
-RESPOND WITH EXACTLY THIS JSON STRUCTURE:
-{
-  "plant_species": "Common name / Scientific name (or 'Unknown')",
-  "disease_name": "Specific disease name or 'No disease detected' or 'Healthy plant'",
-  "disease_type": "fungal/bacterial/viral/pest/nutrient/environmental/healthy",
-  "severity": "healthy/mild/moderate/severe",
-  "confidence": 85,
-  "confidence_reason": "Why we are confident or uncertain in this diagnosis",
-  "image_quality": "Excellent/Good/Fair/Poor - [explanation]",
-  "symptoms": [
-    "First visible symptom observed",
-    "Second visible symptom observed",
-    "Third visible symptom if present"
-  ],
-  "probable_causes": [
-    "Primary cause with conditions that led to it",
-    "Secondary possible cause",
-    "Environmental factor if applicable"
-  ],
-  "immediate_action": [
-    "Action 1: Specific, actionable step",
-    "Action 2: Specific, actionable step",
-    "Action 3: Specific, actionable step"
-  ],
-  "organic_treatments": [
-    "Treatment 1: Specific product and application method",
-    "Treatment 2: Specific product and application method",
-    "Prevention: How to avoid this in future"
-  ],
-  "chemical_treatments": [
-    "Chemical 1: Product name and dilution rate",
-    "Chemical 2: Alternative if resistance develops",
-    "Note: When to use and safety precautions"
-  ],
-  "prevention_long_term": [
-    "Prevention strategy 1: Cultural practice",
-    "Prevention strategy 2: Environmental control",
-    "Prevention strategy 3: Variety selection or rotation"
-  ],
-  "image_quality_tips": "What would make diagnosis more certain",
-  "similar_conditions": "Other conditions that might look similar"
-}"""
-
-def get_type_badge_class(disease_type):
-    type_lower = disease_type.lower() if disease_type else "healthy"
-    if "fungal" in type_lower:
-        return "type-fungal"
-    elif "bacterial" in type_lower:
-        return "type-bacterial"
-    elif "viral" in type_lower:
-        return "type-viral"
-    elif "pest" in type_lower:
-        return "type-pest"
-    elif "nutrient" in type_lower:
-        return "type-nutrient"
-    else:
-        return "type-healthy"
-
-def get_severity_badge_class(severity):
-    severity_lower = (severity.lower() if severity else "moderate")
-    if "healthy" in severity_lower or "none" in severity_lower:
-        return "severity-healthy"
-    elif "mild" in severity_lower:
-        return "severity-mild"
-    elif "moderate" in severity_lower:
-        return "severity-moderate"
-    elif "severe" in severity_lower:
-        return "severity-severe"
-    return "severity-moderate"
-
-def resize_image(image, max_width=600, max_height=500):
-    image.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
-    return image
-
-def zoom_image(image, zoom_level):
-    if zoom_level == 1.0:
-        return image
-    
-    width, height = image.size
-    new_width = int(width * zoom_level)
-    new_height = int(height * zoom_level)
-    
-    left = max(0, (width - new_width) / 2)
-    top = max(0, (height - new_height) / 2)
-    right = min(width, left + new_width)
-    bottom = min(height, top + new_height)
-    
-    cropped = image.crop((left, top, right, bottom))
-    return cropped.resize((width, height), Image.Resampling.LANCZOS)
-
-def extract_json_robust(response_text):
-    if not response_text:
-        return None
-    
-    try:
-        return json.loads(response_text)
-    except:
-        pass
-    
-    cleaned = response_text
-    if "```json" in cleaned:
-        cleaned = cleaned.split("```json")[1].split("```")[0]
-    elif "```" in cleaned:
-        cleaned = cleaned.split("```")[1].split("```")[0]
-    
-    try:
-        return json.loads(cleaned.strip())
-    except:
-        pass
-    
-    match = re.search(r'\{[\s\S]*\}', response_text)
-    if match:
-        try:
-            return json.loads(match.group())
-        except:
-            pass
-    
-    return None
-
-def validate_json_result(data):
-    required_fields = [
-        "disease_name", "disease_type", "severity", 
-        "confidence", "symptoms", "probable_causes"
-    ]
-    
-    if not isinstance(data, dict):
-        return False, "Response is not a dictionary"
-    
-    missing = [f for f in required_fields if f not in data]
-    if missing:
-        return False, f"Missing fields: {', '.join(missing)}"
-    
-    return True, "Valid"
-
-st.markdown("""
-<div class="header-container">
-    <div class="header-title">🌿 AI Plant Doctor - Professional Edition</div>
-    <div class="header-subtitle">Universal Plant Disease Detection with Expert Analysis</div>
-</div>
-""", unsafe_allow_html=True)
-
-col1, col2, col3, col4 = st.columns(4)
+# Header
+col1, col2 = st.columns([1, 3])
 with col1:
-    st.markdown('<div class="feature-card">✅ Expert Diagnosis</div>', unsafe_allow_html=True)
+    st.image("https://cdn-icons-png.flaticon.com/512/3652/3652126.png", width=80)
 with col2:
-    st.markdown('<div class="feature-card">🔍 Image Zoom</div>', unsafe_allow_html=True)
-with col3:
-    st.markdown('<div class="feature-card">🐛 Debug Mode</div>', unsafe_allow_html=True)
-with col4:
-    st.markdown('<div class="feature-card">🚀 Best Accuracy</div>', unsafe_allow_html=True)
+    st.title("🌱 AI Educational & Plant Assistant")
+    st.markdown("*Summarize • Quiz • Learn • Identify Plants*")
 
-st.markdown("<br>", unsafe_allow_html=True)
+st.markdown('<div class="free-badge">🌿 Educational Tool + Plant Recognition • Completely FREE 🌿</div>', unsafe_allow_html=True)
 
-with st.sidebar:
-    st.header("⚙️ Settings & Configuration")
+st.divider()
+
+# Main tabs - UPDATED with Plant Recognition
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["📥 Input", "🌿 Plant ID", "📝 Summary", "❓ Quiz", "🧠 Mind Map"])
+
+# ============ TAB 1: INPUT (EDUCATIONAL CONTENT) ============
+with tab1:
+    st.header("📥 Input Educational Content")
     
-    model_choice = st.radio(
-        "🤖 AI Model Selection",
-        ["Gemini 2.5 Flash (Fast)", "Gemini 2.5 Pro (Accurate)"],
-        help="Flash: 80% accurate, 2-3 sec | Pro: 95% accurate, 5-10 sec"
+    input_method = st.radio(
+        "Choose input type:",
+        ["📄 Text Input"],
+        horizontal=True
+    )
+
+    st.subheader("Paste Educational Content")
+    text_input = st.text_area(
+        "Enter your text (minimum 50 words):",
+        height=250,
+        placeholder="Paste lecture notes, articles, research papers, or any educational content here..."
     )
     
-    debug_mode = st.checkbox("🐛 Debug Mode", value=False, help="Show raw API responses")
-    show_tips = st.checkbox("💡 Show Photo Tips", value=True, help="Display photo quality tips")
-    
-    confidence_min = st.slider(
-        "Minimum Confidence (%)",
-        0, 100, 50,
-        help="Only show results above this confidence"
-    )
-    
-    st.markdown("---")
-    
-    with st.expander("📸 Perfect Photo Checklist", expanded=False):
-        st.markdown("""
-        ✅ **DO THIS:**
-        - Plain WHITE background
-        - Natural, even lighting
-        - Sharp and in-focus
-        - Close-up of diseased part
-        - ONE leaf only
-        - Photograph from above
+    if st.button("✅ Process Text", use_container_width=True, type="primary"):
+        if text_input:
+            word_count = len(text_input.split())
+            if word_count >= 50:
+                st.session_state.processed_data = {
+                    'content': text_input,
+                    'source': f"Text Input ({word_count} words)",
+                    'type': 'text'
+                }
+                st.success(f"✅ Text processed! ({word_count} words)")
+            else:
+                st.error(f"❌ Text too short. Need at least 50 words, you have {word_count}")
+        else:
+            st.error("❌ Please enter some text")
+
+    # Processing options
+    if st.session_state.processed_data:
+        st.divider()
+        st.subheader("⚙️ Customization Options")
         
-        ❌ **AVOID:**
-        - Blurry photos
-        - Dark shadows
-        - Busy backgrounds
-        - Healthy leaves
-        - Multiple leaves
-        - Angled shots
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            summary_points = st.slider("Summary bullet points:", 3, 10, 5)
+        with col2:
+            num_questions = st.slider("Quiz questions:", 3, 8, 5)
+        with col3:
+            difficulty = st.selectbox("Question difficulty:", ["Easy", "Medium", "Hard", "Mixed"])
+        
+        if st.button("🚀 Generate Summary, Quiz & Mind Map", use_container_width=True, type="primary"):
+            with st.spinner("🧠 Processing with AI models..."):
+                try:
+                    content = st.session_state.processed_data['content']
+                    
+                    # Summarization
+                    st.info("📝 Generating summary...")
+                    
+                    try:
+                        from transformers import pipeline
+                        summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=-1)
+                        
+                        sentences = re.split(r'(?<=[.!?])\s+', content)
+                        chunks = []
+                        current_chunk = ""
+                        
+                        for sentence in sentences:
+                            if len(current_chunk) + len(sentence) < 1024:
+                                current_chunk += " " + sentence
+                            else:
+                                if current_chunk.strip():
+                                    chunks.append(current_chunk.strip())
+                                current_chunk = sentence
+                        
+                        if current_chunk.strip():
+                            chunks.append(current_chunk.strip())
+                        
+                        summaries = []
+                        for chunk in chunks:
+                            if len(chunk.split()) >= 50:
+                                try:
+                                    summary = summarizer(chunk, max_length=150, min_length=50, do_sample=False)
+                                    summaries.append(summary[0]['summary_text'])
+                                except:
+                                    pass
+                        
+                        bullets = []
+                        for summary in summaries:
+                            summary = summary.replace('\n', ' ')
+                            sents = re.split(r'[.!?]+', summary)
+                            for sent in sents:
+                                sent = sent.strip()
+                                if len(sent) > 10:
+                                    sent = sent[0].upper() + sent[1:] if sent else sent
+                                    if sent not in bullets:
+                                        bullets.append(f"• {sent}")
+                    except:
+                        bullets = ["• Unable to load summarization model. Using sample content instead."]
+                    
+                    # Quiz generation
+                    st.info("❓ Generating quiz questions...")
+                    
+                    try:
+                        import spacy
+                        nlp = spacy.load("en_core_web_sm")
+                        doc = nlp(content)
+                        
+                        entities = [ent.text for ent in doc.ents if len(ent.text) > 2]
+                        entities = list(set(entities))
+                    except:
+                        entities = []
+                    
+                    quiz = []
+                    sample_questions = [
+                        f"What is the significance of '{{}}'?",
+                        f"Which concept refers to '{{}}'?",
+                        f"'{{}' is associated with:",
+                        f"What does '{}' mean?",
+                        f"Which statement best describes '{{}}'?",
+                    ]
+                    
+                    for i, entity in enumerate(entities[:num_questions]):
+                        if not entity or len(entity) < 2:
+                            continue
+                        
+                        question = random.choice(sample_questions).format(entity)
+                        other_entities = [e for e in entities if e != entity]
+                        distractors = random.sample(other_entities, min(3, len(other_entities)))
+                        
+                        while len(distractors) < 3:
+                            distractors.append(f"Option {len(distractors) + 1}")
+                        
+                        options = [entity] + distractors
+                        random.shuffle(options)
+                        correct_idx = options.index(entity)
+                        
+                        quiz.append({
+                            "id": i + 1,
+                            "question": question,
+                            "options": options,
+                            "correct_option": correct_idx,
+                            "difficulty": difficulty.lower(),
+                            "explanation": f"The correct answer is: {entity}"
+                        })
+                    
+                    # Mind map
+                    st.info("🧠 Creating mind map...")
+                    
+                    concepts = defaultdict(list)
+                    try:
+                        for ent in doc.ents:
+                            if ent.label_ == "PERSON":
+                                concepts["👤 People"].append(ent.text)
+                            elif ent.label_ == "ORG":
+                                concepts["🏢 Organizations"].append(ent.text)
+                            elif ent.label_ in ["DATE", "TIME"]:
+                                concepts["📅 Timeline"].append(ent.text)
+                            elif ent.label_ in ["GPE", "LOC"]:
+                                concepts["📍 Locations"].append(ent.text)
+                            else:
+                                concepts["💡 Concepts"].append(ent.text)
+                    except:
+                        pass
+                    
+                    for key in concepts:
+                        concepts[key] = list(set(concepts[key]))[:10]
+                    
+                    mind_map = {
+                        "name": "Main Topic",
+                        "children": [
+                            {
+                                "name": category,
+                                "children": [{"name": item, "children": []} for item in items]
+                            }
+                            for category, items in concepts.items() if items
+                        ]
+                    }
+                    
+                    st.session_state.processed_data.update({
+                        'summary': bullets[:summary_points],
+                        'quiz': quiz,
+                        'mindmap': mind_map
+                    })
+                    
+                    st.success("✅ Generation complete!")
+                    st.balloons()
+                    
+                except Exception as e:
+                    st.error(f"❌ Error: {str(e)}")
+
+# ============ TAB 2: PLANT IDENTIFICATION (NEW!) ============
+with tab2:
+    st.header("🌿 Plant Identification")
+    
+    st.subheader("Identify Plants from Your Photos")
+    
+    # Image upload
+    uploaded_image = st.file_uploader(
+        "Upload a photo of a plant:",
+        type=['jpg', 'jpeg', 'png', 'webp'],
+        help="Upload a clear photo of a plant to identify it"
+    )
+    
+    if uploaded_image is not None:
+        # Display image
+        st.image(uploaded_image, caption="Uploaded plant photo", use_column_width=True)
+        
+        # Manual plant selection (since we can't do real image recognition without cloud APIs)
+        st.info("""
+        📌 **Note:** Real plant identification requires cloud image processing APIs.
+        
+        For now, please select the plant from the list below to get information about it.
+        You can also describe what you see in the photo.
         """)
     
-    with st.expander("❓ Why Wrong Results?", expanded=False):
-        st.markdown("""
-        **Top 3 Reasons:**
-        
-        1. 📸 **Bad Image Quality**
-           - Blurry or dark
-           - Busy background
-           - Solution: Retake with white background
-        
-        2. 🎯 **Wrong Subject**
-           - Showing healthy leaf
-           - Multiple leaves in frame
-           - Solution: One diseased leaf, clear view
-        
-        3. 🤖 **Model Issue**
-           - Using Flash for complex disease
-           - Solution: Switch to Pro model
-        """)
-
-col_upload, col_empty = st.columns([3, 1])
-
-with col_upload:
-    st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
-    st.subheader("📤 Upload Plant Image")
-    uploaded_file = st.file_uploader(
-        "Drag and drop or click to select your image",
-        type=['jpg', 'jpeg', 'png'],
-        label_visibility="collapsed"
-    )
-    st.markdown("</div>", unsafe_allow_html=True)
-
-if uploaded_file:
-    image = Image.open(uploaded_file)
-    original_image = image.copy()
+    # Plant selection
+    st.subheader("Plant Information Database")
     
-    if show_tips:
-        st.markdown("""
-        <div class="tips-card">
-            <div class="tips-card-title">💡 Photo Quality Matters!</div>
-            For best results: white background + natural light + sharp focus + diseased leaf close-up
+    selected_plant = st.selectbox(
+        "Select a plant or search:",
+        list(PLANT_DATABASE.keys()),
+        help="Choose a plant to learn more about it"
+    )
+    
+    if selected_plant:
+        plant_info = PLANT_DATABASE[selected_plant]
+        
+        # Display plant card
+        st.markdown(f"""
+        <div class="plant-card">
+            <h3>🌱 {selected_plant}</h3>
+            <p><strong>Scientific Name:</strong> {plant_info['scientific_name']}</p>
+            <p><strong>Family:</strong> {plant_info['family']}</p>
         </div>
         """, unsafe_allow_html=True)
-    
-    st.markdown("<div class='result-container'>", unsafe_allow_html=True)
-    
-    col_img, col_zoom = st.columns([3, 1])
-    
-    with col_zoom:
-        st.markdown("### 🔍 Zoom")
-        zoom_level = st.slider(
-            "Zoom",
-            min_value=0.5,
-            max_value=2.0,
-            value=1.0,
-            step=0.1,
-            label_visibility="collapsed"
-        )
-    
-    with col_img:
-        st.subheader("📸 Preview")
-        display_image = original_image.copy()
-        if zoom_level != 1.0:
-            display_image = zoom_image(display_image, zoom_level)
-        display_image = resize_image(display_image)
         
-        st.markdown('<div class="image-container">', unsafe_allow_html=True)
-        st.image(display_image, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    col_b1, col_b2, col_b3 = st.columns([1, 1, 1])
-    
-    with col_b2:
-        analyze_btn = st.button("🔬 Analyze Plant", use_container_width=True, type="primary")
-    
-    if analyze_btn:
-        progress_placeholder = st.empty()
+        # Tabs for plant info
+        plant_col1, plant_col2, plant_col3 = st.tabs(["📖 Description", "🌱 Care Guide", "💡 Uses"])
         
-        with st.spinner("🔄 Analyzing... This may take a few seconds"):
-            try:
-                progress_placeholder.info("📊 Processing image with AI...")
+        with plant_col1:
+            st.write(f"**Description:** {plant_info['description']}")
+            st.write(f"**Growth Time:** {plant_info['growth_time']}")
+        
+        with plant_col2:
+            st.write("**Care Instructions:**")
+            for care in plant_info['care']:
+                st.write(f"• {care}")
+        
+        with plant_col3:
+            st.write("**Common Uses:**")
+            for use in plant_info['uses']:
+                st.write(f"• {use}")
+        
+        # Store plant data
+        st.session_state.plant_data = {
+            'plant_name': selected_plant,
+            'info': plant_info
+        }
+        
+        # Generate learning content about the plant
+        if st.button("📚 Generate Learning Content About This Plant", use_container_width=True, type="primary"):
+            with st.spinner("Creating educational content..."):
+                plant_content = f"""
+                {selected_plant} is a plant belonging to the {plant_info['family']} family, with the scientific name {plant_info['scientific_name']}.
                 
-                model_name = "Gemini 2.5 Pro" if "Pro" in model_choice else "Gemini 2.5 Flash"
-                model_id = 'gemini-2.5-pro' if "Pro" in model_choice else 'gemini-2.5-flash'
-                model = genai.GenerativeModel(model_id)
+                Description: {plant_info['description']}
                 
-                if debug_mode:
-                    st.info(f"📊 Using Model: {model_name}")
+                The growth cycle typically takes about {plant_info['growth_time']} from planting to maturity or first harvest.
                 
-                response = model.generate_content([EXPERT_PROMPT, original_image])
-                raw_response = response.text
+                Care requirements include the following: {', '.join(plant_info['care'])}.
                 
-                if debug_mode:
-                    with st.expander("🔍 Raw API Response"):
-                        st.markdown('<div class="debug-box">', unsafe_allow_html=True)
-                        displayed_response = raw_response[:3000] + "..." if len(raw_response) > 3000 else raw_response
-                        st.text(displayed_response)
-                        st.markdown('</div>', unsafe_allow_html=True)
+                Common uses of {selected_plant} include: {', '.join(plant_info['uses'])}.
                 
-                result = extract_json_robust(raw_response)
+                For optimal growth, ensure proper sunlight, watering, and soil conditions as mentioned in the care guide.
+                """
                 
-                if result is None:
-                    st.markdown('<div class="error-box">', unsafe_allow_html=True)
-                    st.error("❌ Could not parse AI response")
-                    st.write("**This sometimes happens with unusual images. Try:**")
-                    st.write("• Retake photo with better lighting/focus")
-                    st.write("• Use Pro model for better accuracy")
-                    st.write("• Enable debug mode to see raw response")
-                    st.markdown('</div>', unsafe_allow_html=True)
-                    
-                    if debug_mode:
-                        with st.expander("Full Response (Debug)"):
-                            st.markdown('<div class="debug-box">', unsafe_allow_html=True)
-                            st.text(raw_response)
-                            st.markdown('</div>', unsafe_allow_html=True)
-                else:
-                    is_valid, validation_msg = validate_json_result(result)
-                    
-                    if not is_valid:
-                        st.warning(f"⚠️ Incomplete response: {validation_msg}")
-                    
-                    confidence = result.get("confidence", 0)
-                    
-                    if confidence < confidence_min:
-                        st.markdown('<div class="warning-box">', unsafe_allow_html=True)
-                        st.warning(f"⚠️ **Low Confidence ({confidence}%)**")
-                        st.write(result.get("confidence_reason", "AI is uncertain about this diagnosis"))
-                        st.write("**Recommendation:** " + result.get("image_quality_tips", "Provide a clearer image"))
-                        st.markdown('</div>', unsafe_allow_html=True)
-                    
-                    image_quality = result.get("image_quality", "")
-                    if image_quality and ("Poor" in image_quality or "Fair" in image_quality):
-                        st.markdown('<div class="warning-box">', unsafe_allow_html=True)
-                        st.write(f"📸 **Image Quality Note:** {image_quality}")
-                        st.markdown('</div>', unsafe_allow_html=True)
-                    
-                    st.markdown("<div class='result-container'>", unsafe_allow_html=True)
-                    
-                    disease_name = result.get("disease_name", "Unknown")
-                    disease_type = result.get("disease_type", "unknown")
-                    severity = result.get("severity", "unknown")
-                    plant = result.get("plant_species", "Unknown")
-                    
-                    severity_class = get_severity_badge_class(severity)
-                    type_class = get_type_badge_class(disease_type)
-                    
-                    st.markdown(f"""
-                    <div class="disease-header">
-                        <div class="disease-name">{disease_name}</div>
-                        <div class="disease-meta">
-                            <div>
-                                <span class="severity-badge {severity_class}">{severity.title()}</span>
-                            </div>
-                            <div>
-                                <span class="type-badge {type_class}">{disease_type.title()}</span>
-                            </div>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    col1, col2, col3, col4 = st.columns(4)
-                    with col1:
-                        st.metric("🌱 Plant", plant)
-                    with col2:
-                        st.metric("📊 Confidence", f"{confidence}%")
-                    with col3:
-                        st.metric("🚨 Severity", severity.title())
-                    with col4:
-                        st.metric("⏱️ Analysis", datetime.now().strftime("%H:%M"))
-                    
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    
-                    col_left, col_right = st.columns(2)
-                    
-                    with col_left:
-                        st.markdown("""
-                        <div class="info-section">
-                            <div class="info-title">🔍 Symptoms Observed</div>
-                        """, unsafe_allow_html=True)
-                        
-                        for symptom in result.get("symptoms", []):
-                            st.write(f"• {symptom}")
-                        
-                        st.markdown("</div>", unsafe_allow_html=True)
-                        
-                        st.markdown("""
-                        <div class="info-section">
-                            <div class="info-title">⚠️ Probable Causes</div>
-                        """, unsafe_allow_html=True)
-                        
-                        for cause in result.get("probable_causes", []):
-                            st.write(f"• {cause}")
-                        
-                        st.markdown("</div>", unsafe_allow_html=True)
-                    
-                    with col_right:
-                        st.markdown("""
-                        <div class="info-section">
-                            <div class="info-title">⚡ Immediate Actions</div>
-                        """, unsafe_allow_html=True)
-                        
-                        for i, action in enumerate(result.get("immediate_action", []), 1):
-                            st.write(f"**{i}.** {action}")
-                        
-                        st.markdown("</div>", unsafe_allow_html=True)
-                    
-                    col_treat1, col_treat2 = st.columns(2)
-                    
-                    with col_treat1:
-                        st.markdown("""
-                        <div class="info-section">
-                            <div class="info-title">🌱 Organic Treatments</div>
-                        """, unsafe_allow_html=True)
-                        
-                        for treatment in result.get("organic_treatments", []):
-                            st.write(f"• {treatment}")
-                        
-                        st.markdown("</div>", unsafe_allow_html=True)
-                    
-                    with col_treat2:
-                        st.markdown("""
-                        <div class="info-section">
-                            <div class="info-title">💊 Chemical Treatments</div>
-                        """, unsafe_allow_html=True)
-                        
-                        for treatment in result.get("chemical_treatments", []):
-                            st.write(f"• {treatment}")
-                        
-                        st.markdown("</div>", unsafe_allow_html=True)
-                    
-                    st.markdown("""
-                    <div class="info-section">
-                        <div class="info-title">🛡️ Long-Term Prevention</div>
-                    """, unsafe_allow_html=True)
-                    
-                    for tip in result.get("prevention_long_term", []):
-                        st.write(f"• {tip}")
-                    
-                    st.markdown("</div>", unsafe_allow_html=True)
-                    
-                    if result.get("similar_conditions"):
-                        st.markdown("""
-                        <div class="info-section">
-                            <div class="info-title">🔎 Similar Conditions</div>
-                        """, unsafe_allow_html=True)
-                        st.write(result.get("similar_conditions"))
-                        st.markdown("</div>", unsafe_allow_html=True)
-                    
-                    st.markdown("</div>", unsafe_allow_html=True)
-                    
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 1])
-                    
-                    with col_btn1:
-                        if st.button("📸 Analyze Another Plant", use_container_width=True):
-                            st.rerun()
-                    
-                    with col_btn3:
-                        if st.button("🔄 Reset All", use_container_width=True):
-                            st.rerun()
-                    
-                    progress_placeholder.empty()
-                    
-            except Exception as e:
-                st.markdown('<div class="error-box">', unsafe_allow_html=True)
-                st.error(f"❌ Analysis Failed: {str(e)}")
-                st.write("**Troubleshooting steps:**")
-                st.write("1. Check your API key is valid")
-                st.write("2. Try a different image with better quality")
-                st.write("3. Switch to Pro model for better accuracy")
-                st.write("4. Enable Debug Mode to see error details")
-                st.markdown('</div>', unsafe_allow_html=True)
+                st.session_state.processed_data = {
+                    'content': plant_content,
+                    'source': f"Plant Information: {selected_plant}",
+                    'type': 'plant'
+                }
                 
-                if debug_mode:
-                    with st.expander("🔍 Error Details (Debug)"):
-                        st.markdown('<div class="debug-box">', unsafe_allow_html=True)
-                        st.text(str(e))
-                        st.markdown('</div>', unsafe_allow_html=True)
-                
-                progress_placeholder.empty()
+                st.success("✅ Plant learning content generated!")
+                st.info("Go to Summary tab to see the content processed!")
 
+# ============ TAB 3: SUMMARY ============
+with tab3:
+    if st.session_state.processed_data and 'summary' in st.session_state.processed_data:
+        data = st.session_state.processed_data
+        
+        st.header("📋 Summary & Insights")
+        st.subheader(f"📌 Source: {data['source']}")
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            word_count = len(data['content'].split())
+            st.metric("📊 Content Words", f"{word_count:,}")
+        with col2:
+            st.metric("✅ Summary Points", len(data['summary']))
+        with col3:
+            st.metric("❓ Quiz Questions", len(data.get('quiz', [])))
+        
+        st.divider()
+        
+        st.subheader("🎯 Key Points")
+        for i, point in enumerate(data['summary'], 1):
+            st.markdown(f"**{i}.** {point}")
+        
+        summary_text = "\n".join([f"{i}. {p}" for i, p in enumerate(data['summary'], 1)])
+        st.download_button(
+            label="📥 Download Summary (.txt)",
+            data=summary_text,
+            file_name="summary.txt",
+            mime="text/plain",
+            use_container_width=True
+        )
+    else:
+        st.info("👈 Go to **Input** tab or **Plant ID** tab and process content first")
+
+# ============ TAB 4: QUIZ ============
+with tab4:
+    if st.session_state.processed_data and 'quiz' in st.session_state.processed_data:
+        quiz_data = st.session_state.processed_data['quiz']
+        
+        if not quiz_data:
+            st.warning("⚠️ Could not generate quiz. Please try with more content.")
+        else:
+            st.header("❓ Interactive Quiz")
+            
+            score = 0
+            total = len(quiz_data)
+            
+            for idx, question in enumerate(quiz_data, 1):
+                st.subheader(f"Question {idx}/{total}")
+                st.write(f"**{question['question']}**")
+                
+                difficulty_emoji = {
+                    'easy': '🟢',
+                    'medium': '🟡',
+                    'hard': '🔴',
+                    'mixed': '⚪'
+                }
+                st.caption(f"{difficulty_emoji.get(question.get('difficulty', 'medium'), '⚪')} {question.get('difficulty', 'medium').title()}")
+                
+                selected = st.radio(
+                    "Select your answer:",
+                    options=question['options'],
+                    key=f"q_{idx}",
+                    horizontal=False
+                )
+                
+                correct_idx = question.get('correct_option', 0)
+                is_correct = selected == question['options'][correct_idx]
+                
+                if is_correct:
+                    st.success(f"✅ **Correct!** {question.get('explanation', '')}")
+                    score += 1
+                else:
+                    st.error(f"❌ **Incorrect!** Correct answer: {question['options'][correct_idx]}")
+                    st.info(f"💡 {question.get('explanation', '')}")
+                
+                st.divider()
+            
+            st.subheader("📊 Quiz Results")
+            percentage = (score / total * 100) if total > 0 else 0
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Your Score", f"{score}/{total}")
+            with col2:
+                st.metric("Percentage", f"{percentage:.1f}%")
+            with col3:
+                st.metric("Correct Answers", score)
+            
+            st.divider()
+            if percentage >= 80:
+                st.success("🌟 **Excellent!** You've mastered this content!")
+            elif percentage >= 60:
+                st.info("👍 **Good job!** Review the missed questions.")
+            else:
+                st.warning("📚 **Keep studying!** Try again after reviewing the content.")
+    else:
+        st.info("👈 Go to **Input** or **Plant ID** tab and process content first")
+
+# ============ TAB 5: MIND MAP ============
+with tab5:
+    if st.session_state.processed_data and 'mindmap' in st.session_state.processed_data:
+        mindmap = st.session_state.processed_data['mindmap']
+        
+        st.header("🧠 Concept Mind Map")
+        
+        def display_mindmap(node, level=0):
+            indent = "  " * level
+            if level == 0:
+                st.markdown(f"### 📌 {node.get('name', 'Root')}")
+            else:
+                st.markdown(f"{indent}**{node.get('name', 'Concept')}**")
+            
+            if 'children' in node and node['children']:
+                for child in node['children']:
+                    display_mindmap(child, level + 1)
+        
+        display_mindmap(mindmap)
+        
+        st.divider()
+        
+        st.download_button(
+            label="📥 Download Mind Map (JSON)",
+            data=json.dumps(mindmap, indent=2),
+            file_name="mindmap.json",
+            mime="application/json",
+            use_container_width=True
+        )
+    else:
+        st.info("👈 Go to **Input** or **Plant ID** tab and process content first")
+
+# ============ SIDEBAR ============
 with st.sidebar:
-    st.markdown("---")
+    st.header("ℹ️ About This App")
     
-    st.header("📞 Support & Info")
+    st.markdown("""
+    ### 🌱 AI Educational & Plant Assistant v3.0
     
-    with st.expander("🌍 How It Works"):
-        st.write("""
-        1. **Upload Image** - Plant leaf with visible symptoms
-        2. **AI Analysis** - Expert system evaluates the image
-        3. **Results** - Disease identification + treatment plan
-        4. **Action** - Follow recommendations
-        
-        **Works for:**
-        • 500+ plant diseases
-        • Any plant species
-        • Fungal, bacterial, viral, pest, nutrient issues
-        • Environmental stress conditions
-        """)
+    **Features:**
+    - 📝 AI-powered summarization
+    - ❓ Auto-generated quizzes
+    - 🧠 Interactive mind maps
+    - 🌿 Plant identification & info
     
-    with st.expander("✅ Best Results"):
-        st.write("""
-        **Image Requirements:**
-        • Clear, sharp focus
-        • Natural lighting (no flash)
-        • Plain white/gray background
-        • Diseased leaf close-up
-        • Single leaf in frame
-        
-        **Conditions:**
-        • Use Pro model for difficult cases
-        • Enable debug mode for troubleshooting
-        • Check confidence score
-        • Follow photo tips in sidebar
-        """)
+    **Technology:**
+    - Streamlit (UI)
+    - Transformers (BART, spaCy)
+    - Plant database (8+ plants)
     
-    with st.expander("⚙️ Settings Tips"):
-        st.write("""
-        **Debug Mode:**
-        - Shows raw AI response
-        - Helps troubleshoot issues
-        - Shows JSON parsing steps
-        
-        **Model Selection:**
-        - Flash: 80% accurate, 2-3 sec
-        - Pro: 95% accurate, 5-10 sec
-        
-        **Confidence Threshold:**
-        - Set to filter low-confidence results
-        - Helps avoid false positives
-        - Default 50% is reasonable
-        """)
-    
-    st.markdown("---")
-    
-    st.header("📋 Free Tier Limits")
-    
-    st.write("""
-    ✅ **Always FREE:**
-    • 1,500 analyses per day
-    • 15 analyses per minute
-    • Commercial use allowed
-    • No credit card required
-    
-    ⏰ **Duration:**
-    • Works for 3+ months minimum
-    • Likely much longer
-    • See documentation for details
+    **Cost:** ✅ Completely FREE
     """)
+    
+    st.divider()
+    
+    st.subheader("🚀 How to Use")
+    st.markdown("""
+    **For Educational Content:**
+    1. Go to **Input** tab
+    2. Paste text
+    3. Click "Generate"
+    4. View summary, quiz, mind map
+    
+    **For Plant Information:**
+    1. Go to **Plant ID** tab
+    2. Upload plant photo (optional)
+    3. Select plant from list
+    4. Learn about care & uses
+    """)
+    
+    st.divider()
+    
+    st.subheader("🌿 Available Plants")
+    for plant in list(PLANT_DATABASE.keys())[:4]:
+        st.write(f"• {plant}")
+    st.write(f"• ... and {len(PLANT_DATABASE)-4} more!")
+    
+    st.divider()
+    
+    st.subheader("☁️ Cloud Powered")
+    st.markdown("""
+    ✅ No installation
+    ✅ No downloads
+    ✅ No API keys
+    ✅ 100% FREE
+    
+    Made with ❤️ for learners
+    """)
+
+# Footer
+st.divider()
+st.markdown("""
+<div style="text-align: center; color: #666; padding: 20px;">
+    <p>🌱 AI Educational & Plant Recognition Assistant | ☁️ Powered by Streamlit Cloud | 100% FREE & Open Source</p>
+    <p style="font-size: 12px;">No data is stored. All processing is temporary.</p>
+</div>
+""", unsafe_allow_html=True)
