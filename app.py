@@ -1,6 +1,3 @@
-# 🌱 AI Educational Assistant + Plant Recognition
-# app_plants.py - Updated version with plant identification
-
 import streamlit as st
 import json
 import random
