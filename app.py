@@ -26,6 +26,7 @@ st.markdown("""
         color: #e4e6eb;
     }
     
+    /* Main container background */
     [data-testid="stAppViewContainer"] {
         background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
     }
@@ -36,6 +37,7 @@ st.markdown("""
         font-size: 1.1rem;
     }
     
+    /* Header Styles */
     .header-container {
         background: linear-gradient(135deg, #1a2a47 0%, #2d4a7a 100%);
         padding: 40px 20px;
@@ -60,6 +62,7 @@ st.markdown("""
         text-align: center;
     }
     
+    /* Feature Cards */
     .feature-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
@@ -78,6 +81,7 @@ st.markdown("""
         box-shadow: 0 6px 20px rgba(102, 126, 234, 0.7);
     }
     
+    /* Upload Container */
     .upload-container {
         background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%);
         padding: 30px;
@@ -87,6 +91,7 @@ st.markdown("""
         margin: 20px 0;
     }
     
+    /* Result Container */
     .result-container {
         background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%);
         border-radius: 15px;
@@ -96,6 +101,7 @@ st.markdown("""
         border: 1px solid rgba(102, 126, 234, 0.2);
     }
     
+    /* Disease Header */
     .disease-header {
         background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         color: white;
@@ -120,6 +126,7 @@ st.markdown("""
         flex-wrap: wrap;
     }
     
+    /* Info Sections */
     .info-section {
         background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
         border-left: 5px solid #667eea;
@@ -139,6 +146,13 @@ st.markdown("""
         gap: 10px;
     }
     
+    .info-content {
+        color: #d0d6e6;
+        line-height: 1.8;
+        font-size: 1.1rem;
+    }
+    
+    /* Badges */
     .severity-badge {
         display: inline-block;
         padding: 10px 18px;
@@ -147,10 +161,25 @@ st.markdown("""
         font-size: 1rem;
     }
     
-    .severity-healthy { background-color: #1b5e20; color: #4caf50; }
-    .severity-mild { background-color: #004d73; color: #4dd0e1; }
-    .severity-moderate { background-color: #633d00; color: #ffc107; }
-    .severity-severe { background-color: #5a1a1a; color: #ff6b6b; }
+    .severity-healthy {
+        background-color: #1b5e20;
+        color: #4caf50;
+    }
+    
+    .severity-mild {
+        background-color: #004d73;
+        color: #4dd0e1;
+    }
+    
+    .severity-moderate {
+        background-color: #633d00;
+        color: #ffc107;
+    }
+    
+    .severity-severe {
+        background-color: #5a1a1a;
+        color: #ff6b6b;
+    }
     
     .type-badge {
         display: inline-block;
@@ -168,6 +197,7 @@ st.markdown("""
     .type-nutrient { background-color: #0d3a1a; color: #81c784; }
     .type-healthy { background-color: #0d3a1a; color: #81c784; }
     
+    /* Debug Box */
     .debug-box {
         background: #0f1419;
         border: 1px solid #667eea;
@@ -182,6 +212,7 @@ st.markdown("""
         white-space: pre-wrap;
     }
     
+    /* Alert Boxes */
     .warning-box {
         background: linear-gradient(135deg, #4d2600 0%, #3d2000 100%);
         border: 1px solid #ffc107;
@@ -212,6 +243,7 @@ st.markdown("""
         font-size: 1.1rem;
     }
     
+    /* Button Styles */
     .stButton > button {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
         color: white !important;
@@ -229,6 +261,7 @@ st.markdown("""
         box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
     }
     
+    /* Image Container */
     .image-container {
         border-radius: 12px;
         overflow: hidden;
@@ -236,6 +269,7 @@ st.markdown("""
         border: 1px solid rgba(102, 126, 234, 0.2);
     }
     
+    /* Tips Card */
     .tips-card {
         background: linear-gradient(135deg, #1a2a47 0%, #2d3050 100%);
         border: 2px solid #667eea;
@@ -251,16 +285,19 @@ st.markdown("""
         font-size: 1.2rem;
     }
     
+    /* Sidebar styling */
     [data-testid="stSidebar"] {
         background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
     }
     
+    /* Metric styling */
     [data-testid="metric-container"] {
         background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
         border: 1px solid rgba(102, 126, 234, 0.2);
         border-radius: 8px;
     }
     
+    /* Expander styling */
     [data-testid="stExpander"] {
         background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
         border: 1px solid rgba(102, 126, 234, 0.2);
@@ -271,6 +308,7 @@ st.markdown("""
         font-size: 1.1rem !important;
     }
     
+    /* Input fields */
     input, textarea, select {
         background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%) !important;
         border: 1px solid rgba(102, 126, 234, 0.3) !important;
@@ -278,11 +316,13 @@ st.markdown("""
         font-size: 1.1rem !important;
     }
     
+    /* Subheader styling */
     h2, h3, h4 {
         font-size: 1.4rem !important;
         color: #b0c4ff !important;
     }
     
+    /* Scrollbar styling */
     ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
@@ -309,73 +349,59 @@ except:
     st.error("❌ GEMINI_API_KEY not found in environment variables!")
     st.stop()
 
-# ADVANCED EXPERT PROMPT - IMPROVED FOR MAXIMUM ACCURACY
-EXPERT_PROMPT_TEMPLATE = """You are an elite plant pathologist with 35 years of experience and expertise from leading agricultural universities.
-Your task is to provide the MOST ACCURATE plant disease diagnosis possible.
+EXPERT_PROMPT = """You are an expert plant pathologist with 30 years of experience diagnosing plant diseases globally.
+Your task is to provide accurate, practical plant disease diagnosis.
 
-CRITICAL ANALYSIS FRAMEWORK:
-1. Examine ALL visual evidence in the image(s)
-2. Consider environmental context if provided
-3. Use differential diagnosis (rule out similar conditions)
-4. Be extremely specific about disease identification
-5. Only give high confidence if symptoms are VERY clear
+CRITICAL RULES:
+1. RESPOND ONLY WITH VALID JSON - NO markdown, NO explanations, NO code blocks
+2. Start with { and end with } - nothing else
+3. If uncertain about plant species, say "Unknown plant - could be [possibilities]"
+4. If you cannot diagnose with >60% confidence, say so explicitly
+5. Consider fungal, bacterial, viral, pest, nutrient, and environmental causes
+6. Be specific: "tomato early blight" not just "leaf spot"
+7. Practical recommendations only - things the user can actually do
 
-{context_info}
-
-STRICT RESPONSE RULES:
-- RESPOND ONLY WITH VALID JSON - NO markdown, NO explanations
-- If confidence is uncertain, set it appropriately (not artificially high)
-- Consider multiple diseases that look similar and explain differences
-- If multiple diseases are possible, list probability of each
-- Request more information if image quality prevents accurate diagnosis
-
-RESPOND WITH EXACTLY THIS JSON:
+RESPOND WITH EXACTLY THIS JSON STRUCTURE:
 {
   "plant_species": "Common name / Scientific name (or 'Unknown')",
-  "disease_name": "Most likely disease or 'Unable to diagnose - needs clarification'",
+  "disease_name": "Specific disease name or 'No disease detected' or 'Healthy plant'",
   "disease_type": "fungal/bacterial/viral/pest/nutrient/environmental/healthy",
   "severity": "healthy/mild/moderate/severe",
-  "confidence": 75,
-  "confidence_reason": "Detailed explanation of what makes you confident or uncertain",
-  "image_quality": "Excellent/Good/Fair/Poor with specific explanation",
+  "confidence": 85,
+  "confidence_reason": "Why we are confident or uncertain in this diagnosis",
+  "image_quality": "Excellent/Good/Fair/Poor - [explanation]",
   "symptoms": [
-    "Specific symptom with exact location on leaf",
-    "Secondary symptom observed",
-    "Tertiary symptom if present"
-  ],
-  "differential_diagnosis": [
-    "Disease A: Why it might be this (60% likelihood)",
-    "Disease B: Why it might be this (30% likelihood)",
-    "Disease C: Why it might be this (10% likelihood)"
+    "First visible symptom observed",
+    "Second visible symptom observed",
+    "Third visible symptom if present"
   ],
   "probable_causes": [
-    "Primary environmental or biological cause",
-    "Secondary contributing factor",
-    "Tertiary consideration if applicable"
+    "Primary cause with conditions that led to it",
+    "Secondary possible cause",
+    "Environmental factor if applicable"
   ],
   "immediate_action": [
-    "Action 1: Specific and measurable",
-    "Action 2: Specific and measurable",
-    "Action 3: Specific and measurable"
+    "Action 1: Specific, actionable step",
+    "Action 2: Specific, actionable step",
+    "Action 3: Specific, actionable step"
   ],
   "organic_treatments": [
-    "Treatment 1: Product name, dilution, frequency, how long",
-    "Treatment 2: Alternative organic option",
-    "Best timing: When to apply"
+    "Treatment 1: Specific product and application method",
+    "Treatment 2: Specific product and application method",
+    "Prevention: How to avoid this in future"
   ],
   "chemical_treatments": [
-    "Chemical 1: Specific fungicide/pesticide with dilution rate",
+    "Chemical 1: Product name and dilution rate",
     "Chemical 2: Alternative if resistance develops",
-    "Safety: PPE and precautions needed"
+    "Note: When to use and safety precautions"
   ],
   "prevention_long_term": [
-    "Cultural practice 1: How to prevent this disease",
-    "Cultural practice 2: Environmental management",
-    "Resistant varieties: If applicable"
+    "Prevention strategy 1: Cultural practice",
+    "Prevention strategy 2: Environmental control",
+    "Prevention strategy 3: Variety selection or rotation"
   ],
-  "what_makes_diagnosis_certain": "What visual cues confirm this diagnosis",
-  "what_would_increase_confidence": "What additional information or images would help",
-  "similar_looking_conditions": "Other diseases this might be confused with and how to differentiate"
+  "image_quality_tips": "What would make diagnosis more certain",
+  "similar_conditions": "Other conditions that might look similar"
 }"""
 
 def get_type_badge_class(disease_type):
@@ -409,14 +435,21 @@ def resize_image(image, max_width=600, max_height=500):
     image.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
     return image
 
-def enhance_image_for_analysis(image):
-    """Enhance image contrast and clarity for better AI analysis"""
-    from PIL import ImageEnhance
-    enhancer = ImageEnhance.Contrast(image)
-    image = enhancer.enhance(1.3)
-    enhancer = ImageEnhance.Sharpness(image)
-    image = enhancer.enhance(1.2)
-    return image
+def zoom_image(image, zoom_level):
+    if zoom_level == 1.0:
+        return image
+    
+    width, height = image.size
+    new_width = int(width * zoom_level)
+    new_height = int(height * zoom_level)
+    
+    left = max(0, (width - new_width) / 2)
+    top = max(0, (height - new_height) / 2)
+    right = min(width, left + new_width)
+    bottom = min(height, top + new_height)
+    
+    cropped = image.crop((left, top, right, bottom))
+    return cropped.resize((width, height), Image.Resampling.LANCZOS)
 
 def extract_json_robust(response_text):
     if not response_text:
@@ -464,113 +497,130 @@ def validate_json_result(data):
 
 st.markdown("""
 <div class="header-container">
-    <div class="header-title">🌿 AI Plant Doctor - Expert Edition</div>
-    <div class="header-subtitle">Maximum Accuracy Plant Disease Detection with Context</div>
+    <div class="header-title">🌿 AI Plant Doctor - Professional Edition</div>
+    <div class="header-subtitle">Universal Plant Disease Detection with Expert Analysis</div>
 </div>
 """, unsafe_allow_html=True)
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.markdown('<div class="feature-card">✅ Elite Diagnosis</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">✅ Expert Diagnosis</div>', unsafe_allow_html=True)
 with col2:
-    st.markdown('<div class="feature-card">🔍 Multi-Image</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🔍 Image Zoom</div>', unsafe_allow_html=True)
 with col3:
-    st.markdown('<div class="feature-card">📝 Context Info</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🐛 Debug Mode</div>', unsafe_allow_html=True)
 with col4:
-    st.markdown('<div class="feature-card">🚀 Max Accuracy</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🚀 Best Accuracy</div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 with st.sidebar:
-    st.header("⚙️ Settings & Model")
+    st.header("⚙️ Settings & Configuration")
     
     model_choice = st.radio(
         "🤖 AI Model Selection",
         ["Gemini 2.5 Flash (Fast)", "Gemini 2.5 Pro (Accurate)"],
-        help="Flash: 80% accurate | Pro: 95%+ accurate (RECOMMENDED for accuracy)"
+        help="Flash: 80% accurate, 2-3 sec | Pro: 95% accurate, 5-10 sec"
     )
     
-    accuracy_mode = st.checkbox("🎯 Maximum Accuracy Mode", value=True, help="Uses enhanced analysis and differential diagnosis")
     debug_mode = st.checkbox("🐛 Debug Mode", value=False, help="Show raw API responses")
-    show_tips = st.checkbox("💡 Show Photo Tips", value=True)
+    show_tips = st.checkbox("💡 Show Photo Tips", value=True, help="Display photo quality tips")
     
-    confidence_min = st.slider("Minimum Confidence (%)", 0, 100, 60, help="Higher = stricter filtering")
+    confidence_min = st.slider(
+        "Minimum Confidence (%)",
+        0, 100, 50,
+        help="Only show results above this confidence"
+    )
     
     st.markdown("---")
     
-    with st.expander("💡 Accuracy Tips"):
+    with st.expander("📸 Perfect Photo Checklist", expanded=False):
         st.markdown("""
-        **To maximize accuracy:**
+        ✅ **DO THIS:**
+        - Plain WHITE background
+        - Natural, even lighting
+        - Sharp and in-focus
+        - Close-up of diseased part
+        - ONE leaf only
+        - Photograph from above
         
-        1. **Use MULTIPLE angles**
-           - Top of leaf
-           - Bottom of leaf
-           - Side view if possible
+        ❌ **AVOID:**
+        - Blurry photos
+        - Dark shadows
+        - Busy backgrounds
+        - Healthy leaves
+        - Multiple leaves
+        - Angled shots
+        """)
+    
+    with st.expander("❓ Why Wrong Results?", expanded=False):
+        st.markdown("""
+        **Top 3 Reasons:**
         
-        2. **Provide context**
-           - Plant species (if known)
-           - Growing conditions
-           - When symptoms started
+        1. 📸 **Bad Image Quality**
+           - Blurry or dark
+           - Busy background
+           - Solution: Retake with white background
         
-        3. **Image quality**
-           - Plain white background
-           - Natural lighting
-           - Sharp focus
-           - Close-up of disease
+        2. 🎯 **Wrong Subject**
+           - Showing healthy leaf
+           - Multiple leaves in frame
+           - Solution: One diseased leaf, clear view
         
-        4. **Model selection**
-           - Use Pro for best accuracy
-           - Flash for quick checks
+        3. 🤖 **Model Issue**
+           - Using Flash for complex disease
+           - Solution: Switch to Pro model
         """)
 
-col_left, col_right = st.columns([2, 1])
+col_upload, col_empty = st.columns([3, 1])
 
-with col_left:
+with col_upload:
     st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
-    st.subheader("📤 Upload Plant Images (Up to 3)")
-    st.caption("Upload multiple angles for better diagnosis")
-    uploaded_files = st.file_uploader(
-        "Upload images",
+    st.subheader("📤 Upload Plant Image")
+    uploaded_file = st.file_uploader(
+        "Drag and drop or click to select your image",
         type=['jpg', 'jpeg', 'png'],
-        accept_multiple_files=True,
         label_visibility="collapsed"
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
-with col_right:
-    st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
-    st.subheader("ℹ️ Plant Context (Optional)")
-    plant_species = st.text_input("Plant species (if known)", placeholder="e.g., tomato, rose")
-    location = st.text_input("Growing location", placeholder="e.g., indoor, greenhouse, outdoor")
-    additional_info = st.text_area("Additional info", placeholder="e.g., watering frequency, soil type, when symptoms appeared", height=80)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-if uploaded_files and len(uploaded_files) > 0:
-    if len(uploaded_files) > 3:
-        st.warning("⚠️ Maximum 3 images allowed. Only first 3 will be analyzed.")
-        uploaded_files = uploaded_files[:3]
-    
-    images = []
-    for uploaded_file in uploaded_files:
-        image = Image.open(uploaded_file)
-        images.append(image)
+if uploaded_file:
+    image = Image.open(uploaded_file)
+    original_image = image.copy()
     
     if show_tips:
         st.markdown("""
         <div class="tips-card">
-            <div class="tips-card-title">💡 Best Results!</div>
-            Multiple angles + context info + Pro model = Highest accuracy
+            <div class="tips-card-title">💡 Photo Quality Matters!</div>
+            For best results: white background + natural light + sharp focus + diseased leaf close-up
         </div>
         """, unsafe_allow_html=True)
     
     st.markdown("<div class='result-container'>", unsafe_allow_html=True)
     
-    cols = st.columns(len(images))
-    for idx, (col, image) in enumerate(zip(cols, images)):
-        with col:
-            st.caption(f"Image {idx + 1}")
-            display_image = resize_image(image.copy())
-            st.image(display_image, use_container_width=True)
+    col_img, col_zoom = st.columns([3, 1])
+    
+    with col_zoom:
+        st.markdown("### 🔍 Zoom")
+        zoom_level = st.slider(
+            "Zoom",
+            min_value=0.5,
+            max_value=2.0,
+            value=1.0,
+            step=0.1,
+            label_visibility="collapsed"
+        )
+    
+    with col_img:
+        st.subheader("📸 Preview")
+        display_image = original_image.copy()
+        if zoom_level != 1.0:
+            display_image = zoom_image(display_image, zoom_level)
+        display_image = resize_image(display_image)
+        
+        st.markdown('<div class="image-container">', unsafe_allow_html=True)
+        st.image(display_image, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown("</div>", unsafe_allow_html=True)
     
@@ -578,38 +628,23 @@ if uploaded_files and len(uploaded_files) > 0:
     col_b1, col_b2, col_b3 = st.columns([1, 1, 1])
     
     with col_b2:
-        analyze_btn = st.button("🔬 Analyze with Maximum Accuracy", use_container_width=True, type="primary")
+        analyze_btn = st.button("🔬 Analyze Plant", use_container_width=True, type="primary")
     
     if analyze_btn:
         progress_placeholder = st.empty()
         
-        with st.spinner("🔄 Analyzing with expert AI... Please wait"):
+        with st.spinner("🔄 Analyzing... This may take a few seconds"):
             try:
-                progress_placeholder.info("📊 Processing images with elite pathologist AI...")
+                progress_placeholder.info("📊 Processing image with AI...")
                 
                 model_name = "Gemini 2.5 Pro" if "Pro" in model_choice else "Gemini 2.5 Flash"
                 model_id = 'gemini-2.5-pro' if "Pro" in model_choice else 'gemini-2.5-flash'
                 model = genai.GenerativeModel(model_id)
                 
                 if debug_mode:
-                    st.info(f"📊 Using Model: {model_name} | Accuracy Mode: {accuracy_mode}")
+                    st.info(f"📊 Using Model: {model_name}")
                 
-                context_info = ""
-                if plant_species or location or additional_info:
-                    context_info = f"""
-USER PROVIDED CONTEXT (use to improve diagnosis):
-- Plant species: {plant_species if plant_species else 'Not provided'}
-- Location: {location if location else 'Not provided'}
-- Additional info: {additional_info if additional_info else 'Not provided'}
-
-Use this context to increase diagnosis accuracy. Higher confidence if this aligns with visual symptoms.
-"""
-                
-                prompt = EXPERT_PROMPT_TEMPLATE.format(context_info=context_info)
-                
-                enhanced_images = [enhance_image_for_analysis(img.copy()) for img in images]
-                
-                response = model.generate_content([prompt] + enhanced_images)
+                response = model.generate_content([EXPERT_PROMPT, original_image])
                 raw_response = response.text
                 
                 if debug_mode:
@@ -624,10 +659,9 @@ Use this context to increase diagnosis accuracy. Higher confidence if this align
                 if result is None:
                     st.markdown('<div class="error-box">', unsafe_allow_html=True)
                     st.error("❌ Could not parse AI response")
-                    st.write("**Try:**")
+                    st.write("**This sometimes happens with unusual images. Try:**")
+                    st.write("• Retake photo with better lighting/focus")
                     st.write("• Use Pro model for better accuracy")
-                    st.write("• Provide additional context (plant species, location)")
-                    st.write("• Upload 2-3 images from different angles")
                     st.write("• Enable debug mode to see raw response")
                     st.markdown('</div>', unsafe_allow_html=True)
                     
@@ -647,14 +681,14 @@ Use this context to increase diagnosis accuracy. Higher confidence if this align
                     if confidence < confidence_min:
                         st.markdown('<div class="warning-box">', unsafe_allow_html=True)
                         st.warning(f"⚠️ **Low Confidence ({confidence}%)**")
-                        st.write(result.get("confidence_reason", "AI is uncertain"))
-                        st.write("**To improve:** " + result.get("what_would_increase_confidence", "Provide clearer images"))
+                        st.write(result.get("confidence_reason", "AI is uncertain about this diagnosis"))
+                        st.write("**Recommendation:** " + result.get("image_quality_tips", "Provide a clearer image"))
                         st.markdown('</div>', unsafe_allow_html=True)
                     
                     image_quality = result.get("image_quality", "")
                     if image_quality and ("Poor" in image_quality or "Fair" in image_quality):
                         st.markdown('<div class="warning-box">', unsafe_allow_html=True)
-                        st.write(f"📸 **Image Quality:** {image_quality}")
+                        st.write(f"📸 **Image Quality Note:** {image_quality}")
                         st.markdown('</div>', unsafe_allow_html=True)
                     
                     st.markdown("<div class='result-container'>", unsafe_allow_html=True)
@@ -662,7 +696,7 @@ Use this context to increase diagnosis accuracy. Higher confidence if this align
                     disease_name = result.get("disease_name", "Unknown")
                     disease_type = result.get("disease_type", "unknown")
                     severity = result.get("severity", "unknown")
-                    plant = result.get("plant_species", plant_species if plant_species else "Unknown")
+                    plant = result.get("plant_species", "Unknown")
                     
                     severity_class = get_severity_badge_class(severity)
                     type_class = get_type_badge_class(disease_type)
@@ -698,36 +732,33 @@ Use this context to increase diagnosis accuracy. Higher confidence if this align
                     with col_left:
                         st.markdown("""
                         <div class="info-section">
-                            <div class="info-title">🔍 Symptoms</div>
+                            <div class="info-title">🔍 Symptoms Observed</div>
                         """, unsafe_allow_html=True)
+                        
                         for symptom in result.get("symptoms", []):
                             st.write(f"• {symptom}")
+                        
                         st.markdown("</div>", unsafe_allow_html=True)
                         
-                        if result.get("differential_diagnosis"):
-                            st.markdown("""
-                            <div class="info-section">
-                                <div class="info-title">🔀 Differential Diagnosis</div>
-                            """, unsafe_allow_html=True)
-                            for diagnosis in result.get("differential_diagnosis", []):
-                                st.write(f"• {diagnosis}")
-                            st.markdown("</div>", unsafe_allow_html=True)
+                        st.markdown("""
+                        <div class="info-section">
+                            <div class="info-title">⚠️ Probable Causes</div>
+                        """, unsafe_allow_html=True)
+                        
+                        for cause in result.get("probable_causes", []):
+                            st.write(f"• {cause}")
+                        
+                        st.markdown("</div>", unsafe_allow_html=True)
                     
                     with col_right:
                         st.markdown("""
                         <div class="info-section">
-                            <div class="info-title">⚠️ Causes</div>
-                        """, unsafe_allow_html=True)
-                        for cause in result.get("probable_causes", []):
-                            st.write(f"• {cause}")
-                        st.markdown("</div>", unsafe_allow_html=True)
-                        
-                        st.markdown("""
-                        <div class="info-section">
                             <div class="info-title">⚡ Immediate Actions</div>
                         """, unsafe_allow_html=True)
+                        
                         for i, action in enumerate(result.get("immediate_action", []), 1):
                             st.write(f"**{i}.** {action}")
+                        
                         st.markdown("</div>", unsafe_allow_html=True)
                     
                     col_treat1, col_treat2 = st.columns(2)
@@ -737,8 +768,10 @@ Use this context to increase diagnosis accuracy. Higher confidence if this align
                         <div class="info-section">
                             <div class="info-title">🌱 Organic Treatments</div>
                         """, unsafe_allow_html=True)
+                        
                         for treatment in result.get("organic_treatments", []):
                             st.write(f"• {treatment}")
+                        
                         st.markdown("</div>", unsafe_allow_html=True)
                     
                     with col_treat2:
@@ -746,24 +779,28 @@ Use this context to increase diagnosis accuracy. Higher confidence if this align
                         <div class="info-section">
                             <div class="info-title">💊 Chemical Treatments</div>
                         """, unsafe_allow_html=True)
+                        
                         for treatment in result.get("chemical_treatments", []):
                             st.write(f"• {treatment}")
+                        
                         st.markdown("</div>", unsafe_allow_html=True)
                     
                     st.markdown("""
                     <div class="info-section">
                         <div class="info-title">🛡️ Long-Term Prevention</div>
                     """, unsafe_allow_html=True)
+                    
                     for tip in result.get("prevention_long_term", []):
                         st.write(f"• {tip}")
+                    
                     st.markdown("</div>", unsafe_allow_html=True)
                     
-                    if result.get("similar_looking_conditions"):
+                    if result.get("similar_conditions"):
                         st.markdown("""
                         <div class="info-section">
                             <div class="info-title">🔎 Similar Conditions</div>
                         """, unsafe_allow_html=True)
-                        st.write(result.get("similar_looking_conditions"))
+                        st.write(result.get("similar_conditions"))
                         st.markdown("</div>", unsafe_allow_html=True)
                     
                     st.markdown("</div>", unsafe_allow_html=True)
@@ -776,7 +813,7 @@ Use this context to increase diagnosis accuracy. Higher confidence if this align
                             st.rerun()
                     
                     with col_btn3:
-                        if st.button("🔄 Reset", use_container_width=True):
+                        if st.button("🔄 Reset All", use_container_width=True):
                             st.rerun()
                     
                     progress_placeholder.empty()
@@ -784,15 +821,15 @@ Use this context to increase diagnosis accuracy. Higher confidence if this align
             except Exception as e:
                 st.markdown('<div class="error-box">', unsafe_allow_html=True)
                 st.error(f"❌ Analysis Failed: {str(e)}")
-                st.write("**Troubleshooting:**")
-                st.write("1. Use Pro model for higher accuracy")
-                st.write("2. Upload 2-3 images from different angles")
-                st.write("3. Provide plant context (species, location)")
-                st.write("4. Check image quality (white background, natural light)")
+                st.write("**Troubleshooting steps:**")
+                st.write("1. Check your API key is valid")
+                st.write("2. Try a different image with better quality")
+                st.write("3. Switch to Pro model for better accuracy")
+                st.write("4. Enable Debug Mode to see error details")
                 st.markdown('</div>', unsafe_allow_html=True)
                 
                 if debug_mode:
-                    with st.expander("🔍 Error Details"):
+                    with st.expander("🔍 Error Details (Debug)"):
                         st.markdown('<div class="debug-box">', unsafe_allow_html=True)
                         st.text(str(e))
                         st.markdown('</div>', unsafe_allow_html=True)
@@ -801,39 +838,69 @@ Use this context to increase diagnosis accuracy. Higher confidence if this align
 
 with st.sidebar:
     st.markdown("---")
-    st.header("📞 Support")
     
-    with st.expander("🎯 Accuracy Improvements"):
+    st.header("📞 Support & Info")
+    
+    with st.expander("🌍 How It Works"):
         st.write("""
-        **What Changed:**
+        1. **Upload Image** - Plant leaf with visible symptoms
+        2. **AI Analysis** - Expert system evaluates the image
+        3. **Results** - Disease identification + treatment plan
+        4. **Action** - Follow recommendations
         
-        ✅ **Advanced Prompt** - Now uses 35-year expert framework
-        ✅ **Multi-Image Support** - Analyze up to 3 angles simultaneously
-        ✅ **Context Information** - User provides plant species, location
-        ✅ **Image Enhancement** - Auto-enhances contrast and sharpness
-        ✅ **Differential Diagnosis** - Shows similar conditions and probabilities
-        ✅ **Confidence Reasoning** - Explains why AI is certain or uncertain
-        
-        **Result:** 95%+ accuracy with Pro model + context
+        **Works for:**
+        • 500+ plant diseases
+        • Any plant species
+        • Fungal, bacterial, viral, pest, nutrient issues
+        • Environmental stress conditions
         """)
     
-    with st.expander("✅ Best Practices"):
+    with st.expander("✅ Best Results"):
         st.write("""
-        **For Maximum Accuracy:**
-        1. Upload 2-3 images (top, bottom, side)
-        2. Provide plant species if known
-        3. Describe growing conditions
-        4. Use Pro model
-        5. Ensure white background
-        6. Use natural lighting
-        7. Take sharp, focused photos
+        **Image Requirements:**
+        • Clear, sharp focus
+        • Natural lighting (no flash)
+        • Plain white/gray background
+        • Diseased leaf close-up
+        • Single leaf in frame
+        
+        **Conditions:**
+        • Use Pro model for difficult cases
+        • Enable debug mode for troubleshooting
+        • Check confidence score
+        • Follow photo tips in sidebar
+        """)
+    
+    with st.expander("⚙️ Settings Tips"):
+        st.write("""
+        **Debug Mode:**
+        - Shows raw AI response
+        - Helps troubleshoot issues
+        - Shows JSON parsing steps
+        
+        **Model Selection:**
+        - Flash: 80% accurate, 2-3 sec
+        - Pro: 95% accurate, 5-10 sec
+        
+        **Confidence Threshold:**
+        - Set to filter low-confidence results
+        - Helps avoid false positives
+        - Default 50% is reasonable
         """)
     
     st.markdown("---")
-    st.header("📋 Free Tier")
+    
+    st.header("📋 Free Tier Limits")
+    
     st.write("""
-    ✅ 1,500 analyses/day
-    ✅ 15 analyses/minute
-    ✅ 100% FREE
-    ✅ Commercial use allowed
+    ✅ **Always FREE:**
+    • 1,500 analyses per day
+    • 15 analyses per minute
+    • Commercial use allowed
+    • No credit card required
+    
+    ⏰ **Duration:**
+    • Works for 3+ months minimum
+    • Likely much longer
+    • See documentation for details
     """)
