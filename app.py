@@ -28,7 +28,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap');
@@ -52,7 +51,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
 # ====== MODEL NAMES (unchanged UI labels) ======
 MODEL_NAMES = {
     "Gemini 2.5 Pro": "models/gemini-2.5-pro",
@@ -61,68 +59,46 @@ MODEL_NAMES = {
 SIDEBAR_MODEL_KEYS = list(MODEL_NAMES.keys())
 
 # -------------------------
-# UPDATED safe_generate()
+# Safe generate wrapper with fallback and exponential backoff
 # -------------------------
-def safe_generate(model_id, prompt, max_retries=3, backoff_base=2):
+def safe_generate(model_id, prompt, max_retries=2, backoff_base=2):
     """
-    Safe wrapper that:
-    - Detects rate limits / ResourceExhausted errors
-    - Extracts retry_delay from Gemini response when available
-    - Waits for cooldown (max 5 seconds)
-    - Automatically falls back to Gemini Flash
-    - Retries with exponential backoff
-    - Returns None if all attempts fail
+    Generate content safely.
+    - If a quota 429 occurs, automatically switch to flash fallback.
+    - Retries a small number of times with backoff for transient errors.
     """
     attempt = 0
-
+    last_exc = None
     while attempt <= max_retries:
         try:
             model = genai.GenerativeModel(model_id)
             return model.generate_content(prompt)
-
         except Exception as e:
-            err = str(e).lower()
-
-            # Check quota/rate limit
-            if any(x in err for x in ["429", "resourceexhausted", "quota", "rate limit"]):
-
-                retry_seconds = 2
-
-                # extract retry delay if present
-                match = re.search(r"retry.*?(\d+)\.?(\d*)s", err)
-                if match:
-                    retry_seconds = float(match.group(1))
-                    retry_seconds = min(retry_seconds, 5)  # cap wait
-
-                st.warning(f"⚠️ API quota reached for {model_id}. Cooling down {retry_seconds}s...")
-                time.sleep(retry_seconds)
-
-                # fallback to Flash if not already using it
-                if model_id != "models/gemini-2.5-flash":
-                    st.info("Switching to Gemini 2.5 Flash (fallback).")
+            last_exc = e
+            msg = str(e).lower()
+            # Quota / rate limit -> fallback to flash
+            if "429" in msg or "quota" in msg or "rate limit" in msg:
+                # If already using flash, break
+                if model_id == "models/gemini-2.5-flash":
+                    # cannot recover
+                    return None
+                # warn user once
+                st.warning("⚠️ Model quota/rate limit reached. Switching to Gemini 2.5 Flash as fallback.")
+                try:
                     model_id = "models/gemini-2.5-flash"
-                    continue
-
-                # if flash also fails, retry w/backoff
-                attempt += 1
-                wait = min((backoff_base ** attempt) * 0.5, 4)
-                st.warning(f"Retrying Flash model in {wait}s...")
-                time.sleep(wait)
-                continue
-
-            # non-quota errors → retry with backoff
+                    model = genai.GenerativeModel(model_id)
+                    return model.generate_content(prompt)
+                except Exception:
+                    return None
+            # transient network error -> retry
             attempt += 1
-            wait = min((backoff_base ** attempt) * 0.5, 4)
-            st.warning(f"Temporary error. Retrying in {wait}s...")
-            time.sleep(wait)
-
-    # complete failure
-    st.error("❌ AI unavailable (quota or repeated failure). Offline fallback used.")
+            time.sleep(backoff_base ** attempt * 0.5)
+    # final failure
+    st.error("AI request failed. Using offline fallback where possible.")
     return None
 
-
 # -------------------------
-# Lexicon scoring
+# Lexicon scoring (same but stable)
 # -------------------------
 LEXICON_WEIGHTS = {
     "suicid": 5, "kill myself": 5, "end my life": 5, "i want to die": 5, "worthless": 4,
@@ -141,11 +117,14 @@ def lexicon_score(text):
         score = max(score, 8.0)
     return int(round(min(1.0, score / 10.0) * 100))
 
-
 # -------------------------
-# Deep reasoning (model intensity)
+# Deep reasoning check (model rates intensity 0-100)
 # -------------------------
 def ask_model_for_intensity(user_text, model_id):
+    """
+    Ask the model to give a simple integer intensity 0-100 and a confidence.
+    This is a short, directed prompt to get a concise numeric result.
+    """
     prompt = (
         "You are an evaluator that gives a concise numeric emotional intensity score.\n"
         "Reply with ONLY valid JSON: {\"intensity\": <0-100>, \"confidence\": <0.0-1.0>}.\n\n"
@@ -154,25 +133,27 @@ def ask_model_for_intensity(user_text, model_id):
     resp = safe_generate(model_id, prompt)
     if not resp:
         return None
-
     txt = resp.text.strip()
+    # try to extract JSON
     match = re.search(r"\{[\s\S]*?\}", txt)
     if not match:
         return None
-
     try:
         data = json.loads(match.group())
         intensity = int(max(0, min(100, int(data.get("intensity", 50)))))
         confidence = float(max(0.0, min(1.0, float(data.get("confidence", 0.5)))))
         return {"intensity": intensity, "confidence": confidence}
-    except:
+    except Exception:
         return None
 
-
 # -------------------------
-# Model structured JSON parsing
+# Model structured stress extraction (robust JSON parse + repair)
 # -------------------------
 def ask_model_for_structured_stress(user_text, model_id):
+    """
+    Ask model to return JSON: {score, evidence, confidence}
+    Attempt to repair slight formatting issues in returned JSON.
+    """
     prompt = (
         "Return ONLY a single JSON object with keys:\n"
         "score: integer 0-100\n"
@@ -184,56 +165,79 @@ def ask_model_for_structured_stress(user_text, model_id):
     resp = safe_generate(model_id, prompt)
     if not resp:
         return None
-
     txt = resp.text.strip()
+    # try to find JSON object; allow model to include backticks or text before/after
     match = re.search(r'\{[\s\S]*\}', txt)
     if not match:
+        # try to clean common issues (replace single quotes->double)
         cleaned = txt.replace("'", '"')
         match = re.search(r'\{[\s\S]*\}', cleaned)
         if not match:
             return None
-
     json_text = match.group()
-
+    # attempt parse with small repairs
     try:
         data = json.loads(json_text)
-    except:
+    except Exception:
+        # minor repair: add missing quotes around keys (very naive)
         repaired = re.sub(r'(\w+):', r'"\1":', json_text)
         try:
             data = json.loads(repaired)
-        except:
+        except Exception:
             return None
-
+    # validate
     score = int(max(0, min(100, int(data.get("score", 50)))))
     evidence = data.get("evidence", [])
     confidence = float(max(0.0, min(1.0, float(data.get("confidence", 0.5)))))
-
     return {"model_score": score, "evidence": evidence, "confidence": confidence}
 
-
 # -------------------------
-# Combined scoring logic
+# Combined scoring (Balanced - Option B)
 # -------------------------
 def get_stress_level(user_text, model_id):
+    """
+    Combine three signals:
+      - model structured JSON (score + confidence)
+      - lexicon score (rule-based)
+      - deep reasoning intensity (intensity + confidence)
+    Balanced weights (B):
+      - model_structured_weight_base = 0.45
+      - lexicon_weight_base = 0.30
+      - reasoning_weight_base = 0.25
+    We adapt weights if confidences are low.
+    """
     lex = lexicon_score(user_text)
+
+    # ask for structured model score
     structured = ask_model_for_structured_stress(user_text, model_id)
     reasoning = ask_model_for_intensity(user_text, model_id)
 
-    model_score = structured["model_score"] if structured else None
-    model_conf = structured["confidence"] if structured else 0.0
-    reasoning_score = reasoning["intensity"] if reasoning else None
-    reasoning_conf = reasoning["confidence"] if reasoning else 0.0
+    # defaults
+    model_score = None
+    model_conf = 0.0
+    reasoning_score = None
+    reasoning_conf = 0.0
 
+    if structured:
+        model_score = structured["model_score"]
+        model_conf = structured.get("confidence", 0.5)
+    if reasoning:
+        reasoning_score = reasoning["intensity"]
+        reasoning_conf = reasoning.get("confidence", 0.5)
+
+    # set base weights for Option B (balanced)
     w_model_base = 0.45
     w_lex_base = 0.30
     w_reason_base = 0.25
 
-    model_conf_factor = model_conf if model_conf else 0.0
-    reason_conf_factor = reasoning_conf if reasoning_conf else 0.0
+    # adapt weights by reported confidences (if absent, shift weight to lexicon)
+    model_conf_factor = model_conf if model_conf is not None else 0.0
+    reason_conf_factor = reasoning_conf if reasoning_conf is not None else 0.0
 
+    # If model and reasoning both present, scale by their confidences
     w_model = w_model_base * (0.5 + 0.5 * model_conf_factor)
     w_reason = w_reason_base * (0.5 + 0.5 * reason_conf_factor)
-
+    # give lexicon remaining weight but ensure minimum
     w_lex = 1.0 - (w_model + w_reason)
     if w_lex < 0.1:
         w_lex = 0.1
@@ -242,21 +246,25 @@ def get_stress_level(user_text, model_id):
         w_reason /= total
         w_lex /= total
 
+    # fallback handling
+    # if model_score missing -> rely more on lexicon
     if model_score is None:
         w_model = 0.0
         w_lex = 0.75
         w_reason = 0.25
-
     if reasoning_score is None:
+        # re-normalize between model and lex
         if model_score is None:
             w_reason = 0.0
         else:
+            # move its weight into model/lex proportionally
             w_model += w_reason * 0.6
             w_lex += w_reason * 0.4
             w_reason = 0.0
 
+    # prepare numeric signals
     ms = model_score if model_score is not None else 50
-    rs = reasoning_score if reasoning_score is not None else ms
+    rs = reasoning_score if reasoning_score is not None else ms  # use model if reasoning absent
 
     final = int(round(ms * w_model + lex * w_lex + rs * w_reason))
     final = max(0, min(100, final))
@@ -270,22 +278,23 @@ def get_stress_level(user_text, model_id):
     }
     return final, meta
 
-
 def get_stress_desc(level):
     if level < 25: return "😌 Minimal Stress — You seem calm."
     if level < 50: return "🙂 Mild Stress — Manageable tension."
     if level < 75: return "😟 Moderate Stress — Consider coping tools."
     return "😰 High Stress — Strong distress detected."
 
-
 # -------------------------
-# Support message builder
+# Support message builder (more specific)
 # -------------------------
 def build_support_prompt(mode, text):
     return f"""
-You are a deeply empathetic professional mental-health assistant. Use the user's exact phrases where relevant. Be specific and avoid generic stock responses.
+You are a deeply empathetic professional mental-health assistant.
+Use the user's exact phrases where relevant. Be specific and avoid generic stock responses.
 
-User text: {text}
+User text:
+{text}
+
 Mode: {mode}
 
 Produce a structured response in Markdown with these sections:
@@ -298,15 +307,14 @@ Produce a structured response in Markdown with these sections:
 End with the exact disclaimer block (do not vary):
 ----------------------------------------
 ⚠ **Important Disclaimer**
-This AI may be inaccurate. Please seek medical advice from a professional.
-Talk to your loved ones for support.
+This AI may be inaccurate. Please seek medical advice from a professional.  
+Talk to your loved ones for support.  
 **Indian Mental Health Helpline:** 1800-599-0019
 ----------------------------------------
 """
 
-
 # -------------------------
-# UI HEADER
+# UI HEADER (unchanged)
 # -------------------------
 st.markdown("""
 <div class="main-header">
@@ -315,7 +323,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-
+# QUOTES (unchanged)
 st.markdown("""
 <div style="
     background:rgba(49,24,94,0.55);
@@ -332,23 +340,19 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-
 # -------------------------
-# SIDEBAR
+# SIDEBAR (unchanged labels)
 # -------------------------
 with st.sidebar:
     st.write("## Settings")
     chosen_model_name = st.selectbox("Choose AI Model", SIDEBAR_MODEL_KEYS, index=1)
     model_id = MODEL_NAMES[chosen_model_name]
-
     mode = st.radio("Analysis Mode", ["Crisis Detection", "Emotional Support", "Risk Assessment"])
-
     st.write("### Emergency Resources")
     st.info("**KIRAN:** 1800-599-0019\n**Vandrevala:** 1860-2662-345\n**iCall:** 9152987821")
 
-
 # -------------------------
-# MAIN UI
+# MAIN UI (unchanged layout)
 # -------------------------
 col1, col2 = st.columns([2, 1])
 
@@ -385,14 +389,15 @@ with col1:
             </div>
             """, unsafe_allow_html=True)
 
+            # Build a specific support prompt and generate answer (safe)
             support_prompt = build_support_prompt(mode, input_text)
             response = safe_generate(model_id, support_prompt)
 
             st.markdown('<div class="response-area">', unsafe_allow_html=True)
-
             if response:
                 st.markdown("### AI Support\n" + response.text)
             else:
+                # offline fallback: give structured helpful fallback message
                 fallback_text = f"""
 ### AI Support (Fallback)
 - **Validation:** I hear that you're saying: "{input_text[:120]}..." — that sounds distressing and important.
@@ -402,29 +407,28 @@ with col1:
   3. Reach out to one trusted person with this exact line: "I need to talk — I haven't been okay lately."
 - **12–24 hour plan:** sleep hygiene, short walk outside, limit caffeine, connect with someone.
 - **When to seek help:** if you have thoughts of harming yourself, call a helpline immediately.
-
 ----------------------------------------
 ⚠ **Important Disclaimer**
-This AI may be inaccurate. Please seek medical advice from a professional.
-Talk to your loved ones for support.
+This AI may be inaccurate. Please seek medical advice from a professional.  
+Talk to your loved ones for support.  
 **Indian Mental Health Helpline:** 1800-599-0019
 ----------------------------------------
 """
                 st.markdown(fallback_text)
-
             st.markdown('</div>', unsafe_allow_html=True)
-
 
 with col2:
     st.markdown('<div class="info-card"><h3>Why Mindful?</h3>- Modern\n- Gemini 2.5 models\n- 24/7 support</div>', unsafe_allow_html=True)
     st.markdown('<div class="info-card"><h3>Modes</h3>- Crisis Detection\n- Emotional Support\n- Risk Assessment</div>', unsafe_allow_html=True)
     st.markdown('<div class="emergency-banner">🚨 IN CRISIS? CALL KIRAN 1800-599-0019 🚨</div>', unsafe_allow_html=True)
 
-# Footer
+# Footer (unchanged)
 st.markdown("---")
 st.markdown("""
 <div class="footer-dark">
-<p><strong>Disclaimer:</strong> This tool does not replace professional help. If you are in crisis,
-contact emergency services or the KIRAN helpline (1800-599-0019).</p>
+<p><strong>Disclaimer:</strong> This tool does not replace professional help.
+If you are in crisis, contact emergency services or the KIRAN helpline (1800-599-0019).</p>
 </div>
 """, unsafe_allow_html=True)
+
+
