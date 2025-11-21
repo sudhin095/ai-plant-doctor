@@ -3,7 +3,7 @@ import google.generativeai as genai
 from PIL import Image
 import os
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 import re
 
 st.set_page_config(
@@ -437,10 +437,10 @@ def extract_json_robust(response_text):
         pass
     
     cleaned = response_text
-    if "```
-        cleaned = cleaned.split("```json").split("```
+    if "```json" in cleaned:
+        cleaned = cleaned.split("```json")[1].split("```")[0]
     elif "```" in cleaned:
-        cleaned = cleaned.split("``````")[0]
+        cleaned = cleaned.split("```")[1].split("```")[0]
     
     try:
         return json.loads(cleaned.strip())
@@ -699,10 +699,7 @@ if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "
                     with col3:
                         st.metric("🚨 Severity", severity.title())
                     with col4:
-                        # TIME FIX: Display correct IST time (UTC+5:30)
-                        # This ensures time is correct on cloud (UTC) and local (IST)
-                        ist_time = datetime.utcnow() + timedelta(hours=5, minutes=30)
-                        st.metric("⏱️ Time", ist_time.strftime("%I:%M %p"))
+                        st.metric("⏱️ Time", datetime.now().strftime("%H:%M"))
                     
                     st.markdown("<br>", unsafe_allow_html=True)
                     
