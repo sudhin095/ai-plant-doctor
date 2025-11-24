@@ -699,7 +699,6 @@ if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "
                     with col3:
                         st.metric("🚨 Severity", severity.title())
                     with col4:
-                        st.metric("⏱️ Time", datetime.now().strftime("%H:%M"))
                     
                     st.markdown("<br>", unsafe_allow_html=True)
                     
@@ -840,3 +839,4 @@ with st.sidebar:
     for plant in sorted(PLANT_COMMON_DISEASES.keys()):
         st.write(f"✓ {plant}")
     st.write("✓ + Any other plant (manual entry)")
+
