@@ -30,36 +30,24 @@ except:
     st.stop()
 
 # ------------------------------
-# AI RESPONSE TRANSLATION FUNCTION
+# TRANSLATION FUNCTION
 # ------------------------------
 def translate_json_values_via_gemini(obj, target_lang_code: str):
-    """
-    Translate all values inside the JSON object into the selected language.
-    Keeps the JSON structure identical and removes any fallback English.
-    """
+    """Translate all text values in JSON object to selected language."""
     if not target_lang_code or target_lang_code.lower() == "en":
         return obj
-    if not os.environ.get("GEMINI_API_KEY"):
-        return obj
-
     try:
         model = genai.GenerativeModel("gemini-2.0-pro")
         original_json = json.dumps(obj, ensure_ascii=False)
-
         prompt = (
             f"Translate ALL text values in the following JSON into '{target_lang_code}'. "
-            "Keep the JSON structure, keys, and formatting EXACTLY the same. "
-            "Do NOT change field names. Only change the text in the values. "
-            "Return ONLY the JSON. No explanations, no markdown.\n\n"
+            "Keep the JSON structure EXACTLY the same. Only translate values, not keys. "
+            "Return ONLY the JSON, no explanations, no markdown.\n\n"
             f"{original_json}"
         )
-
         response = model.generate_content(prompt)
-        cleaned_text = response.text.strip()
-        cleaned_text = cleaned_text.replace("```json", "").replace("```", "").strip()
-
-        translated_json = json.loads(cleaned_text)
-        return translated_json
+        cleaned_text = response.text.strip().replace("```json", "").replace("```", "").strip()
+        return json.loads(cleaned_text)
     except Exception as e:
         if debug_mode:
             st.warning(f"Translation failed: {str(e)}")
@@ -181,15 +169,18 @@ with st.sidebar:
     confidence_min = st.slider("Min Confidence (%)", 0, 100, 65)
     
     st.markdown("---")
-    st.header("🌐 Translation")
-    target_lang = st.selectbox("Translate Result To", ["English", "Hindi", "Bengali", "Tamil", "Marathi", "Urdu", "Arabic", "Japanese"])
+    st.header("🌐 Translate Result")
+    target_lang = st.selectbox(
+        "Select language",
+        ["English", "Hindi", "Bengali", "Tamil", "Marathi", "Urdu", "Arabic", "Japanese"]
+    )
     lang_code_map = {
         "English": "en", "Hindi": "hi", "Bengali": "bn", "Tamil": "ta",
         "Marathi": "mr", "Urdu": "ur", "Arabic": "ar", "Japanese": "ja"
     }
 
 # ------------------------------
-# PLANT TYPE SELECTION
+# PLANT TYPE SELECTION & UPLOAD
 # ------------------------------
 col_plant, col_upload = st.columns([1, 2])
 with col_plant:
@@ -209,42 +200,125 @@ with col_upload:
     uploaded_files = st.file_uploader("Select images", type=['jpg','jpeg','png'], accept_multiple_files=True)
 
 # ------------------------------
-# ANALYSIS BUTTON
+# ANALYSIS
 # ------------------------------
 if uploaded_files and plant_type and plant_type != "Select a plant...":
     images = [Image.open(f) for f in uploaded_files[:3]]
     analyze_btn = st.button(f"🔬 Analyze {plant_type}")
-    
+
     if analyze_btn:
-        try:
-            model_id = 'gemini-2.5-pro' if "Pro" in model_choice else 'gemini-2.5-flash'
-            model = genai.GenerativeModel(model_id)
-            common_diseases = PLANT_COMMON_DISEASES.get(plant_type, "various plant diseases")
-            prompt = EXPERT_PROMPT_TEMPLATE.format(plant_type=plant_type, common_diseases=common_diseases)
-            
-            enhanced_images = [enhance_image_for_analysis(img.copy()) for img in images]
-            response = model.generate_content([prompt] + enhanced_images)
-            raw_response = response.text
-            
-            result = extract_json_robust(raw_response)
-            
-            # ------------------------------
-            # TRANSLATE RESULT
-            # ------------------------------
-            if result and target_lang != "English":
-                result = translate_json_values_via_gemini(result, lang_code_map[target_lang])
-            
-            # ------------------------------
-            # VALIDATION & DISPLAY
-            # ------------------------------
-            if result:
-                is_valid, msg = validate_json_result(result)
-                st.write(result)  # Replace with your full UI display code here
-            else:
-                st.error("❌ Could not parse AI response")
-        
-        except Exception as e:
-            st.error(f"❌ Analysis Failed: {str(e)}")
+        progress_placeholder = st.empty()
+        with st.spinner("🔄 Analyzing images..."):
+            try:
+                model_id = 'gemini-2.5-pro' if "Pro" in model_choice else 'gemini-2.5-flash'
+                model = genai.GenerativeModel(model_id)
+                common_diseases = PLANT_COMMON_DISEASES.get(plant_type, "various plant diseases")
+                prompt = EXPERT_PROMPT_TEMPLATE.format(plant_type=plant_type, common_diseases=common_diseases)
+                
+                enhanced_images = [enhance_image_for_analysis(img.copy()) for img in images]
+                response = model.generate_content([prompt] + enhanced_images)
+                raw_response = response.text
+                
+                result = extract_json_robust(raw_response)
+                
+                # ------------------------------
+                # TRANSLATE RESULT
+                # ------------------------------
+                if result and target_lang != "English":
+                    result = translate_json_values_via_gemini(result, lang_code_map[target_lang])
+                
+                # ------------------------------
+                # DISPLAY RESULT
+                # ------------------------------
+                if result:
+                    is_valid, msg = validate_json_result(result)
+                    if not is_valid:
+                        st.warning(f"⚠️ Incomplete response: {msg}")
+                    
+                    confidence = result.get("confidence", 0)
+                    disease_name = result.get("disease_name", "Unknown")
+                    disease_type = result.get("disease_type", "unknown")
+                    severity = result.get("severity", "unknown")
+                    severity_class = get_severity_badge_class(severity)
+                    type_class = get_type_badge_class(disease_type)
+
+                    # Result header
+                    st.markdown(f"""
+                    <div class="disease-header">
+                        <div class="disease-name">{disease_name}</div>
+                        <div class="disease-meta">
+                            <span class="severity-badge {severity_class}">{severity.title()}</span>
+                            <span class="type-badge {type_class}">{disease_type.title()}</span>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    col1, col2, col3, col4 = st.columns(4)
+                    col1.metric("🌱 Plant", plant_type)
+                    col2.metric("📊 Confidence", f"{confidence}%")
+                    col3.metric("🚨 Severity", severity.title())
+                    col4.metric("⏱️ Time", datetime.now().strftime("%H:%M"))
+
+                    # Symptoms, Causes, Actions, Treatments, Prevention
+                    col_left, col_right = st.columns(2)
+                    with col_left:
+                        if result.get("symptoms"):
+                            st.markdown("<div class='info-section'><div class='info-title'>🔍 Symptoms</div>", unsafe_allow_html=True)
+                            for s in result.get("symptoms", []):
+                                st.write(f"• {s}")
+                            st.markdown("</div>", unsafe_allow_html=True)
+                        if result.get("differential_diagnosis"):
+                            st.markdown("<div class='info-section'><div class='info-title'>🔀 Other Possibilities</div>", unsafe_allow_html=True)
+                            for d in result.get("differential_diagnosis", []):
+                                st.write(f"• {d}")
+                            st.markdown("</div>", unsafe_allow_html=True)
+                    with col_right:
+                        if result.get("probable_causes"):
+                            st.markdown("<div class='info-section'><div class='info-title'>⚠️ Causes</div>", unsafe_allow_html=True)
+                            for c in result.get("probable_causes", []):
+                                st.write(f"• {c}")
+                            st.markdown("</div>", unsafe_allow_html=True)
+                        if result.get("immediate_action"):
+                            st.markdown("<div class='info-section'><div class='info-title'>⚡ Actions</div>", unsafe_allow_html=True)
+                            for i, a in enumerate(result.get("immediate_action", []), 1):
+                                st.write(f"**{i}.** {a}")
+                            st.markdown("</div>", unsafe_allow_html=True)
+                    
+                    # Treatments
+                    col_treat1, col_treat2 = st.columns(2)
+                    with col_treat1:
+                        if result.get("organic_treatments"):
+                            st.markdown("<div class='info-section'><div class='info-title'>🌱 Organic Treatments</div>", unsafe_allow_html=True)
+                            for t in result.get("organic_treatments", []):
+                                st.write(f"• {t}")
+                            st.markdown("</div>", unsafe_allow_html=True)
+                    with col_treat2:
+                        if result.get("chemical_treatments"):
+                            st.markdown("<div class='info-section'><div class='info-title'>💊 Chemical Treatments</div>", unsafe_allow_html=True)
+                            for t in result.get("chemical_treatments", []):
+                                st.write(f"• {t}")
+                            st.markdown("</div>", unsafe_allow_html=True)
+                    
+                    # Prevention
+                    if result.get("prevention_long_term"):
+                        st.markdown("<div class='info-section'><div class='info-title'>🛡️ Prevention</div>", unsafe_allow_html=True)
+                        for p in result.get("prevention_long_term", []):
+                            st.write(f"• {p}")
+                        st.markdown("</div>", unsafe_allow_html=True)
+                    
+                    # Notes & Similar Conditions
+                    if result.get("plant_specific_notes"):
+                        st.markdown(f"<div class='info-section'><div class='info-title'>📝 {plant_type} Care Notes</div>{result.get('plant_specific_notes')}</div>", unsafe_allow_html=True)
+                    if result.get("similar_conditions"):
+                        st.markdown(f"<div class='info-section'><div class='info-title'>🔎 Similar Conditions in {plant_type}</div>{result.get('similar_conditions')}</div>", unsafe_allow_html=True)
+
+                else:
+                    st.error("❌ Could not parse AI response")
+                
+            except Exception as e:
+                st.error(f"❌ Analysis Failed: {str(e)}")
+                if debug_mode:
+                    st.text(str(e))
 
 elif uploaded_files and not plant_type:
     st.warning("⚠️ Please select a plant type first for best accuracy!")
