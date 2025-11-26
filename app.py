@@ -686,5 +686,5 @@ with st.sidebar:
         - Shows JSON parsing steps
         """))
     st.markdown("---")
-    st.write(T("""))
 # End of file
+
