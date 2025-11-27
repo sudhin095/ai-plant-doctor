@@ -13,26 +13,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ============ PLANT COMMON DISEASES DATABASE ============
-PLANT_COMMON_DISEASES = {
-    "Tomato": "• Early Blight\n• Late Blight\n• Septoria Leaf Spot\n• Fusarium Wilt\n• Powdery Mildew",
-    "Potato": "• Late Blight\n• Early Blight\n• Bacterial Wilt\n• Verticillium Wilt\n• Rhizoctonia",
-    "Rice": "• Leaf Blast\n• Neck Blast\n• Brown Spot\n• Sheath Blight\n• Tungro Virus",
-    "Wheat": "• Rusts (Leaf, Stem, Yellow)\n• Powdery Mildew\n• Septoria Nodorum\n• Fusarium Head Blight\n• Smuts",
-    "Corn/Maize": "• Leaf Rust\n• Northern Leaf Blight\n• Southern Leaf Blight\n• Gray Leaf Spot\n• Anthracnose",
-    "Cotton": "• Leaf Curl\n• Alternaria Leaf Spot\n• Bacterial Blight\n• Fusarium Wilt\n• Verticillium Wilt",
-    "Apple": "• Apple Scab\n• Powdery Mildew\n• Fire Blight\n• Sooty Blotch\n• Flyspeck",
-    "Mango": "• Anthracnose\n• Powdery Mildew\n• Stem End Rot\n• Gall Midge\n• Leaf Spot",
-    "Banana": "• Leaf Spot (Sigatoka)\n• Panama Disease\n• Anthracnose\n• Mosaic Virus\n• Cordana",
-    "Grape": "• Powdery Mildew\n• Downy Mildew\n• Black Rot\n• Anthracnose\n• Eutypa Dieback",
-    "Onion": "• Pink Root\n• Fusarium Basal Rot\n• White Rot\n• Downy Mildew\n• Purple Blotch",
-    "Chili/Pepper": "• Anthracnose\n• Bacterial Spot\n• Powdery Mildew\n• Leaf Curl\n• Capsicum Mosaic",
-    "Cabbage": "• Black Rot\n• Clubroot\n• Leaf Spot\n• White Rust\n• Powdery Mildew",
-    "Cucumber": "• Powdery Mildew\n• Downy Mildew\n• Angular Leaf Spot\n• Anthracnose\n• Fusarium Wilt",
-    "Carrot": "• Leaf Blight\n• Aster Yellows\n• Cercospora Leaf Spot\n• Motley Dwarf\n• Root Rot",
-}
-
-# ============ ACCURATE INDIA MARKET TREATMENT COSTS (2024-2025) ============
+# ============ TREATMENT COSTS DATABASE - ACCURATE INDIA PRICES ============
 TREATMENT_COSTS = {
     "organic": {
         "Neem Oil Spray": 250,
@@ -204,68 +185,15 @@ st.markdown("""
         font-size: 0.95rem;
     }
     
-    /* Cost Card - Organic (Green) */
-    .cost-card-organic {
-        background: linear-gradient(135deg, #1e4620 0%, #2d5a33 100%);
-        border-left: 5px solid #4caf50;
-        padding: 18px;
-        border-radius: 8px;
-        margin: 15px 0;
-        border: 1px solid rgba(76, 175, 80, 0.3);
-        color: #81c784;
-        font-size: 0.95rem;
-    }
-    
-    .cost-card-organic b {
-        font-size: 1.1rem;
-        display: block;
-        margin-bottom: 8px;
-        color: #4caf50;
-    }
-    
-    .cost-card-organic .cost-value {
-        font-size: 1.4rem;
-        font-weight: bold;
-        color: #81c784;
+    /* Cost Box - Simple style matching response */
+    .cost-info {
+        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
+        border-left: 5px solid #667eea;
+        padding: 12px 16px;
+        border-radius: 6px;
         margin: 8px 0;
-    }
-    
-    .cost-card-organic .cost-details {
-        font-size: 0.85rem;
-        margin-top: 8px;
-        opacity: 0.9;
-    }
-    
-    /* Cost Card - Chemical (Red) */
-    .cost-card-chemical {
-        background: linear-gradient(135deg, #5a1a1a 0%, #3d0d0d 100%);
-        border-left: 5px solid #ff6b6b;
-        padding: 18px;
-        border-radius: 8px;
-        margin: 15px 0;
-        border: 1px solid rgba(255, 107, 107, 0.3);
-        color: #ef9a9a;
-        font-size: 0.95rem;
-    }
-    
-    .cost-card-chemical b {
-        font-size: 1.1rem;
-        display: block;
-        margin-bottom: 8px;
-        color: #ff6b6b;
-    }
-    
-    .cost-card-chemical .cost-value {
-        font-size: 1.4rem;
-        font-weight: bold;
-        color: #ef9a9a;
-        margin: 8px 0;
-    }
-    
-    .cost-card-chemical .cost-details {
-        font-size: 0.85rem;
-        margin-top: 8px;
-        opacity: 0.9;
+        font-size: 0.9rem;
+        color: #b0c4ff;
     }
     
     /* Badges */
@@ -549,11 +477,8 @@ def get_treatment_cost(treatment_type, treatment_name):
         if key.lower() in treatment_name_lower or treatment_name_lower in key.lower():
             return value
     
-    # Default averages if no match found
-    if treatment_type == "organic":
-        return 300  # Average organic cost in India
-    else:
-        return 250  # Average chemical cost in India
+    # Default averages
+    return 300 if treatment_type == "organic" else 250
 
 def resize_image(image, max_width=600, max_height=500):
     image.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
@@ -630,9 +555,9 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.markdown('<div class="feature-card">✅ Expert Diagnosis</div>', unsafe_allow_html=True)
 with col2:
-    st.markdown('<div class="feature-card">🌱 Plant Selection</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🔍 Image Zoom</div>', unsafe_allow_html=True)
 with col3:
-    st.markdown('<div class="feature-card">💰 Real Pricing</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🐛 Debug Mode</div>', unsafe_allow_html=True)
 with col4:
     st.markdown('<div class="feature-card">🚀 Best Accuracy</div>', unsafe_allow_html=True)
 
@@ -696,36 +621,7 @@ with st.sidebar:
            - Solution: Switch to Pro model
         """)
 
-# ============ PLANT TYPE SELECTION - MAIN ACCURACY FEATURE ============
-col_plant, col_upload = st.columns([1, 2])
-
-with col_plant:
-    st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
-    st.subheader("🌱 Select Plant Type")
-    
-    plant_options = ["Select a plant..."] + sorted(list(PLANT_COMMON_DISEASES.keys())) + ["Other (Manual Entry)"]
-    selected_plant = st.selectbox(
-        "What plant do you have?",
-        plant_options,
-        label_visibility="collapsed",
-        help="Selecting plant type increases accuracy by 25-30%!"
-    )
-    
-    if selected_plant == "Other (Manual Entry)":
-        custom_plant = st.text_input("Enter plant name", placeholder="e.g., Banana, Orange, Pepper")
-        plant_type = custom_plant if custom_plant else "Unknown Plant"
-    else:
-        plant_type = selected_plant if selected_plant != "Select a plant..." else None
-    
-    if plant_type and plant_type in PLANT_COMMON_DISEASES:
-        st.markdown(f"""
-        <div class="success-box">
-        <b>Common diseases in {plant_type}:</b><br>
-        {PLANT_COMMON_DISEASES[plant_type]}
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
+col_upload, col_empty = st.columns([3, 1])
 
 with col_upload:
     st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
@@ -925,9 +821,7 @@ if uploaded_file:
                         for treatment in result.get("organic_treatments", []):
                             st.write(f"• {treatment}")
                         
-                        st.markdown("</div>", unsafe_allow_html=True)
-                        
-                        # ============ ORGANIC COST CALCULATION ============
+                        # Calculate and display organic cost
                         organic_treatments = result.get("organic_treatments", [])
                         total_organic_cost = 0
                         if organic_treatments:
@@ -935,17 +829,8 @@ if uploaded_file:
                                 cost = get_treatment_cost("organic", treatment)
                                 total_organic_cost += cost
                         
-                        st.markdown(f"""
-                        <div class="cost-card-organic">
-                            <b>💚 Organic Treatment Cost (India)</b>
-                            <div class="cost-value">₹{total_organic_cost} approx</div>
-                            <div class="cost-details">
-                            Per application (1-2L)<br>
-                            Safe • Eco-friendly • Slow effect (7-14 days)<br>
-                            <small>Based on 2024-2025 market rates</small>
-                            </div>
-                        </div>
-                        """, unsafe_allow_html=True)
+                        st.markdown(f'<div class="cost-info">💚 <b>Approx Cost (India):</b> ₹{total_organic_cost}</div>', unsafe_allow_html=True)
+                        st.markdown("</div>", unsafe_allow_html=True)
                     
                     with col_treat2:
                         st.markdown("""
@@ -956,9 +841,7 @@ if uploaded_file:
                         for treatment in result.get("chemical_treatments", []):
                             st.write(f"• {treatment}")
                         
-                        st.markdown("</div>", unsafe_allow_html=True)
-                        
-                        # ============ CHEMICAL COST CALCULATION ============
+                        # Calculate and display chemical cost
                         chemical_treatments = result.get("chemical_treatments", [])
                         total_chemical_cost = 0
                         if chemical_treatments:
@@ -966,19 +849,8 @@ if uploaded_file:
                                 cost = get_treatment_cost("chemical", treatment)
                                 total_chemical_cost += cost
                         
-                        st.markdown(f"""
-                        <div class="cost-card-chemical">
-                            <b>⚠️ Chemical Treatment Cost (India)</b>
-                            <div class="cost-value">₹{total_chemical_cost} approx</div>
-                            <div class="cost-details">
-                            Per application (1-2L)<br>
-                            Fast acting • Effective • Requires care (3-7 days)<br>
-                            <small>Based on 2024-2025 market rates</small>
-                            </div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                    
-                    st.markdown("<br>", unsafe_allow_html=True)
+                        st.markdown(f'<div class="cost-info">⚠️ <b>Approx Cost (India):</b> ₹{total_chemical_cost}</div>', unsafe_allow_html=True)
+                        st.markdown("</div>", unsafe_allow_html=True)
                     
                     st.markdown("""
                     <div class="info-section">
@@ -1038,11 +910,10 @@ with st.sidebar:
     
     with st.expander("🌍 How It Works"):
         st.write("""
-        1. **Select Plant** - Choose plant type for better accuracy
-        2. **Upload Image** - Plant leaf with visible symptoms
-        3. **AI Analysis** - Expert system evaluates the image
-        4. **Results** - Disease identification + treatment plan
-        5. **Action** - Follow recommendations
+        1. **Upload Image** - Plant leaf with visible symptoms
+        2. **AI Analysis** - Expert system evaluates the image
+        3. **Results** - Disease identification + treatment plan
+        4. **Action** - Follow recommendations
         
         **Works for:**
         • 500+ plant diseases
@@ -1084,23 +955,7 @@ with st.sidebar:
         - Default 50% is reasonable
         """)
     
-    with st.expander("💰 Pricing Information"):
-        st.write("""
-        **Treatment Costs (India, 2024-2025)**
-        
-        **Organic Range:**
-        • Budget: ₹150-250
-        • Mid-range: ₹250-400
-        • Premium: ₹400-550
-        
-        **Chemical Range:**
-        • Budget: ₹120-200
-        • Mid-range: ₹200-350
-        • Premium: ₹350-450
-        
-        Prices vary by region and retailer.
-        Always check local agricultural stores.
-        """)
-    
     st.markdown("---")
+    
+    st.header("📋 Free Tier Limits")
     
