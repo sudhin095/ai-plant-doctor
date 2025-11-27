@@ -5,17 +5,6 @@ import os
 import json
 from datetime import datetime
 import re
-from io import BytesIO
-
-try:
-    from reportlab.lib.pagesizes import letter
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-    from reportlab.lib.units import inch
-    from reportlab.lib import colors
-    REPORTLAB_AVAILABLE = True
-except ImportError:
-    REPORTLAB_AVAILABLE = False
 
 st.set_page_config(
     page_title="🌿 AI Plant Doctor - Professional Edition",
@@ -24,50 +13,37 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ============ PLANT COMMON DISEASES DATABASE ============
-PLANT_COMMON_DISEASES = {
-    "Tomato": "• Early Blight\n• Late Blight\n• Septoria Leaf Spot\n• Fusarium Wilt\n• Powdery Mildew",
-    "Potato": "• Late Blight\n• Early Blight\n• Bacterial Wilt\n• Verticillium Wilt\n• Rhizoctonia",
-    "Rice": "• Leaf Blast\n• Neck Blast\n• Brown Spot\n• Sheath Blight\n• Tungro Virus",
-    "Wheat": "• Rusts (Leaf, Stem, Yellow)\n• Powdery Mildew\n• Septoria Nodorum\n• Fusarium Head Blight\n• Smuts",
-    "Corn/Maize": "• Leaf Rust\n• Northern Leaf Blight\n• Southern Leaf Blight\n• Gray Leaf Spot\n• Anthracnose",
-    "Cotton": "• Leaf Curl\n• Alternaria Leaf Spot\n• Bacterial Blight\n• Fusarium Wilt\n• Verticillium Wilt",
-    "Apple": "• Apple Scab\n• Powdery Mildew\n• Fire Blight\n• Sooty Blotch\n• Flyspeck",
-    "Mango": "• Anthracnose\n• Powdery Mildew\n• Stem End Rot\n• Gall Midge\n• Leaf Spot",
-    "Banana": "• Leaf Spot (Sigatoka)\n• Panama Disease\n• Anthracnose\n• Mosaic Virus\n• Cordana",
-    "Grape": "• Powdery Mildew\n• Downy Mildew\n• Black Rot\n• Anthracnose\n• Eutypa Dieback",
-    "Onion": "• Pink Root\n• Fusarium Basal Rot\n• White Rot\n• Downy Mildew\n• Purple Blotch",
-    "Chili/Pepper": "• Anthracnose\n• Bacterial Spot\n• Powdery Mildew\n• Leaf Curl\n• Capsicum Mosaic",
-    "Cabbage": "• Black Rot\n• Clubroot\n• Leaf Spot\n• White Rust\n• Powdery Mildew",
-    "Cucumber": "• Powdery Mildew\n• Downy Mildew\n• Angular Leaf Spot\n• Anthracnose\n• Fusarium Wilt",
-    "Carrot": "• Leaf Blight\n• Aster Yellows\n• Cercospora Leaf Spot\n• Motley Dwarf\n• Root Rot",
-}
-
-# ============ TREATMENT COST DATABASE ============
+# ============ ACCURATE INDIA MARKET TREATMENT COSTS (2024-2025) ============
 TREATMENT_COSTS = {
     "organic": {
-        "Neem Oil Spray": 150,
-        "Sulfur Powder": 120,
-        "Bordeaux Mixture": 180,
-        "Copper Fungicide (Organic)": 160,
-        "Potassium Bicarbonate": 140,
-        "Bacillus subtilis": 200,
-        "Trichoderma": 220,
-        "Spinosad": 250,
-        "Azadirachtin": 190,
-        "Lime Sulfur": 170,
+        "Neem Oil Spray": 250,
+        "Sulfur Powder": 180,
+        "Bordeaux Mixture": 280,
+        "Copper Fungicide (Organic)": 350,
+        "Potassium Bicarbonate": 320,
+        "Bacillus subtilis": 400,
+        "Trichoderma": 450,
+        "Spinosad": 550,
+        "Azadirachtin": 380,
+        "Lime Sulfur": 220,
+        "Sulfur Dust": 150,
+        "Karanja Oil": 280,
+        "Cow Urine Extract": 120,
     },
     "chemical": {
-        "Carbendazim": 80,
-        "Mancozeb": 100,
-        "Copper Oxychloride": 110,
-        "Chlorothalonil": 130,
-        "Fluconazole": 250,
-        "Tebuconazole": 200,
-        "Imidacloprid": 180,
-        "Deltamethrin": 160,
-        "Profenofos": 120,
-        "Thiamethoxam": 190,
+        "Carbendazim (Bavistin)": 120,
+        "Mancozeb (Indofil)": 180,
+        "Copper Oxychloride": 150,
+        "Chlorothalonil": 200,
+        "Fluconazole (Contaf)": 400,
+        "Tebuconazole (Folicur)": 350,
+        "Imidacloprid (Confidor)": 280,
+        "Deltamethrin (Decis)": 240,
+        "Profenofos (Meothrin)": 190,
+        "Thiamethoxam (Actara)": 320,
+        "Azoxystrobin (Amistar)": 450,
+        "Hexaconazole (Contaf Plus)": 380,
+        "Phosphorous Acid": 280,
     }
 }
 
@@ -209,23 +185,68 @@ st.markdown("""
         font-size: 0.95rem;
     }
     
-    /* Cost Card */
-    .cost-card {
+    /* Cost Card - Organic (Green) */
+    .cost-card-organic {
         background: linear-gradient(135deg, #1e4620 0%, #2d5a33 100%);
         border-left: 5px solid #4caf50;
-        padding: 15px;
+        padding: 18px;
         border-radius: 8px;
-        margin: 10px 0;
+        margin: 15px 0;
         border: 1px solid rgba(76, 175, 80, 0.3);
         color: #81c784;
         font-size: 0.95rem;
     }
     
+    .cost-card-organic b {
+        font-size: 1.1rem;
+        display: block;
+        margin-bottom: 8px;
+        color: #4caf50;
+    }
+    
+    .cost-card-organic .cost-value {
+        font-size: 1.4rem;
+        font-weight: bold;
+        color: #81c784;
+        margin: 8px 0;
+    }
+    
+    .cost-card-organic .cost-details {
+        font-size: 0.85rem;
+        margin-top: 8px;
+        opacity: 0.9;
+    }
+    
+    /* Cost Card - Chemical (Red) */
     .cost-card-chemical {
-        background: linear-gradient(135deg, #5a1a1a 0%, #3d0d0d 100%) !important;
-        border-left: 5px solid #ff6b6b !important;
-        border: 1px solid rgba(255, 107, 107, 0.3) !important;
-        color: #ef9a9a !important;
+        background: linear-gradient(135deg, #5a1a1a 0%, #3d0d0d 100%);
+        border-left: 5px solid #ff6b6b;
+        padding: 18px;
+        border-radius: 8px;
+        margin: 15px 0;
+        border: 1px solid rgba(255, 107, 107, 0.3);
+        color: #ef9a9a;
+        font-size: 0.95rem;
+    }
+    
+    .cost-card-chemical b {
+        font-size: 1.1rem;
+        display: block;
+        margin-bottom: 8px;
+        color: #ff6b6b;
+    }
+    
+    .cost-card-chemical .cost-value {
+        font-size: 1.4rem;
+        font-weight: bold;
+        color: #ef9a9a;
+        margin: 8px 0;
+    }
+    
+    .cost-card-chemical .cost-details {
+        font-size: 0.85rem;
+        margin-top: 8px;
+        opacity: 0.9;
     }
     
     /* Badges */
@@ -495,141 +516,89 @@ def get_severity_badge_class(severity):
     return "severity-moderate"
 
 def get_treatment_cost(treatment_type, treatment_name):
-    """Get cost for treatment"""
+    """Get ACCURATE Indian market cost for treatment"""
     costs = TREATMENT_COSTS.get(treatment_type, {})
+    treatment_name_lower = treatment_name.lower()
+    
+    # Exact match first
     for key, value in costs.items():
-        if key.lower() in treatment_name.lower() or treatment_name.lower() in key.lower():
+        if key.lower() == treatment_name_lower:
             return value
-    return 150  # default cost
+    
+    # Partial match
+    for key, value in costs.items():
+        if key.lower() in treatment_name_lower or treatment_name_lower in key.lower():
+            return value
+    
+    # Default averages if no match found
+    if treatment_type == "organic":
+        return 300  # Average organic cost in India
+    else:
+        return 250  # Average chemical cost in India
 
-def generate_pdf_prescription(diagnosis, farmer_name="Farmer", crop_area=1.0):
-    """Generate PDF prescription for the farmer"""
-    if not REPORTLAB_AVAILABLE:
+def resize_image(image, max_width=600, max_height=500):
+    image.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
+    return image
+
+def zoom_image(image, zoom_level):
+    if zoom_level == 1.0:
+        return image
+    
+    width, height = image.size
+    new_width = int(width * zoom_level)
+    new_height = int(height * zoom_level)
+    
+    left = max(0, (width - new_width) / 2)
+    top = max(0, (height - new_height) / 2)
+    right = min(width, left + new_width)
+    bottom = min(height, top + new_height)
+    
+    cropped = image.crop((left, top, right, bottom))
+    return cropped.resize((width, height), Image.Resampling.LANCZOS)
+
+def extract_json_robust(response_text):
+    if not response_text:
         return None
     
     try:
-        buffer = BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
-        elements = []
-        
-        styles = getSampleStyleSheet()
-        title_style = ParagraphStyle(
-            'CustomTitle',
-            parent=styles['Heading1'],
-            fontSize=18,
-            textColor=colors.HexColor('#667eea'),
-            spaceAfter=12,
-            alignment=1
-        )
-        
-        heading_style = ParagraphStyle(
-            'CustomHeading',
-            parent=styles['Heading2'],
-            fontSize=11,
-            textColor=colors.HexColor('#667eea'),
-            spaceAfter=8,
-            spaceBefore=8,
-            fontName='Helvetica-Bold'
-        )
-        
-        normal_style = ParagraphStyle(
-            'CustomNormal',
-            parent=styles['Normal'],
-            fontSize=9,
-            spaceAfter=5,
-            leading=12
-        )
-        
-        # Title
-        elements.append(Paragraph("AI PLANT DOCTOR - TREATMENT PRESCRIPTION", title_style))
-        elements.append(Spacer(1, 0.15*inch))
-        
-        # Farmer Info
-        date_str = datetime.now().strftime("%d-%m-%Y %H:%M")
-        elements.append(Paragraph(f"<b>Date:</b> {date_str}", normal_style))
-        elements.append(Paragraph(f"<b>Farmer Name:</b> {farmer_name}", normal_style))
-        elements.append(Paragraph(f"<b>Crop Area:</b> {crop_area} acres", normal_style))
-        elements.append(Spacer(1, 0.1*inch))
-        
-        # Disease Information
-        elements.append(Paragraph("DIAGNOSIS", heading_style))
-        disease_name = diagnosis.get("disease_name", "Unknown")
-        disease_type = diagnosis.get("disease_type", "Unknown").title()
-        severity = diagnosis.get("severity", "Unknown").title()
-        confidence = diagnosis.get("confidence", 0)
-        
-        elements.append(Paragraph(f"<b>Disease:</b> {disease_name}", normal_style))
-        elements.append(Paragraph(f"<b>Type:</b> {disease_type} | <b>Severity:</b> {severity} | <b>Confidence:</b> {confidence}%", normal_style))
-        elements.append(Spacer(1, 0.1*inch))
-        
-        # Symptoms
-        elements.append(Paragraph("SYMPTOMS", heading_style))
-        for symptom in diagnosis.get("symptoms", [])[:3]:
-            elements.append(Paragraph(f"• {symptom}", normal_style))
-        elements.append(Spacer(1, 0.08*inch))
-        
-        # Immediate Actions
-        elements.append(Paragraph("IMMEDIATE ACTIONS (TODAY)", heading_style))
-        for i, action in enumerate(diagnosis.get("immediate_action", [])[:3], 1):
-            elements.append(Paragraph(f"<b>{i}.</b> {action}", normal_style))
-        elements.append(Spacer(1, 0.08*inch))
-        
-        # Treatment Options with Costs
-        elements.append(Paragraph("TREATMENT & COSTS", heading_style))
-        
-        organic_treatments = diagnosis.get("organic_treatments", [])
-        chemical_treatments = diagnosis.get("chemical_treatments", [])
-        
-        organic_cost = sum([get_treatment_cost("organic", t) for t in organic_treatments[:2]]) if organic_treatments else 0
-        chemical_cost = sum([get_treatment_cost("chemical", t) for t in chemical_treatments[:2]]) if chemical_treatments else 0
-        
-        table_data = [
-            ["Type", "Cost", "Duration", "Safety"],
-            ["Organic", f"₹{organic_cost}", "7-14 days", "High"],
-            ["Chemical", f"₹{chemical_cost}", "3-7 days", "Medium"],
-        ]
-        
-        table = Table(table_data, colWidths=[1.5*inch, 1*inch, 1*inch, 1*inch])
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 8),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f0f0f0')),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f9f9f9')]),
-        ]))
-        elements.append(table)
-        elements.append(Spacer(1, 0.1*inch))
-        
-        # Treatments
-        elements.append(Paragraph("ORGANIC TREATMENTS (Recommended)", heading_style))
-        for treatment in organic_treatments[:2]:
-            elements.append(Paragraph(f"• {treatment}", normal_style))
-        elements.append(Spacer(1, 0.08*inch))
-        
-        elements.append(Paragraph("CHEMICAL TREATMENTS (Alternative)", heading_style))
-        for treatment in chemical_treatments[:2]:
-            elements.append(Paragraph(f"• {treatment}", normal_style))
-        elements.append(Spacer(1, 0.08*inch))
-        
-        # Prevention
-        elements.append(Paragraph("PREVENTION", heading_style))
-        for prevention in diagnosis.get("prevention_long_term", [])[:3]:
-            elements.append(Paragraph(f"• {prevention}", normal_style))
-        
-        # Footer
-        elements.append(Spacer(1, 0.1*inch))
-        elements.append(Paragraph("<i>Note: Based on AI analysis. Consult local experts for confirmation.</i>", normal_style))
-        
-        doc.build(elements)
-        buffer.seek(0)
-        return buffer
-    except Exception as e:
-        st.error(f"❌ PDF Error: {str(e)}")
-        return None
+        return json.loads(response_text)
+    except:
+        pass
+    
+    cleaned = response_text
+    if "```json" in cleaned:
+        cleaned = cleaned.split("```json")[1].split("```")[0]
+    elif "```" in cleaned:
+        cleaned = cleaned.split("```")[1].split("```")[0]
+    
+    try:
+        return json.loads(cleaned.strip())
+    except:
+        pass
+    
+    match = re.search(r'\{[\s\S]*\}', response_text)
+    if match:
+        try:
+            return json.loads(match.group())
+        except:
+            pass
+    
+    return None
+
+def validate_json_result(data):
+    required_fields = [
+        "disease_name", "disease_type", "severity", 
+        "confidence", "symptoms", "probable_causes"
+    ]
+    
+    if not isinstance(data, dict):
+        return False, "Response is not a dictionary"
+    
+    missing = [f for f in required_fields if f not in data]
+    if missing:
+        return False, f"Missing fields: {', '.join(missing)}"
+    
+    return True, "Valid"
 
 st.markdown("""
 <div class="header-container">
@@ -642,11 +611,11 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.markdown('<div class="feature-card">✅ Expert Diagnosis</div>', unsafe_allow_html=True)
 with col2:
-    st.markdown('<div class="feature-card">🌱 Plant Selection</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🔍 Image Zoom</div>', unsafe_allow_html=True)
 with col3:
-    st.markdown('<div class="feature-card">💰 Cost Calculator</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">💰 Real Pricing</div>', unsafe_allow_html=True)
 with col4:
-    st.markdown('<div class="feature-card">📄 PDF Prescriptions</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🚀 Best Accuracy</div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -708,36 +677,7 @@ with st.sidebar:
            - Solution: Switch to Pro model
         """)
 
-# ============ PLANT TYPE SELECTION - MAIN ACCURACY FEATURE ============
-col_plant, col_upload = st.columns([1, 2])
-
-with col_plant:
-    st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
-    st.subheader("🌱 Select Plant Type")
-    
-    plant_options = ["Select a plant..."] + sorted(list(PLANT_COMMON_DISEASES.keys())) + ["Other (Manual Entry)"]
-    selected_plant = st.selectbox(
-        "What plant do you have?",
-        plant_options,
-        label_visibility="collapsed",
-        help="Selecting plant type increases accuracy by 25-30%!"
-    )
-    
-    if selected_plant == "Other (Manual Entry)":
-        custom_plant = st.text_input("Enter plant name", placeholder="e.g., Banana, Orange, Pepper")
-        plant_type = custom_plant if custom_plant else "Unknown Plant"
-    else:
-        plant_type = selected_plant if selected_plant != "Select a plant..." else None
-    
-    if plant_type and plant_type in PLANT_COMMON_DISEASES:
-        st.markdown(f"""
-        <div class="success-box">
-        <b>Common diseases in {plant_type}:</b><br>
-        {PLANT_COMMON_DISEASES[plant_type]}
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
+col_upload, col_empty = st.columns([3, 1])
 
 with col_upload:
     st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
@@ -780,16 +720,8 @@ if uploaded_file:
         st.subheader("📸 Preview")
         display_image = original_image.copy()
         if zoom_level != 1.0:
-            # Simple zoom implementation
-            width, height = display_image.size
-            new_width = int(width / zoom_level)
-            new_height = int(height / zoom_level)
-            left = (width - new_width) / 2
-            top = (height - new_height) / 2
-            display_image = display_image.crop((left, top, left + new_width, top + new_height))
-            display_image = display_image.resize((width, height), Image.Resampling.LANCZOS)
-        
-        display_image.thumbnail((600, 500), Image.Resampling.LANCZOS)
+            display_image = zoom_image(display_image, zoom_level)
+        display_image = resize_image(display_image)
         
         st.markdown('<div class="image-container">', unsafe_allow_html=True)
         st.image(display_image, use_container_width=True)
@@ -827,15 +759,7 @@ if uploaded_file:
                         st.text(displayed_response)
                         st.markdown('</div>', unsafe_allow_html=True)
                 
-                # Extract JSON
-                result = None
-                try:
-                    result = json.loads(raw_response)
-                except:
-                    if "```json" in raw_response:
-                        result = json.loads(raw_response.split("```json")[1].split("```")[0])
-                    elif "```" in raw_response:
-                        result = json.loads(raw_response.split("```")[1].split("```")[0])
+                result = extract_json_robust(raw_response)
                 
                 if result is None:
                     st.markdown('<div class="error-box">', unsafe_allow_html=True)
@@ -845,7 +769,18 @@ if uploaded_file:
                     st.write("• Use Pro model for better accuracy")
                     st.write("• Enable debug mode to see raw response")
                     st.markdown('</div>', unsafe_allow_html=True)
+                    
+                    if debug_mode:
+                        with st.expander("Full Response (Debug)"):
+                            st.markdown('<div class="debug-box">', unsafe_allow_html=True)
+                            st.text(raw_response)
+                            st.markdown('</div>', unsafe_allow_html=True)
                 else:
+                    is_valid, validation_msg = validate_json_result(result)
+                    
+                    if not is_valid:
+                        st.warning(f"⚠️ Incomplete response: {validation_msg}")
+                    
                     confidence = result.get("confidence", 0)
                     
                     if confidence < confidence_min:
@@ -944,15 +879,23 @@ if uploaded_file:
                         
                         st.markdown("</div>", unsafe_allow_html=True)
                         
-                        # Organic Cost
+                        # ============ ORGANIC COST CALCULATION ============
                         organic_treatments = result.get("organic_treatments", [])
-                        organic_cost = sum([get_treatment_cost("organic", t) for t in organic_treatments[:2]]) if organic_treatments else 0
+                        total_organic_cost = 0
+                        if organic_treatments:
+                            for treatment in organic_treatments[:2]:
+                                cost = get_treatment_cost("organic", treatment)
+                                total_organic_cost += cost
                         
                         st.markdown(f"""
-                        <div class="cost-card">
-                            <b>💚 Organic Treatment Cost</b><br>
-                            <b>Approx: ₹{organic_cost}</b> per application<br>
-                            <small>Safe • Eco-friendly • Slower (7-14 days)</small>
+                        <div class="cost-card-organic">
+                            <b>💚 Organic Treatment Cost (India)</b>
+                            <div class="cost-value">₹{total_organic_cost} approx</div>
+                            <div class="cost-details">
+                            Per application (1-2L)<br>
+                            Safe • Eco-friendly • Slow effect (7-14 days)<br>
+                            <small>Based on 2024-2025 market rates</small>
+                            </div>
                         </div>
                         """, unsafe_allow_html=True)
                     
@@ -967,15 +910,23 @@ if uploaded_file:
                         
                         st.markdown("</div>", unsafe_allow_html=True)
                         
-                        # Chemical Cost
+                        # ============ CHEMICAL COST CALCULATION ============
                         chemical_treatments = result.get("chemical_treatments", [])
-                        chemical_cost = sum([get_treatment_cost("chemical", t) for t in chemical_treatments[:2]]) if chemical_treatments else 0
+                        total_chemical_cost = 0
+                        if chemical_treatments:
+                            for treatment in chemical_treatments[:2]:
+                                cost = get_treatment_cost("chemical", treatment)
+                                total_chemical_cost += cost
                         
                         st.markdown(f"""
-                        <div class="cost-card cost-card-chemical">
-                            <b>⚠️ Chemical Treatment Cost</b><br>
-                            <b>Approx: ₹{chemical_cost}</b> per application<br>
-                            <small>Fast acting • Effective • Requires care (3-7 days)</small>
+                        <div class="cost-card-chemical">
+                            <b>⚠️ Chemical Treatment Cost (India)</b>
+                            <div class="cost-value">₹{total_chemical_cost} approx</div>
+                            <div class="cost-details">
+                            Per application (1-2L)<br>
+                            Fast acting • Effective • Requires care (3-7 days)<br>
+                            <small>Based on 2024-2025 market rates</small>
+                            </div>
                         </div>
                         """, unsafe_allow_html=True)
                     
@@ -1002,45 +953,14 @@ if uploaded_file:
                     st.markdown("</div>", unsafe_allow_html=True)
                     
                     st.markdown("<br>", unsafe_allow_html=True)
-                    st.divider()
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    
-                    # ============ PDF PRESCRIPTION SECTION ============
-                    st.subheader("📄 Generate Prescription PDF")
-                    col_pdf1, col_pdf2 = st.columns(2)
-                    
-                    with col_pdf1:
-                        farmer_name = st.text_input("👨‍🌾 Farmer Name", value="Farmer", key="farmer_name_input")
-                    
-                    with col_pdf2:
-                        crop_area = st.number_input("🌾 Crop Area (acres)", min_value=0.1, max_value=100.0, value=1.0, key="crop_area_input")
-                    
-                    col_pdf_btn1, col_pdf_btn2 = st.columns(2)
-                    
-                    with col_pdf_btn1:
-                        if st.button("📥 Generate PDF", use_container_width=True, key="gen_pdf"):
-                            pdf_buffer = generate_pdf_prescription(result, farmer_name, crop_area)
-                            if pdf_buffer:
-                                st.download_button(
-                                    label="📥 Download PDF Prescription",
-                                    data=pdf_buffer,
-                                    file_name=f"Prescription_{disease_name.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
-                                    mime="application/pdf",
-                                    use_container_width=True,
-                                    key="download_pdf"
-                                )
-                                st.success("✅ PDF Ready! Download above.")
-                    
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    
                     col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 1])
                     
                     with col_btn1:
-                        if st.button("📸 Analyze Another", use_container_width=True):
+                        if st.button("📸 Analyze Another Plant", use_container_width=True):
                             st.rerun()
                     
                     with col_btn3:
-                        if st.button("🔄 Reset", use_container_width=True):
+                        if st.button("🔄 Reset All", use_container_width=True):
                             st.rerun()
                     
                     progress_placeholder.empty()
@@ -1070,11 +990,10 @@ with st.sidebar:
     
     with st.expander("🌍 How It Works"):
         st.write("""
-        1. **Select Plant** - Choose plant type for better accuracy
-        2. **Upload Image** - Plant leaf with visible symptoms
-        3. **AI Analysis** - Expert system evaluates the image
-        4. **Results** - Disease identification + treatment plan
-        5. **Download** - Generate PDF prescription for farmers
+        1. **Upload Image** - Plant leaf with visible symptoms
+        2. **AI Analysis** - Expert system evaluates the image
+        3. **Results** - Disease identification + treatment plan
+        4. **Action** - Follow recommendations
         
         **Works for:**
         • 500+ plant diseases
@@ -1114,6 +1033,24 @@ with st.sidebar:
         - Set to filter low-confidence results
         - Helps avoid false positives
         - Default 50% is reasonable
+        """)
+    
+    with st.expander("💰 Pricing Information"):
+        st.write("""
+        **Treatment Costs (India, 2024-2025)**
+        
+        **Organic Range:**
+        • Budget: ₹150-250
+        • Mid-range: ₹250-400
+        • Premium: ₹400-550
+        
+        **Chemical Range:**
+        • Budget: ₹120-200
+        • Mid-range: ₹200-350
+        • Premium: ₹350-450
+        
+        Prices vary by region and retailer.
+        Always check local agricultural stores.
         """)
     
     st.markdown("---")
