@@ -813,7 +813,7 @@ Current Diagnosis:
 - Confidence: {diagnosis_context.get('confidence', 'Unknown')}%
 """
 
-    prompt = f"""You are KisanAI, an expert agricultural advisor for Indian farmers with deep expertise in crop management, disease control, and sustainable farming.
+    prompt = f"""You are an expert agricultural advisor for farmers with deep expertise in crop management, disease control, and sustainable farming practices.
 
 {context_text}
 
@@ -821,12 +821,12 @@ Farmer's Question: {user_question}
 
 IMPORTANT: Provide a comprehensive, detailed response (5-8 sentences) that includes:
 1. Direct answer to the question
-2. Practical, cost-effective solutions
-3. Seasonal timing if applicable
-4. Resource availability in India
-5. Long-term sustainability advice
+2. Practical, cost-effective solutions suitable for farming conditions
+3. Seasonal timing and weather considerations if applicable
+4. Resource availability and sourcing information
+5. Long-term sustainability and soil health recommendations
 
-Write in simple Hindi-influenced English. Focus on low-cost, readily available solutions."""
+Use clear, professional English. Focus on actionable, readily available solutions with proven effectiveness."""
     
     try:
         response = model.generate_content(prompt)
