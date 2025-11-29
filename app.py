@@ -1,25 +1,17 @@
 import subprocess
 import sys
 
-# Auto-install reportlab if not present
+# Auto-install fpdf2 if not present
 try:
-    from reportlab.lib.pagesizes import letter, A4
-    from reportlab.lib import colors
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, SimpleTable
-    from reportlab.lib.units import inch
-    HAS_REPORTLAB = True
+    from fpdf import FPDF
+    HAS_PDF = True
 except ImportError:
     try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "reportlab", "-q"])
-        from reportlab.lib.pagesizes import letter, A4
-        from reportlab.lib import colors
-        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, SimpleTable
-        from reportlab.lib.units import inch
-        HAS_REPORTLAB = True
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "fpdf2", "-q"])
+        from fpdf import FPDF
+        HAS_PDF = True
     except:
-        HAS_REPORTLAB = False
+        HAS_PDF = False
 
 import streamlit as st
 import google.generativeai as genai
@@ -556,8 +548,8 @@ def validate_json_result(data):
     return True, "Valid"
 
 def generate_bilingual_prescriptions(result, plant_type):
-    """Generate professional bilingual PDFs (English & Hindi) with complete medicine lists"""
-    if not HAS_REPORTLAB:
+    """Generate professional bilingual PDFs (English & Hindi) using FPDF2"""
+    if not HAS_PDF:
         return None, None
     
     english_buffer = generate_prescription_pdf_english(result, plant_type)
@@ -566,328 +558,210 @@ def generate_bilingual_prescriptions(result, plant_type):
     return english_buffer, hindi_buffer
 
 def generate_prescription_pdf_english(result, plant_type):
-    """Generate English Prescription PDF"""
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4,
-                           rightMargin=0.5*inch, leftMargin=0.5*inch,
-                           topMargin=0.5*inch, bottomMargin=0.5*inch)
+    """Generate English Prescription PDF using FPDF2"""
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=14, style="B")
     
-    elements = []
-    styles = getSampleStyleSheet()
+    # Header
+    pdf.cell(0, 10, "AI PLANT DOCTOR - PRESCRIPTION", ln=True, align="C")
+    pdf.set_font("Arial", size=10)
+    pdf.cell(0, 8, "Professional Plant Disease Diagnosis & Treatment Plan", ln=True, align="C")
+    pdf.ln(5)
     
-    title_style = ParagraphStyle(
-        'Title',
-        parent=styles['Heading1'],
-        fontSize=18,
-        textColor=colors.HexColor('#1a2a47'),
-        spaceAfter=2,
-        alignment=1,
-        fontName='Helvetica-Bold',
-        leading=20
-    )
+    # Disease Details
+    pdf.set_font("Arial", size=11, style="B")
+    pdf.cell(0, 8, "DIAGNOSIS DETAILS", ln=True)
+    pdf.set_font("Arial", size=10)
     
-    heading_style = ParagraphStyle(
-        'Heading',
-        parent=styles['Heading2'],
-        fontSize=11,
-        textColor=colors.white,
-        spaceAfter=8,
-        spaceBefore=8,
-        fontName='Helvetica-Bold',
-        backColor=colors.HexColor('#667eea'),
-        leftIndent=6,
-        rightIndent=6,
-        topPadding=6,
-        bottomPadding=6
-    )
-    
-    normal_style = ParagraphStyle(
-        'Normal',
-        parent=styles['Normal'],
-        fontSize=9,
-        textColor=colors.HexColor('#1a1f2e'),
-        spaceAfter=4,
-        leading=12
-    )
-    
-    # HEADER
-    elements.append(Paragraph("🌿 AI PLANT DOCTOR - PRESCRIPTION", title_style))
-    elements.append(Paragraph("Professional Plant Disease Diagnosis & Treatment Plan", 
-                            ParagraphStyle('Subtitle', parent=styles['Normal'], fontSize=10, 
-                                          textColor=colors.HexColor('#667eea'), alignment=1)))
-    elements.append(Spacer(1, 0.15*inch))
-    
-    # PATIENT DETAILS TABLE
     disease_name = result.get("disease_name", "Unknown")
     plant_species = result.get("plant_species", plant_type)
     severity = result.get("severity", "Unknown").title()
     confidence = result.get("confidence", 0)
     disease_type = result.get("disease_type", "Unknown").title()
     
-    details_data = [
-        ["Plant Type:", plant_species, "Disease:", disease_name],
-        ["Severity:", severity, "Confidence:", f"{confidence}%"],
-        ["Disease Type:", disease_type, "Date:", datetime.now().strftime("%d-%m-%Y")],
-    ]
+    pdf.cell(40, 8, "Plant Type:")
+    pdf.cell(0, 8, plant_species, ln=True)
+    pdf.cell(40, 8, "Disease:")
+    pdf.cell(0, 8, disease_name, ln=True)
+    pdf.cell(40, 8, "Severity:")
+    pdf.cell(0, 8, severity, ln=True)
+    pdf.cell(40, 8, "Confidence:")
+    pdf.cell(0, 8, f"{confidence}%", ln=True)
+    pdf.cell(40, 8, "Type:")
+    pdf.cell(0, 8, disease_type, ln=True)
+    pdf.ln(5)
     
-    details_table = Table(details_data, colWidths=[1.8*inch, 1.8*inch, 1.8*inch, 1.8*inch])
-    details_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#e8ecf7')),
-        ('BACKGROUND', (2, 0), (2, -1), colors.HexColor('#e8ecf7')),
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#1a1f2e')),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 9),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#667eea')),
-    ]))
-    elements.append(details_table)
-    elements.append(Spacer(1, 0.15*inch))
-    
-    # SYMPTOMS
-    elements.append(Paragraph("SYMPTOMS OBSERVED", heading_style))
+    # Symptoms
+    pdf.set_font("Arial", size=11, style="B")
+    pdf.cell(0, 8, "SYMPTOMS OBSERVED", ln=True)
+    pdf.set_font("Arial", size=10)
     for i, symptom in enumerate(result.get("symptoms", []), 1):
-        elements.append(Paragraph(f"{i}. {symptom}", normal_style))
-    elements.append(Spacer(1, 0.1*inch))
+        pdf.multi_cell(0, 6, f"{i}. {symptom}")
+    pdf.ln(3)
     
-    # CAUSES
-    elements.append(Paragraph("PROBABLE CAUSES", heading_style))
+    # Causes
+    pdf.set_font("Arial", size=11, style="B")
+    pdf.cell(0, 8, "PROBABLE CAUSES", ln=True)
+    pdf.set_font("Arial", size=10)
     for i, cause in enumerate(result.get("probable_causes", []), 1):
-        elements.append(Paragraph(f"{i}. {cause}", normal_style))
-    elements.append(Spacer(1, 0.1*inch))
+        pdf.multi_cell(0, 6, f"{i}. {cause}")
+    pdf.ln(3)
     
-    # IMMEDIATE ACTIONS
-    elements.append(Paragraph("IMMEDIATE ACTIONS REQUIRED", heading_style))
+    # Immediate Actions
+    pdf.set_font("Arial", size=11, style="B")
+    pdf.cell(0, 8, "IMMEDIATE ACTIONS REQUIRED", ln=True)
+    pdf.set_font("Arial", size=10)
     for i, action in enumerate(result.get("immediate_action", []), 1):
-        elements.append(Paragraph(f"{i}. {action}", normal_style))
-    elements.append(Spacer(1, 0.1*inch))
+        pdf.multi_cell(0, 6, f"{i}. {action}")
+    pdf.ln(3)
     
-    # ORGANIC TREATMENTS LIST
-    elements.append(Paragraph("ORGANIC TREATMENT OPTIONS", heading_style))
-    organic_treatments = result.get("organic_treatments", [])
-    organic_data = [["S.No", "Medicine Name", "Cost (₹)", "Application", "Frequency"]]
-    for i, treatment in enumerate(organic_treatments, 1):
+    # Organic Treatments
+    pdf.set_font("Arial", size=11, style="B")
+    pdf.cell(0, 8, "ORGANIC TREATMENT OPTIONS", ln=True)
+    pdf.set_font("Arial", size=9)
+    
+    for i, treatment in enumerate(result.get("organic_treatments", []), 1):
         cost = get_treatment_cost("organic", treatment)
-        organic_data.append([str(i), treatment, f"₹{cost}", "Spray/Dust", "Every 7-10 days"])
+        pdf.cell(10, 6, f"{i}.")
+        pdf.cell(80, 6, treatment[:30])
+        pdf.cell(30, 6, f"Rs {cost}")
+        pdf.cell(40, 6, "Spray/7-10 days", ln=True)
+    pdf.ln(3)
     
-    organic_table = Table(organic_data, colWidths=[0.6*inch, 2.2*inch, 1*inch, 1.2*inch, 1.2*inch])
-    organic_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1b5e20')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f0f7f0')),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#4caf50')),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-    ]))
-    elements.append(organic_table)
-    elements.append(Spacer(1, 0.1*inch))
+    # Chemical Treatments
+    pdf.set_font("Arial", size=11, style="B")
+    pdf.cell(0, 8, "CHEMICAL TREATMENT OPTIONS", ln=True)
+    pdf.set_font("Arial", size=9)
     
-    # CHEMICAL TREATMENTS LIST
-    elements.append(Paragraph("CHEMICAL TREATMENT OPTIONS", heading_style))
-    chemical_treatments = result.get("chemical_treatments", [])
-    chemical_data = [["S.No", "Medicine Name", "Cost (₹)", "Dilution", "Safety"]]
-    for i, treatment in enumerate(chemical_treatments, 1):
+    for i, treatment in enumerate(result.get("chemical_treatments", []), 1):
         cost = get_treatment_cost("chemical", treatment)
-        chemical_data.append([str(i), treatment, f"₹{cost}", "1:500", "Use gloves"])
+        pdf.cell(10, 6, f"{i}.")
+        pdf.cell(80, 6, treatment[:30])
+        pdf.cell(30, 6, f"Rs {cost}")
+        pdf.cell(40, 6, "1:500 dilution", ln=True)
+    pdf.ln(3)
     
-    chemical_table = Table(chemical_data, colWidths=[0.6*inch, 2.2*inch, 1*inch, 1.2*inch, 1.2*inch])
-    chemical_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#5a1a1a')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#ffe0e0')),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#ff6b6b')),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-    ]))
-    elements.append(chemical_table)
-    elements.append(Spacer(1, 0.1*inch))
-    
-    # PREVENTION
-    elements.append(Paragraph("LONG-TERM PREVENTION STRATEGIES", heading_style))
+    # Prevention
+    pdf.set_font("Arial", size=11, style="B")
+    pdf.cell(0, 8, "LONG-TERM PREVENTION STRATEGIES", ln=True)
+    pdf.set_font("Arial", size=10)
     for i, tip in enumerate(result.get("prevention_long_term", []), 1):
-        elements.append(Paragraph(f"{i}. {tip}", normal_style))
-    elements.append(Spacer(1, 0.2*inch))
+        pdf.multi_cell(0, 6, f"{i}. {tip}")
+    pdf.ln(5)
     
-    # FOOTER
-    footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8,
-                                 textColor=colors.HexColor('#667eea'), alignment=1, italic=True)
-    elements.append(Paragraph("This prescription is generated by AI Plant Doctor. Consult your local agricultural officer for guidance.", footer_style))
-    elements.append(Paragraph(f"Generated on {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}", footer_style))
+    # Footer
+    pdf.set_font("Arial", size=8)
+    pdf.cell(0, 6, "This prescription is generated by AI Plant Doctor. Consult your local agricultural officer.", ln=True, align="C")
+    pdf.cell(0, 6, f"Generated on {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}", ln=True, align="C")
     
-    doc.build(elements)
+    # Output to BytesIO
+    buffer = BytesIO()
+    pdf.output(buffer)
     buffer.seek(0)
     return buffer
 
 def generate_prescription_pdf_hindi(result, plant_type):
-    """Generate Hindi Prescription PDF"""
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4,
-                           rightMargin=0.5*inch, leftMargin=0.5*inch,
-                           topMargin=0.5*inch, bottomMargin=0.5*inch)
+    """Generate Hindi Prescription PDF using FPDF2"""
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=14, style="B")
     
-    elements = []
-    styles = getSampleStyleSheet()
+    # Header (Hindi)
+    pdf.cell(0, 10, "AI PLANT DOCTOR - PRESCRIPTION (HINDI)", ln=True, align="C")
+    pdf.set_font("Arial", size=10)
+    pdf.cell(0, 8, "व्यावसायिक पौध रोग निदान और उपचार योजना", ln=True, align="C")
+    pdf.ln(5)
     
-    title_style = ParagraphStyle(
-        'Title',
-        parent=styles['Heading1'],
-        fontSize=18,
-        textColor=colors.HexColor('#1a2a47'),
-        spaceAfter=2,
-        alignment=1,
-        fontName='Helvetica-Bold',
-        leading=20
-    )
+    # Disease Details (Hindi)
+    pdf.set_font("Arial", size=11, style="B")
+    pdf.cell(0, 8, "DIAGNOSIS DETAILS (HINDI)", ln=True)
+    pdf.set_font("Arial", size=10)
     
-    heading_style = ParagraphStyle(
-        'Heading',
-        parent=styles['Heading2'],
-        fontSize=11,
-        textColor=colors.white,
-        spaceAfter=8,
-        spaceBefore=8,
-        fontName='Helvetica-Bold',
-        backColor=colors.HexColor('#667eea'),
-        leftIndent=6,
-        rightIndent=6,
-        topPadding=6,
-        bottomPadding=6
-    )
-    
-    normal_style = ParagraphStyle(
-        'Normal',
-        parent=styles['Normal'],
-        fontSize=9,
-        textColor=colors.HexColor('#1a1f2e'),
-        spaceAfter=4,
-        leading=12
-    )
-    
-    # HEADER
-    elements.append(Paragraph("🌿 कृत्रिम बुद्धिमत्ता पौध चिकित्सक - प्रेषण", title_style))
-    elements.append(Paragraph("व्यावसायिक पौध रोग निदान और उपचार योजना", 
-                            ParagraphStyle('Subtitle', parent=styles['Normal'], fontSize=10, 
-                                          textColor=colors.HexColor('#667eea'), alignment=1)))
-    elements.append(Spacer(1, 0.15*inch))
-    
-    # PATIENT DETAILS TABLE - HINDI
     disease_name = result.get("disease_name", "Unknown")
     plant_species = result.get("plant_species", plant_type)
     severity = result.get("severity", "Unknown").title()
     confidence = result.get("confidence", 0)
     disease_type = result.get("disease_type", "Unknown").title()
     
-    details_data = [
-        ["पौध प्रकार:", plant_species, "रोग:", disease_name],
-        ["गंभीरता:", severity, "आत्मविश्वास:", f"{confidence}%"],
-        ["रोग का प्रकार:", disease_type, "तारीख:", datetime.now().strftime("%d-%m-%Y")],
-    ]
+    pdf.cell(40, 8, "Plant (Paudh):")
+    pdf.cell(0, 8, plant_species, ln=True)
+    pdf.cell(40, 8, "Disease (Rog):")
+    pdf.cell(0, 8, disease_name, ln=True)
+    pdf.cell(40, 8, "Severity (Gambhirta):")
+    pdf.cell(0, 8, severity, ln=True)
+    pdf.cell(40, 8, "Confidence (Aatmavishwas):")
+    pdf.cell(0, 8, f"{confidence}%", ln=True)
+    pdf.cell(40, 8, "Type (Prakar):")
+    pdf.cell(0, 8, disease_type, ln=True)
+    pdf.ln(5)
     
-    details_table = Table(details_data, colWidths=[1.8*inch, 1.8*inch, 1.8*inch, 1.8*inch])
-    details_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#e8ecf7')),
-        ('BACKGROUND', (2, 0), (2, -1), colors.HexColor('#e8ecf7')),
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#1a1f2e')),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 9),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#667eea')),
-    ]))
-    elements.append(details_table)
-    elements.append(Spacer(1, 0.15*inch))
-    
-    # SYMPTOMS - HINDI
-    elements.append(Paragraph("देखे गए लक्षण", heading_style))
+    # Symptoms (Hindi)
+    pdf.set_font("Arial", size=11, style="B")
+    pdf.cell(0, 8, "SYMPTOMS (LAKSHAN)", ln=True)
+    pdf.set_font("Arial", size=10)
     for i, symptom in enumerate(result.get("symptoms", []), 1):
-        elements.append(Paragraph(f"{i}. {symptom}", normal_style))
-    elements.append(Spacer(1, 0.1*inch))
+        pdf.multi_cell(0, 6, f"{i}. {symptom}")
+    pdf.ln(3)
     
-    # CAUSES - HINDI
-    elements.append(Paragraph("संभावित कारण", heading_style))
+    # Causes (Hindi)
+    pdf.set_font("Arial", size=11, style="B")
+    pdf.cell(0, 8, "PROBABLE CAUSES (SAMBHAVIT KARAN)", ln=True)
+    pdf.set_font("Arial", size=10)
     for i, cause in enumerate(result.get("probable_causes", []), 1):
-        elements.append(Paragraph(f"{i}. {cause}", normal_style))
-    elements.append(Spacer(1, 0.1*inch))
+        pdf.multi_cell(0, 6, f"{i}. {cause}")
+    pdf.ln(3)
     
-    # IMMEDIATE ACTIONS - HINDI
-    elements.append(Paragraph("तुरंत आवश्यक कार्रवाई", heading_style))
+    # Immediate Actions (Hindi)
+    pdf.set_font("Arial", size=11, style="B")
+    pdf.cell(0, 8, "IMMEDIATE ACTIONS (TURANT KARVAYI)", ln=True)
+    pdf.set_font("Arial", size=10)
     for i, action in enumerate(result.get("immediate_action", []), 1):
-        elements.append(Paragraph(f"{i}. {action}", normal_style))
-    elements.append(Spacer(1, 0.1*inch))
+        pdf.multi_cell(0, 6, f"{i}. {action}")
+    pdf.ln(3)
     
-    # ORGANIC TREATMENTS LIST - HINDI
-    elements.append(Paragraph("जैविक उपचार विकल्प", heading_style))
-    organic_treatments = result.get("organic_treatments", [])
-    organic_data = [["क्रम", "दवाई का नाम", "लागत (₹)", "प्रयोग", "आवृत्ति"]]
-    for i, treatment in enumerate(organic_treatments, 1):
+    # Organic Treatments (Hindi)
+    pdf.set_font("Arial", size=11, style="B")
+    pdf.cell(0, 8, "ORGANIC TREATMENTS (JAIVIK UPCHAR)", ln=True)
+    pdf.set_font("Arial", size=9)
+    
+    for i, treatment in enumerate(result.get("organic_treatments", []), 1):
         cost = get_treatment_cost("organic", treatment)
-        organic_data.append([str(i), treatment, f"₹{cost}", "स्प्रे/पाउडर", "हर 7-10 दिन में"])
+        pdf.cell(10, 6, f"{i}.")
+        pdf.cell(80, 6, treatment[:30])
+        pdf.cell(30, 6, f"Rs {cost}")
+        pdf.cell(40, 6, "Spray/7-10 din", ln=True)
+    pdf.ln(3)
     
-    organic_table = Table(organic_data, colWidths=[0.6*inch, 2.2*inch, 1*inch, 1.2*inch, 1.2*inch])
-    organic_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1b5e20')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f0f7f0')),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#4caf50')),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-    ]))
-    elements.append(organic_table)
-    elements.append(Spacer(1, 0.1*inch))
+    # Chemical Treatments (Hindi)
+    pdf.set_font("Arial", size=11, style="B")
+    pdf.cell(0, 8, "CHEMICAL TREATMENTS (RASAYNIK UPCHAR)", ln=True)
+    pdf.set_font("Arial", size=9)
     
-    # CHEMICAL TREATMENTS LIST - HINDI
-    elements.append(Paragraph("रासायनिक उपचार विकल्प", heading_style))
-    chemical_treatments = result.get("chemical_treatments", [])
-    chemical_data = [["क्रम", "दवाई का नाम", "लागत (₹)", "पतलापन", "सावधानी"]]
-    for i, treatment in enumerate(chemical_treatments, 1):
+    for i, treatment in enumerate(result.get("chemical_treatments", []), 1):
         cost = get_treatment_cost("chemical", treatment)
-        chemical_data.append([str(i), treatment, f"₹{cost}", "1:500", "दस्ताने लगाएं"])
+        pdf.cell(10, 6, f"{i}.")
+        pdf.cell(80, 6, treatment[:30])
+        pdf.cell(30, 6, f"Rs {cost}")
+        pdf.cell(40, 6, "1:500 patlapan", ln=True)
+    pdf.ln(3)
     
-    chemical_table = Table(chemical_data, colWidths=[0.6*inch, 2.2*inch, 1*inch, 1.2*inch, 1.2*inch])
-    chemical_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#5a1a1a')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#ffe0e0')),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#ff6b6b')),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-    ]))
-    elements.append(chemical_table)
-    elements.append(Spacer(1, 0.1*inch))
-    
-    # PREVENTION - HINDI
-    elements.append(Paragraph("दीर्घकालीन रोकथाम रणनीति", heading_style))
+    # Prevention (Hindi)
+    pdf.set_font("Arial", size=11, style="B")
+    pdf.cell(0, 8, "LONG-TERM PREVENTION (DEERGKAALIN ROKTHAAM)", ln=True)
+    pdf.set_font("Arial", size=10)
     for i, tip in enumerate(result.get("prevention_long_term", []), 1):
-        elements.append(Paragraph(f"{i}. {tip}", normal_style))
-    elements.append(Spacer(1, 0.2*inch))
+        pdf.multi_cell(0, 6, f"{i}. {tip}")
+    pdf.ln(5)
     
-    # FOOTER - HINDI
-    footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8,
-                                 textColor=colors.HexColor('#667eea'), alignment=1, italic=True)
-    elements.append(Paragraph("यह प्रेषण AI पौध चिकित्सक द्वारा उत्पन्न है। मार्गदर्शन के लिए अपने स्थानीय कृषि अधिकारी से परामर्श लें।", footer_style))
-    elements.append(Paragraph(f"{datetime.now().strftime('%d-%m-%Y %H:%M:%S')} को उत्पन्न", footer_style))
+    # Footer (Hindi)
+    pdf.set_font("Arial", size=8)
+    pdf.cell(0, 6, "Yeh prescrption AI Plant Doctor dwara utpann hai.", ln=True, align="C")
+    pdf.cell(0, 6, f"{datetime.now().strftime('%d-%m-%Y %H:%M:%S')} ko utpann", ln=True, align="C")
     
-    doc.build(elements)
+    # Output to BytesIO
+    buffer = BytesIO()
+    pdf.output(buffer)
     buffer.seek(0)
     return buffer
 
@@ -1223,10 +1097,10 @@ if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "
                     # PDF DOWNLOAD SECTION
                     st.markdown("""
                     <div class="info-section">
-                        <div class="info-title">📋 Download Bilingual Prescriptions</div>
+                        <div class="info-title">📋 Download Bilingual Prescriptions (FPDF2)</div>
                     """, unsafe_allow_html=True)
                     
-                    if HAS_REPORTLAB:
+                    if HAS_PDF:
                         english_pdf, hindi_pdf = generate_bilingual_prescriptions(result, plant_type)
                         
                         if english_pdf and hindi_pdf:
@@ -1253,7 +1127,7 @@ if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "
                         else:
                             st.error("❌ Error generating PDFs. Please try again.")
                     else:
-                        st.error("❌ ReportLab is not available. Installing...")
+                        st.error("❌ FPDF2 is not available. Installing...")
                         st.info("🔄 Please refresh the page in a moment for PDF generation to work.")
                     
                     st.markdown("</div>", unsafe_allow_html=True)
