@@ -1,452 +1,4 @@
-import subprocess
-import sys
 
-# Auto-install fpdf2 if not present
-try:
-    from fpdf import FPDF
-    HAS_PDF = True
-except ImportError:
-    try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "fpdf2", "-q"])
-        from fpdf import FPDF
-        HAS_PDF = True
-    except:
-        HAS_PDF = False
-
-import streamlit as st
-import google.generativeai as genai
-from PIL import Image
-import os
-import json
-from datetime import datetime
-import re
-from io import BytesIO
-
-st.set_page_config(
-    page_title="🌿 AI Plant Doctor - Smart Edition",
-    page_icon="🌿",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# ============ TREATMENT COSTS DATABASE - ACCURATE INDIA PRICES ============
-TREATMENT_COSTS = {
-    "organic": {
-        "Neem Oil Spray": 250,
-        "Sulfur Powder": 180,
-        "Bordeaux Mixture": 280,
-        "Copper Fungicide (Organic)": 350,
-        "Potassium Bicarbonate": 320,
-        "Bacillus subtilis": 400,
-        "Trichoderma": 450,
-        "Spinosad": 550,
-        "Azadirachtin": 380,
-        "Lime Sulfur": 220,
-        "Sulfur Dust": 150,
-        "Karanja Oil": 280,
-        "Cow Urine Extract": 120,
-    },
-    "chemical": {
-        "Carbendazim (Bavistin)": 120,
-        "Mancozeb (Indofil)": 180,
-        "Copper Oxychloride": 150,
-        "Chlorothalonil": 200,
-        "Fluconazole (Contaf)": 400,
-        "Tebuconazole (Folicur)": 350,
-        "Imidacloprid (Confidor)": 280,
-        "Deltamethrin (Decis)": 240,
-        "Profenofos (Meothrin)": 190,
-        "Thiamethoxam (Actara)": 320,
-        "Azoxystrobin (Amistar)": 450,
-        "Hexaconazole (Contaf Plus)": 380,
-        "Phosphorous Acid": 280,
-    }
-}
-
-st.markdown("""
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-    }
-    
-    /* DARK MODE */
-    .stApp {
-        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
-        color: #e4e6eb;
-    }
-    
-    [data-testid="stAppViewContainer"] {
-        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
-    }
-    
-    /* LARGER FONT SIZES */
-    p, span, div, label {
-        color: #e4e6eb;
-        font-size: 1.1rem;
-    }
-    
-    .header-container {
-        background: linear-gradient(135deg, #1a2a47 0%, #2d4a7a 100%);
-        padding: 40px 20px;
-        border-radius: 15px;
-        margin-bottom: 30px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(102, 126, 234, 0.3);
-    }
-    
-    .header-title {
-        font-size: 3rem;
-        font-weight: 700;
-        color: #ffffff;
-        text-align: center;
-        margin-bottom: 10px;
-        letter-spacing: 1px;
-    }
-    
-    .header-subtitle {
-        font-size: 1.4rem;
-        color: #b0c4ff;
-        text-align: center;
-    }
-    
-    .feature-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 15px 20px;
-        border-radius: 10px;
-        text-align: center;
-        font-weight: 600;
-        font-size: 1.1rem;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
-        transition: transform 0.3s ease;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .feature-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.7);
-    }
-    
-    .upload-container {
-        background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%);
-        padding: 30px;
-        border-radius: 15px;
-        border: 2px dashed #667eea;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        margin: 20px 0;
-    }
-    
-    .result-container {
-        background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%);
-        border-radius: 15px;
-        padding: 30px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-        margin: 20px 0;
-        border: 1px solid rgba(102, 126, 234, 0.2);
-    }
-    
-    .disease-header {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
-        padding: 25px;
-        border-radius: 12px;
-        margin-bottom: 25px;
-        box-shadow: 0 4px 20px rgba(245, 87, 108, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .disease-name {
-        font-size: 2.8rem;
-        font-weight: 700;
-        margin-bottom: 15px;
-    }
-    
-    .disease-meta {
-        font-size: 1.1rem;
-        opacity: 0.95;
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-    }
-    
-    .info-section {
-        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
-        border-left: 5px solid #667eea;
-        padding: 20px;
-        border-radius: 8px;
-        margin: 15px 0;
-        border: 1px solid rgba(102, 126, 234, 0.2);
-    }
-    
-    .info-title {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #b0c4ff;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    
-    .cost-info {
-        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
-        border-left: 5px solid #667eea;
-        padding: 12px 16px;
-        border-radius: 6px;
-        margin: 12px 0;
-        font-size: 1rem;
-        color: #b0c4ff;
-        font-weight: 600;
-    }
-    
-    .severity-badge {
-        display: inline-block;
-        padding: 10px 18px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 1rem;
-    }
-    
-    .severity-healthy { background-color: #1b5e20; color: #4caf50; }
-    .severity-mild { background-color: #004d73; color: #4dd0e1; }
-    .severity-moderate { background-color: #633d00; color: #ffc107; }
-    .severity-severe { background-color: #5a1a1a; color: #ff6b6b; }
-    
-    .type-badge {
-        display: inline-block;
-        padding: 8px 14px;
-        border-radius: 15px;
-        font-weight: 600;
-        font-size: 0.95rem;
-        margin: 5px 5px 5px 0;
-    }
-    
-    .type-fungal { background-color: #4a148c; color: #ce93d8; }
-    .type-bacterial { background-color: #0d47a1; color: #64b5f6; }
-    .type-viral { background-color: #5c0b0b; color: #ef9a9a; }
-    .type-pest { background-color: #4d2600; color: #ffcc80; }
-    .type-nutrient { background-color: #0d3a1a; color: #81c784; }
-    .type-healthy { background-color: #0d3a1a; color: #81c784; }
-    
-    .debug-box {
-        background: #0f1419;
-        border: 1px solid #667eea;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 10px 0;
-        font-family: monospace;
-        font-size: 0.95rem;
-        max-height: 400px;
-        overflow-y: auto;
-        color: #b0c4ff;
-        white-space: pre-wrap;
-    }
-    
-    .warning-box {
-        background: linear-gradient(135deg, #4d2600 0%, #3d2000 100%);
-        border: 1px solid #ffc107;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 10px 0;
-        color: #ffcc80;
-        font-size: 1.1rem;
-    }
-    
-    .success-box {
-        background: linear-gradient(135deg, #1b5e20 0%, #0d3a1a 100%);
-        border: 1px solid #4caf50;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 10px 0;
-        color: #81c784;
-        font-size: 1.1rem;
-    }
-    
-    .error-box {
-        background: linear-gradient(135deg, #5a1a1a 0%, #3d0d0d 100%);
-        border: 1px solid #ff6b6b;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 10px 0;
-        color: #ef9a9a;
-        font-size: 1.1rem;
-    }
-    
-    .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: white !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        padding: 12px 30px !important;
-        font-weight: 600 !important;
-        font-size: 1.1rem !important;
-        border-radius: 8px !important;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
-        transition: all 0.3s ease !important;
-    }
-    
-    .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
-    }
-    
-    .image-container {
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(102, 126, 234, 0.2);
-    }
-    
-    .tips-card {
-        background: linear-gradient(135deg, #1a2a47 0%, #2d3050 100%);
-        border: 2px solid #667eea;
-        border-radius: 10px;
-        padding: 15px;
-        margin: 10px 0;
-    }
-    
-    .tips-card-title {
-        font-weight: 700;
-        color: #b0c4ff;
-        margin-bottom: 10px;
-        font-size: 1.2rem;
-    }
-    
-    [data-testid="stSidebar"] {
-        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
-    }
-    
-    [data-testid="metric-container"] {
-        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
-        border: 1px solid rgba(102, 126, 234, 0.2);
-        border-radius: 8px;
-    }
-    
-    [data-testid="stExpander"] {
-        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
-        border: 1px solid rgba(102, 126, 234, 0.2);
-    }
-    
-    .streamlit-expanderHeader {
-        color: #b0c4ff !important;
-        font-size: 1.1rem !important;
-    }
-    
-    input, textarea, select {
-        background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%) !important;
-        border: 1px solid rgba(102, 126, 234, 0.3) !important;
-        color: #e4e6eb !important;
-        font-size: 1.1rem !important;
-    }
-    
-    h2, h3, h4 {
-        font-size: 1.4rem !important;
-        color: #b0c4ff !important;
-    }
-    
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-    
-    ::-webkit-scrollbar-track {
-        background: #0f1419;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-        background: #667eea;
-        border-radius: 4px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-        background: #764ba2;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-try:
-    genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-except:
-    st.error("❌ GEMINI_API_KEY not found in environment variables!")
-    st.stop()
-
-# SMART PROMPT WITH PLANT TYPE SPECIALIZATION
-EXPERT_PROMPT_TEMPLATE = """You are an elite plant pathologist with 40 years of specialized experience diagnosing diseases in {plant_type}.
-You are an expert specifically in {plant_type} diseases and health issues.
-
-SPECIALIZED ANALYSIS FOR: {plant_type}
-Common diseases in {plant_type}: {common_diseases}
-
-Your task is to provide the MOST ACCURATE diagnosis specifically for {plant_type}.
-
-CRITICAL RULES:
-1. RESPOND ONLY WITH VALID JSON - NO markdown, NO explanations
-2. Use your specialized knowledge of {plant_type}
-3. Consider {plant_type}-specific diseases and conditions
-4. Cross-reference against known {plant_type} pathologies
-5. Be extremely confident ONLY if symptoms match {plant_type} disease profiles
-6. Discount diseases that don't typically affect {plant_type}
-
-RESPOND WITH EXACTLY THIS JSON:
-{{
-  "plant_species": "{plant_type}",
-  "disease_name": "Specific disease name or 'Unable to diagnose'",
-  "disease_type": "fungal/bacterial/viral/pest/nutrient/environmental/healthy",
-  "severity": "healthy/mild/moderate/severe",
-  "confidence": 85,
-  "confidence_reason": "Detailed explanation specific to {plant_type}",
-  "image_quality": "Excellent/Good/Fair/Poor - explanation",
-  "symptoms": [
-    "Specific symptom seen in {plant_type}",
-    "Secondary symptom",
-    "Tertiary symptom if present"
-  ],
-  "differential_diagnosis": [
-    "Disease A (common in {plant_type}): Why it might be this",
-    "Disease B (common in {plant_type}): Why it might be this",
-    "Disease C: Why this is unlikely for {plant_type}"
-  ],
-  "probable_causes": [
-    "Primary cause relevant to {plant_type}",
-    "Secondary cause",
-    "Environmental factor"
-  ],
-  "immediate_action": [
-    "Action 1: Specific to {plant_type}",
-    "Action 2: Specific to {plant_type}",
-    "Action 3: Specific to {plant_type}"
-  ],
-  "organic_treatments": [
-    "Treatment 1: Product and application for {plant_type}",
-    "Treatment 2: Alternative for {plant_type}",
-    "Timing: When to apply for {plant_type}"
-  ],
-  "chemical_treatments": [
-    "Chemical 1: Safe for {plant_type} with dilution",
-    "Chemical 2: Alternative safe for {plant_type}",
-    "Safety: Important precautions for {plant_type}"
-  ],
-  "prevention_long_term": [
-    "Prevention strategy 1 for {plant_type}",
-    "Prevention strategy 2 for {plant_type}",
-    "Resistant varieties: If available for {plant_type}"
-  ],
-  "plant_specific_notes": "Important notes specific to {plant_type} care and disease management",
-  "similar_conditions": "Other {plant_type} conditions that look similar"
-}}"""
-
-PLANT_COMMON_DISEASES = {
-    "Tomato": "Early blight, Late blight, Septoria leaf spot, Fusarium wilt, Bacterial wilt, Spider mites, Powdery mildew",
-    "Rose": "Black spot, Powdery mildew, Rose rosette virus, Rose slugs, Rust, Botrytis",
-    "Apple": "Apple scab, Fire blight, Powdery mildew, Cedar apple rust, Sooty blotch, Apple maggot",
-    "Lettuce": "Lettuce mosaic virus, Downy mildew, Septoria leaf spot, Bottom rot, Tip burn",
-    "Grape": "Powdery mildew, Downy mildew, Black rot, Phomopsis cane and leaf spot, Grape phylloxera",
-    "Pepper": "Anthracnose, Bacterial wilt, Phytophthora blight, Cercospora leaf spot, Pepper weevil",
-    "Cucumber": "Powdery mildew, Downy mildew, Angular leaf spot, Anthracnose, Cucumber beetles",
-    "Strawberry": "Leaf scorch, Powdery mildew, Red stele root rot, Angular leaf spot, Slugs",
-    "Corn": "Leaf blotch, Rust, Stewart's wilt, Fusarium ear rot, Corn borer",
-    "Potato": "Late blight, Early blight, Verticillium wilt, Potato scab, Rhizoctonia",
-}
 
 def get_type_badge_class(disease_type):
     type_lower = disease_type.lower() if disease_type else "healthy"
@@ -558,116 +110,127 @@ def generate_bilingual_prescriptions(result, plant_type):
     return english_buffer, hindi_buffer
 
 def generate_prescription_pdf_english(result, plant_type):
-    """Generate English Prescription PDF using FPDF2 - FIXED VERSION"""
+    """Generate English Prescription PDF using FPDF2 - TRULY FIXED"""
     pdf = FPDF()
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=10)
     
     # Header
-    pdf.set_font("Arial", size=14, style="B")
-    pdf.cell(0, 10, "AI PLANT DOCTOR - PRESCRIPTION", ln=True, align="C")
+    pdf.set_font("Arial", size=12, style="B")
+    pdf.cell(0, 8, "AI PLANT DOCTOR", ln=True, align="C")
     pdf.set_font("Arial", size=9)
-    pdf.cell(0, 8, "Professional Plant Disease Diagnosis & Treatment Plan", ln=True, align="C")
-    pdf.ln(3)
+    pdf.cell(0, 6, "Plant Disease Diagnosis & Treatment", ln=True, align="C")
+    pdf.ln(2)
     
-    # Disease Details - REDUCED WIDTH
-    pdf.set_font("Arial", size=10, style="B")
-    pdf.cell(0, 8, "DIAGNOSIS DETAILS", ln=True)
-    pdf.set_font("Arial", size=9)
+    # Disease Details
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "DIAGNOSIS DETAILS", ln=True)
+    pdf.set_font("Arial", size=8)
     
-    disease_name = result.get("disease_name", "Unknown")
-    plant_species = result.get("plant_species", plant_type)
-    severity = result.get("severity", "Unknown").title()
+    disease_name = str(result.get("disease_name", "Unknown"))[:40]
+    plant_species = str(result.get("plant_species", plant_type))[:40]
+    severity = str(result.get("severity", "Unknown")).title()
     confidence = result.get("confidence", 0)
-    disease_type = result.get("disease_type", "Unknown").title()
+    disease_type = str(result.get("disease_type", "Unknown")).title()
     
-    # FIXED: Use smaller column widths
-    pdf.cell(35, 6, "Plant Type:")
-    pdf.cell(0, 6, str(plant_species)[:50], ln=True)
-    pdf.cell(35, 6, "Disease:")
-    pdf.cell(0, 6, str(disease_name)[:50], ln=True)
-    pdf.cell(35, 6, "Severity:")
-    pdf.cell(0, 6, severity, ln=True)
-    pdf.cell(35, 6, "Confidence:")
-    pdf.cell(0, 6, f"{confidence}%", ln=True)
-    pdf.cell(35, 6, "Type:")
-    pdf.cell(0, 6, disease_type, ln=True)
-    pdf.ln(3)
+    pdf.cell(30, 5, "Plant:")
+    pdf.cell(0, 5, plant_species, ln=True)
+    pdf.cell(30, 5, "Disease:")
+    pdf.cell(0, 5, disease_name, ln=True)
+    pdf.cell(30, 5, "Severity:")
+    pdf.cell(0, 5, severity, ln=True)
+    pdf.cell(30, 5, "Confidence:")
+    pdf.cell(0, 5, f"{confidence}%", ln=True)
+    pdf.ln(2)
     
     # Symptoms
-    pdf.set_font("Arial", size=10, style="B")
-    pdf.cell(0, 8, "SYMPTOMS OBSERVED", ln=True)
-    pdf.set_font("Arial", size=9)
-    # FIXED: Limit to 5 items, slice text to 80 chars
-    for i, symptom in enumerate(result.get("symptoms", [])[:5], 1):
-        pdf.multi_cell(0, 5, f"{i}. {str(symptom)[:80]}")
-    pdf.ln(2)
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "SYMPTOMS", ln=True)
+    pdf.set_font("Arial", size=8)
+    symptoms = result.get("symptoms", [])[:4]
+    for i, symptom in enumerate(symptoms, 1):
+        text = str(symptom)[:70]
+        pdf.multi_cell(0, 4, f"{i}. {text}")
+    pdf.ln(1)
     
     # Causes
-    pdf.set_font("Arial", size=10, style="B")
-    pdf.cell(0, 8, "PROBABLE CAUSES", ln=True)
-    pdf.set_font("Arial", size=9)
-    for i, cause in enumerate(result.get("probable_causes", [])[:4], 1):
-        pdf.multi_cell(0, 5, f"{i}. {str(cause)[:80]}")
-    pdf.ln(2)
-    
-    # Immediate Actions
-    pdf.set_font("Arial", size=10, style="B")
-    pdf.cell(0, 8, "IMMEDIATE ACTIONS", ln=True)
-    pdf.set_font("Arial", size=9)
-    for i, action in enumerate(result.get("immediate_action", [])[:3], 1):
-        pdf.multi_cell(0, 5, f"{i}. {str(action)[:80]}")
-    pdf.ln(2)
-    
-    # Organic Treatments - TABLE
-    pdf.set_font("Arial", size=10, style="B")
-    pdf.cell(0, 8, "ORGANIC TREATMENTS", ln=True)
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "CAUSES", ln=True)
     pdf.set_font("Arial", size=8)
+    causes = result.get("probable_causes", [])[:3]
+    for i, cause in enumerate(causes, 1):
+        text = str(cause)[:70]
+        pdf.multi_cell(0, 4, f"{i}. {text}")
+    pdf.ln(1)
     
-    # FIXED: Smaller font and column widths
-    pdf.cell(8, 5, "No")
-    pdf.cell(55, 5, "Treatment")
-    pdf.cell(25, 5, "Cost")
-    pdf.cell(0, 5, "Freq", ln=True)
+    # Actions
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "IMMEDIATE ACTIONS", ln=True)
+    pdf.set_font("Arial", size=8)
+    actions = result.get("immediate_action", [])[:2]
+    for i, action in enumerate(actions, 1):
+        text = str(action)[:70]
+        pdf.multi_cell(0, 4, f"{i}. {text}")
+    pdf.ln(1)
     
-    for i, treatment in enumerate(result.get("organic_treatments", [])[:5], 1):
+    # Organic Treatments - TABLE FIX
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "ORGANIC TREATMENTS", ln=True)
+    pdf.set_font("Arial", size=7)
+    
+    # CRITICAL FIX: ALL explicit widths, NO 0
+    pdf.cell(5, 4, "S")
+    pdf.cell(40, 4, "Treatment")
+    pdf.cell(22, 4, "Cost")
+    pdf.cell(23, 4, "When", ln=True)
+    
+    pdf.set_font("Arial", size=7)
+    treatments = result.get("organic_treatments", [])[:4]
+    for i, treatment in enumerate(treatments, 1):
         cost = get_treatment_cost("organic", treatment)
-        pdf.cell(8, 5, str(i))
-        pdf.cell(55, 5, str(treatment)[:35])
-        pdf.cell(25, 5, f"Rs {cost}")
-        pdf.cell(0, 5, "7-10d", ln=True)
-    pdf.ln(2)
+        treatment_short = str(treatment)[:20]
+        pdf.cell(5, 4, str(i))
+        pdf.cell(40, 4, treatment_short)
+        pdf.cell(22, 4, f"Rs{cost}")
+        pdf.cell(23, 4, "7-10d", ln=True)
+    pdf.ln(1)
     
-    # Chemical Treatments - TABLE
-    pdf.set_font("Arial", size=10, style="B")
-    pdf.cell(0, 8, "CHEMICAL TREATMENTS", ln=True)
-    pdf.set_font("Arial", size=8)
+    # Chemical Treatments - TABLE FIX
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "CHEMICAL TREATMENTS", ln=True)
+    pdf.set_font("Arial", size=7)
     
-    pdf.cell(8, 5, "No")
-    pdf.cell(55, 5, "Treatment")
-    pdf.cell(25, 5, "Cost")
-    pdf.cell(0, 5, "Dilute", ln=True)
+    # CRITICAL FIX: ALL explicit widths, NO 0
+    pdf.cell(5, 4, "S")
+    pdf.cell(40, 4, "Treatment")
+    pdf.cell(22, 4, "Cost")
+    pdf.cell(23, 4, "Dilute", ln=True)
     
-    for i, treatment in enumerate(result.get("chemical_treatments", [])[:5], 1):
+    pdf.set_font("Arial", size=7)
+    treatments = result.get("chemical_treatments", [])[:4]
+    for i, treatment in enumerate(treatments, 1):
         cost = get_treatment_cost("chemical", treatment)
-        pdf.cell(8, 5, str(i))
-        pdf.cell(55, 5, str(treatment)[:35])
-        pdf.cell(25, 5, f"Rs {cost}")
-        pdf.cell(0, 5, "1:500", ln=True)
-    pdf.ln(2)
+        treatment_short = str(treatment)[:20]
+        pdf.cell(5, 4, str(i))
+        pdf.cell(40, 4, treatment_short)
+        pdf.cell(22, 4, f"Rs{cost}")
+        pdf.cell(23, 4, "1:500", ln=True)
+    pdf.ln(1)
     
     # Prevention
-    pdf.set_font("Arial", size=10, style="B")
-    pdf.cell(0, 8, "PREVENTION STRATEGIES", ln=True)
-    pdf.set_font("Arial", size=9)
-    for i, tip in enumerate(result.get("prevention_long_term", [])[:4], 1):
-        pdf.multi_cell(0, 5, f"{i}. {str(tip)[:80]}")
-    pdf.ln(3)
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "PREVENTION", ln=True)
+    pdf.set_font("Arial", size=8)
+    prevention = result.get("prevention_long_term", [])[:2]
+    for i, tip in enumerate(prevention, 1):
+        text = str(tip)[:65]
+        pdf.multi_cell(0, 4, f"{i}. {text}")
     
     # Footer
-    pdf.set_font("Arial", size=7)
-    pdf.cell(0, 4, "Generated by AI Plant Doctor", ln=True, align="C")
-    pdf.cell(0, 4, f"Date: {datetime.now().strftime('%d-%m-%Y')}", ln=True, align="C")
+    pdf.ln(2)
+    pdf.set_font("Arial", size=6)
+    pdf.cell(0, 3, "AI Plant Doctor - Professional Diagnosis", ln=True, align="C")
+    pdf.cell(0, 3, datetime.now().strftime("%d-%m-%Y %H:%M"), ln=True, align="C")
     
     buffer = BytesIO()
     pdf.output(buffer)
@@ -675,113 +238,125 @@ def generate_prescription_pdf_english(result, plant_type):
     return buffer
 
 def generate_prescription_pdf_hindi(result, plant_type):
-    """Generate Hindi Prescription PDF using FPDF2 - FIXED VERSION"""
+    """Generate Hindi Prescription PDF using FPDF2 - TRULY FIXED"""
     pdf = FPDF()
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=10)
     
     # Header
-    pdf.set_font("Arial", size=14, style="B")
-    pdf.cell(0, 10, "AI PLANT DOCTOR - NIDAAN (HINDI)", ln=True, align="C")
+    pdf.set_font("Arial", size=12, style="B")
+    pdf.cell(0, 8, "AI PLANT DOCTOR", ln=True, align="C")
     pdf.set_font("Arial", size=9)
-    pdf.cell(0, 8, "Paudh Rog Nidaan aur Upchar", ln=True, align="C")
-    pdf.ln(3)
+    pdf.cell(0, 6, "Paudh Rog Nidaan", ln=True, align="C")
+    pdf.ln(2)
     
     # Disease Details
-    pdf.set_font("Arial", size=10, style="B")
-    pdf.cell(0, 8, "NIDAAN (DIAGNOSIS)", ln=True)
-    pdf.set_font("Arial", size=9)
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "NIDAAN (DIAGNOSIS)", ln=True)
+    pdf.set_font("Arial", size=8)
     
-    disease_name = result.get("disease_name", "Unknown")
-    plant_species = result.get("plant_species", plant_type)
-    severity = result.get("severity", "Unknown").title()
+    disease_name = str(result.get("disease_name", "Unknown"))[:40]
+    plant_species = str(result.get("plant_species", plant_type))[:40]
+    severity = str(result.get("severity", "Unknown")).title()
     confidence = result.get("confidence", 0)
-    disease_type = result.get("disease_type", "Unknown").title()
+    disease_type = str(result.get("disease_type", "Unknown")).title()
     
-    pdf.cell(35, 6, "Paudh:")
-    pdf.cell(0, 6, str(plant_species)[:50], ln=True)
-    pdf.cell(35, 6, "Rog:")
-    pdf.cell(0, 6, str(disease_name)[:50], ln=True)
-    pdf.cell(35, 6, "Gambhirta:")
-    pdf.cell(0, 6, severity, ln=True)
-    pdf.cell(35, 6, "Confidence:")
-    pdf.cell(0, 6, f"{confidence}%", ln=True)
-    pdf.cell(35, 6, "Prakar:")
-    pdf.cell(0, 6, disease_type, ln=True)
-    pdf.ln(3)
+    pdf.cell(30, 5, "Paudh:")
+    pdf.cell(0, 5, plant_species, ln=True)
+    pdf.cell(30, 5, "Rog:")
+    pdf.cell(0, 5, disease_name, ln=True)
+    pdf.cell(30, 5, "Gambhirta:")
+    pdf.cell(0, 5, severity, ln=True)
+    pdf.cell(30, 5, "Viswas:")
+    pdf.cell(0, 5, f"{confidence}%", ln=True)
+    pdf.ln(2)
     
     # Symptoms
-    pdf.set_font("Arial", size=10, style="B")
-    pdf.cell(0, 8, "LAKSHAN (SYMPTOMS)", ln=True)
-    pdf.set_font("Arial", size=9)
-    for i, symptom in enumerate(result.get("symptoms", [])[:5], 1):
-        pdf.multi_cell(0, 5, f"{i}. {str(symptom)[:80]}")
-    pdf.ln(2)
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "LAKSHAN", ln=True)
+    pdf.set_font("Arial", size=8)
+    symptoms = result.get("symptoms", [])[:4]
+    for i, symptom in enumerate(symptoms, 1):
+        text = str(symptom)[:70]
+        pdf.multi_cell(0, 4, f"{i}. {text}")
+    pdf.ln(1)
     
     # Causes
-    pdf.set_font("Arial", size=10, style="B")
-    pdf.cell(0, 8, "KARAN (CAUSES)", ln=True)
-    pdf.set_font("Arial", size=9)
-    for i, cause in enumerate(result.get("probable_causes", [])[:4], 1):
-        pdf.multi_cell(0, 5, f"{i}. {str(cause)[:80]}")
-    pdf.ln(2)
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "KARAN", ln=True)
+    pdf.set_font("Arial", size=8)
+    causes = result.get("probable_causes", [])[:3]
+    for i, cause in enumerate(causes, 1):
+        text = str(cause)[:70]
+        pdf.multi_cell(0, 4, f"{i}. {text}")
+    pdf.ln(1)
     
-    # Immediate Actions
-    pdf.set_font("Arial", size=10, style="B")
-    pdf.cell(0, 8, "TURANT KARVAYI (ACTIONS)", ln=True)
-    pdf.set_font("Arial", size=9)
-    for i, action in enumerate(result.get("immediate_action", [])[:3], 1):
-        pdf.multi_cell(0, 5, f"{i}. {str(action)[:80]}")
-    pdf.ln(2)
+    # Actions
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "TURANT KARVAYI", ln=True)
+    pdf.set_font("Arial", size=8)
+    actions = result.get("immediate_action", [])[:2]
+    for i, action in enumerate(actions, 1):
+        text = str(action)[:70]
+        pdf.multi_cell(0, 4, f"{i}. {text}")
+    pdf.ln(1)
     
     # Organic Treatments
-    pdf.set_font("Arial", size=10, style="B")
-    pdf.cell(0, 8, "JAIVIK UPCHAR (ORGANIC)", ln=True)
-    pdf.set_font("Arial", size=8)
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "JAIVIK UPCHAR", ln=True)
+    pdf.set_font("Arial", size=7)
     
-    pdf.cell(8, 5, "No")
-    pdf.cell(55, 5, "Medicine")
-    pdf.cell(25, 5, "Cost")
-    pdf.cell(0, 5, "Avrti", ln=True)
+    pdf.cell(5, 4, "S")
+    pdf.cell(40, 4, "Medicine")
+    pdf.cell(22, 4, "Cost")
+    pdf.cell(23, 4, "Samay", ln=True)
     
-    for i, treatment in enumerate(result.get("organic_treatments", [])[:5], 1):
+    pdf.set_font("Arial", size=7)
+    treatments = result.get("organic_treatments", [])[:4]
+    for i, treatment in enumerate(treatments, 1):
         cost = get_treatment_cost("organic", treatment)
-        pdf.cell(8, 5, str(i))
-        pdf.cell(55, 5, str(treatment)[:35])
-        pdf.cell(25, 5, f"Rs {cost}")
-        pdf.cell(0, 5, "7-10d", ln=True)
-    pdf.ln(2)
+        treatment_short = str(treatment)[:20]
+        pdf.cell(5, 4, str(i))
+        pdf.cell(40, 4, treatment_short)
+        pdf.cell(22, 4, f"Rs{cost}")
+        pdf.cell(23, 4, "7-10d", ln=True)
+    pdf.ln(1)
     
     # Chemical Treatments
-    pdf.set_font("Arial", size=10, style="B")
-    pdf.cell(0, 8, "RASAYNIK UPCHAR (CHEMICAL)", ln=True)
-    pdf.set_font("Arial", size=8)
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "RASAYNIK UPCHAR", ln=True)
+    pdf.set_font("Arial", size=7)
     
-    pdf.cell(8, 5, "No")
-    pdf.cell(55, 5, "Medicine")
-    pdf.cell(25, 5, "Cost")
-    pdf.cell(0, 5, "Dilute", ln=True)
+    pdf.cell(5, 4, "S")
+    pdf.cell(40, 4, "Medicine")
+    pdf.cell(22, 4, "Cost")
+    pdf.cell(23, 4, "Dilute", ln=True)
     
-    for i, treatment in enumerate(result.get("chemical_treatments", [])[:5], 1):
+    pdf.set_font("Arial", size=7)
+    treatments = result.get("chemical_treatments", [])[:4]
+    for i, treatment in enumerate(treatments, 1):
         cost = get_treatment_cost("chemical", treatment)
-        pdf.cell(8, 5, str(i))
-        pdf.cell(55, 5, str(treatment)[:35])
-        pdf.cell(25, 5, f"Rs {cost}")
-        pdf.cell(0, 5, "1:500", ln=True)
-    pdf.ln(2)
+        treatment_short = str(treatment)[:20]
+        pdf.cell(5, 4, str(i))
+        pdf.cell(40, 4, treatment_short)
+        pdf.cell(22, 4, f"Rs{cost}")
+        pdf.cell(23, 4, "1:500", ln=True)
+    pdf.ln(1)
     
     # Prevention
-    pdf.set_font("Arial", size=10, style="B")
-    pdf.cell(0, 8, "ROKTHAAM (PREVENTION)", ln=True)
-    pdf.set_font("Arial", size=9)
-    for i, tip in enumerate(result.get("prevention_long_term", [])[:4], 1):
-        pdf.multi_cell(0, 5, f"{i}. {str(tip)[:80]}")
-    pdf.ln(3)
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "ROKTHAAM", ln=True)
+    pdf.set_font("Arial", size=8)
+    prevention = result.get("prevention_long_term", [])[:2]
+    for i, tip in enumerate(prevention, 1):
+        text = str(tip)[:65]
+        pdf.multi_cell(0, 4, f"{i}. {text}")
     
     # Footer
-    pdf.set_font("Arial", size=7)
-    pdf.cell(0, 4, "AI Plant Doctor dwara utpann", ln=True, align="C")
-    pdf.cell(0, 4, f"Tarikh: {datetime.now().strftime('%d-%m-%Y')}", ln=True, align="C")
+    pdf.ln(2)
+    pdf.set_font("Arial", size=6)
+    pdf.cell(0, 3, "AI Plant Doctor - Paudh Chikitsa", ln=True, align="C")
+    pdf.cell(0, 3, datetime.now().strftime("%d-%m-%Y %H:%M"), ln=True, align="C")
     
     buffer = BytesIO()
     pdf.output(buffer)
