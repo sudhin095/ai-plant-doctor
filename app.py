@@ -5,6 +5,7 @@ import os
 import json
 from datetime import datetime
 import re
+from io import BytesIO
 
 st.set_page_config(
     page_title="🌿 AI Plant Doctor - Smart Edition",
@@ -46,6 +47,24 @@ TREATMENT_COSTS = {
         "Phosphorous Acid": 280,
     }
 }
+
+# ============ CROP ROTATION DATABASE ============
+CROP_ROTATION_DATA = {
+    "Tomato": ["Beans", "Cabbage", "Cucumber"],
+    "Rose": ["Tulips", "Roses", "Carnations"],
+    "Apple": ["Pear", "Plum", "Almond"],
+    "Lettuce": ["Spinach", "Broccoli", "Cauliflower"],
+    "Grape": ["Kiwi", "Passion Fruit", "Berries"],
+    "Pepper": ["Eggplant", "Tomato", "Onion"],
+    "Cucumber": ["Squash", "Melon", "Watermelon"],
+    "Strawberry": ["Raspberry", "Blueberry", "Blackberry"],
+    "Corn": ["Soybean", "Wheat", "Oats"],
+    "Potato": ["Carrot", "Turnip", "Radish"],
+}
+
+# ============ REGION DATA ============
+REGIONS = ["North India", "South India", "East India", "West India", "Central India"]
+SOIL_TYPES = ["Black Soil", "Red Soil", "Laterite Soil", "Alluvial Soil", "Clay Soil"]
 
 st.markdown("""
 <style>
@@ -182,6 +201,25 @@ st.markdown("""
         font-size: 1rem;
         color: #b0c4ff;
         font-weight: 600;
+    }
+    
+    .chatbot-container {
+        background: linear-gradient(135deg, #1a2a47 0%, #2d3050 100%);
+        border: 2px solid #667eea;
+        border-radius: 12px;
+        padding: 15px;
+        margin: 10px 0;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    .chat-message {
+        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
+        border-left: 4px solid #667eea;
+        padding: 12px;
+        margin: 8px 0;
+        border-radius: 8px;
+        font-size: 0.95rem;
     }
     
     .severity-badge {
@@ -464,17 +502,14 @@ def get_treatment_cost(treatment_type, treatment_name):
     costs = TREATMENT_COSTS.get(treatment_type, {})
     treatment_name_lower = treatment_name.lower()
     
-    # Exact match first
     for key, value in costs.items():
         if key.lower() == treatment_name_lower:
             return value
     
-    # Partial match
     for key, value in costs.items():
         if key.lower() in treatment_name_lower or treatment_name_lower in key.lower():
             return value
     
-    # Default averages
     return 300 if treatment_type == "organic" else 250
 
 def resize_image(image, max_width=600, max_height=500):
@@ -534,6 +569,360 @@ def validate_json_result(data):
     
     return True, "Valid"
 
+def generate_bilingual_prescriptions(result, plant_type):
+    """Generate professional bilingual PDFs (English & Hindi) using FPDF2"""
+    if not HAS_PDF:
+        return None, None
+    
+    english_buffer = generate_prescription_pdf_english(result, plant_type)
+    hindi_buffer = generate_prescription_pdf_hindi(result, plant_type)
+    
+    return english_buffer, hindi_buffer
+
+def generate_prescription_pdf_english(result, plant_type):
+    """Generate English Prescription PDF using FPDF2 - TRULY FIXED"""
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=10)
+    
+    # Header
+    pdf.set_font("Arial", size=12, style="B")
+    pdf.cell(0, 8, "AI PLANT DOCTOR", ln=True, align="C")
+    pdf.set_font("Arial", size=9)
+    pdf.cell(0, 6, "Plant Disease Diagnosis & Treatment", ln=True, align="C")
+    pdf.ln(2)
+    
+    # Disease Details
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "DIAGNOSIS DETAILS", ln=True)
+    pdf.set_font("Arial", size=8)
+    
+    disease_name = str(result.get("disease_name", "Unknown"))[:40]
+    plant_species = str(result.get("plant_species", plant_type))[:40]
+    severity = str(result.get("severity", "Unknown")).title()
+    confidence = result.get("confidence", 0)
+    disease_type = str(result.get("disease_type", "Unknown")).title()
+    
+    pdf.cell(30, 5, "Plant:")
+    pdf.cell(0, 5, plant_species, ln=True)
+    pdf.cell(30, 5, "Disease:")
+    pdf.cell(0, 5, disease_name, ln=True)
+    pdf.cell(30, 5, "Severity:")
+    pdf.cell(0, 5, severity, ln=True)
+    pdf.cell(30, 5, "Confidence:")
+    pdf.cell(0, 5, f"{confidence}%", ln=True)
+    pdf.ln(2)
+    
+    # Symptoms
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "SYMPTOMS", ln=True)
+    pdf.set_font("Arial", size=8)
+    symptoms = result.get("symptoms", [])[:4]
+    for i, symptom in enumerate(symptoms, 1):
+        text = str(symptom)[:70]
+        pdf.multi_cell(0, 4, f"{i}. {text}")
+    pdf.ln(1)
+    
+    # Causes
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "CAUSES", ln=True)
+    pdf.set_font("Arial", size=8)
+    causes = result.get("probable_causes", [])[:3]
+    for i, cause in enumerate(causes, 1):
+        text = str(cause)[:70]
+        pdf.multi_cell(0, 4, f"{i}. {text}")
+    pdf.ln(1)
+    
+    # Actions
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "IMMEDIATE ACTIONS", ln=True)
+    pdf.set_font("Arial", size=8)
+    actions = result.get("immediate_action", [])[:2]
+    for i, action in enumerate(actions, 1):
+        text = str(action)[:70]
+        pdf.multi_cell(0, 4, f"{i}. {text}")
+    pdf.ln(1)
+    
+    # Organic Treatments - TABLE FIX
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "ORGANIC TREATMENTS", ln=True)
+    pdf.set_font("Arial", size=7)
+    
+    pdf.cell(5, 4, "S")
+    pdf.cell(40, 4, "Treatment")
+    pdf.cell(22, 4, "Cost")
+    pdf.cell(23, 4, "When", ln=True)
+    
+    pdf.set_font("Arial", size=7)
+    treatments = result.get("organic_treatments", [])[:4]
+    for i, treatment in enumerate(treatments, 1):
+        cost = get_treatment_cost("organic", treatment)
+        treatment_short = str(treatment)[:20]
+        pdf.cell(5, 4, str(i))
+        pdf.cell(40, 4, treatment_short)
+        pdf.cell(22, 4, f"Rs{cost}")
+        pdf.cell(23, 4, "7-10d", ln=True)
+    pdf.ln(1)
+    
+    # Chemical Treatments - TABLE FIX
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "CHEMICAL TREATMENTS", ln=True)
+    pdf.set_font("Arial", size=7)
+    
+    pdf.cell(5, 4, "S")
+    pdf.cell(40, 4, "Treatment")
+    pdf.cell(22, 4, "Cost")
+    pdf.cell(23, 4, "Dilute", ln=True)
+    
+    pdf.set_font("Arial", size=7)
+    treatments = result.get("chemical_treatments", [])[:4]
+    for i, treatment in enumerate(treatments, 1):
+        cost = get_treatment_cost("chemical", treatment)
+        treatment_short = str(treatment)[:20]
+        pdf.cell(5, 4, str(i))
+        pdf.cell(40, 4, treatment_short)
+        pdf.cell(22, 4, f"Rs{cost}")
+        pdf.cell(23, 4, "1:500", ln=True)
+    pdf.ln(1)
+    
+    # Prevention
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "PREVENTION", ln=True)
+    pdf.set_font("Arial", size=8)
+    prevention = result.get("prevention_long_term", [])[:2]
+    for i, tip in enumerate(prevention, 1):
+        text = str(tip)[:65]
+        pdf.multi_cell(0, 4, f"{i}. {text}")
+    
+    # Footer
+    pdf.ln(2)
+    pdf.set_font("Arial", size=6)
+    pdf.cell(0, 3, "AI Plant Doctor - Professional Diagnosis", ln=True, align="C")
+    pdf.cell(0, 3, datetime.now().strftime("%d-%m-%Y %H:%M"), ln=True, align="C")
+    
+    buffer = BytesIO()
+    pdf.output(buffer)
+    buffer.seek(0)
+    return buffer
+
+def generate_prescription_pdf_hindi(result, plant_type):
+    """Generate Hindi Prescription PDF using FPDF2 - TRULY FIXED"""
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=10)
+    
+    # Header
+    pdf.set_font("Arial", size=12, style="B")
+    pdf.cell(0, 8, "AI PLANT DOCTOR", ln=True, align="C")
+    pdf.set_font("Arial", size=9)
+    pdf.cell(0, 6, "Paudh Rog Nidaan", ln=True, align="C")
+    pdf.ln(2)
+    
+    # Disease Details
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "NIDAAN (DIAGNOSIS)", ln=True)
+    pdf.set_font("Arial", size=8)
+    
+    disease_name = str(result.get("disease_name", "Unknown"))[:40]
+    plant_species = str(result.get("plant_species", plant_type))[:40]
+    severity = str(result.get("severity", "Unknown")).title()
+    confidence = result.get("confidence", 0)
+    disease_type = str(result.get("disease_type", "Unknown")).title()
+    
+    pdf.cell(30, 5, "Paudh:")
+    pdf.cell(0, 5, plant_species, ln=True)
+    pdf.cell(30, 5, "Rog:")
+    pdf.cell(0, 5, disease_name, ln=True)
+    pdf.cell(30, 5, "Gambhirta:")
+    pdf.cell(0, 5, severity, ln=True)
+    pdf.cell(30, 5, "Viswas:")
+    pdf.cell(0, 5, f"{confidence}%", ln=True)
+    pdf.ln(2)
+    
+    # Symptoms
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "LAKSHAN", ln=True)
+    pdf.set_font("Arial", size=8)
+    symptoms = result.get("symptoms", [])[:4]
+    for i, symptom in enumerate(symptoms, 1):
+        text = str(symptom)[:70]
+        pdf.multi_cell(0, 4, f"{i}. {text}")
+    pdf.ln(1)
+    
+    # Causes
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "KARAN", ln=True)
+    pdf.set_font("Arial", size=8)
+    causes = result.get("probable_causes", [])[:3]
+    for i, cause in enumerate(causes, 1):
+        text = str(cause)[:70]
+        pdf.multi_cell(0, 4, f"{i}. {text}")
+    pdf.ln(1)
+    
+    # Actions
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "TURANT KARVAYI", ln=True)
+    pdf.set_font("Arial", size=8)
+    actions = result.get("immediate_action", [])[:2]
+    for i, action in enumerate(actions, 1):
+        text = str(action)[:70]
+        pdf.multi_cell(0, 4, f"{i}. {text}")
+    pdf.ln(1)
+    
+    # Organic Treatments
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "JAIVIK UPCHAR", ln=True)
+    pdf.set_font("Arial", size=7)
+    
+    pdf.cell(5, 4, "S")
+    pdf.cell(40, 4, "Medicine")
+    pdf.cell(22, 4, "Cost")
+    pdf.cell(23, 4, "Samay", ln=True)
+    
+    pdf.set_font("Arial", size=7)
+    treatments = result.get("organic_treatments", [])[:4]
+    for i, treatment in enumerate(treatments, 1):
+        cost = get_treatment_cost("organic", treatment)
+        treatment_short = str(treatment)[:20]
+        pdf.cell(5, 4, str(i))
+        pdf.cell(40, 4, treatment_short)
+        pdf.cell(22, 4, f"Rs{cost}")
+        pdf.cell(23, 4, "7-10d", ln=True)
+    pdf.ln(1)
+    
+    # Chemical Treatments
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "RASAYNIK UPCHAR", ln=True)
+    pdf.set_font("Arial", size=7)
+    
+    pdf.cell(5, 4, "S")
+    pdf.cell(40, 4, "Medicine")
+    pdf.cell(22, 4, "Cost")
+    pdf.cell(23, 4, "Dilute", ln=True)
+    
+    pdf.set_font("Arial", size=7)
+    treatments = result.get("chemical_treatments", [])[:4]
+    for i, treatment in enumerate(treatments, 1):
+        cost = get_treatment_cost("chemical", treatment)
+        treatment_short = str(treatment)[:20]
+        pdf.cell(5, 4, str(i))
+        pdf.cell(40, 4, treatment_short)
+        pdf.cell(22, 4, f"Rs{cost}")
+        pdf.cell(23, 4, "1:500", ln=True)
+    pdf.ln(1)
+    
+    # Prevention
+    pdf.set_font("Arial", size=9, style="B")
+    pdf.cell(0, 6, "ROKTHAAM", ln=True)
+    pdf.set_font("Arial", size=8)
+    prevention = result.get("prevention_long_term", [])[:2]
+    for i, tip in enumerate(prevention, 1):
+        text = str(tip)[:65]
+        pdf.multi_cell(0, 4, f"{i}. {text}")
+    
+    # Footer
+    pdf.ln(2)
+    pdf.set_font("Arial", size=6)
+    pdf.cell(0, 3, "AI Plant Doctor - Paudh Chikitsa", ln=True, align="C")
+    pdf.cell(0, 3, datetime.now().strftime("%d-%m-%Y %H:%M"), ln=True, align="C")
+    
+    buffer = BytesIO()
+    pdf.output(buffer)
+    buffer.seek(0)
+    return buffer
+
+def get_crop_rotation_plan(plant_type, region, soil_type):
+    """Generate 3-year crop rotation plan"""
+    rotations = CROP_ROTATION_DATA.get(plant_type, ["Legumes", "Cereals", "Vegetables"])
+    return f"""
+**3-YEAR CROP ROTATION PLAN FOR {plant_type.upper()}**
+
+**Region:** {region} | **Soil:** {soil_type}
+
+**Year 1:** {plant_type} (Current crop)
+- Prepare soil with organic matter
+- Manage disease pressure
+- Harvest and store properly
+
+**Year 2:** {rotations[0]} 
+- Breaks disease cycle
+- Improves soil nitrogen (if legume)
+- Different pest/disease profile
+- Beneficial for soil health
+
+**Year 3:** {rotations[1]}
+- Further diversification
+- Continues disease prevention
+- Restores soil nutrients
+- Reduces chemical dependency
+
+**Benefits:**
+✅ Reduces pathogen buildup by 60-80%
+✅ Improves soil health & fertility
+✅ Reduces pest/disease pressure
+✅ Lowers chemical input costs
+✅ Sustainable farming practice
+"""
+
+def get_cost_analysis(organic_cost, chemical_cost, crop_yield_kg=1000, market_price=50):
+    """Calculate ROI and cost analysis"""
+    total_yield_value = crop_yield_kg * market_price
+    
+    # Assuming treatment prevents 40% loss
+    loss_prevented = total_yield_value * 0.4
+    
+    org_roi = ((loss_prevented - organic_cost) / organic_cost * 100) if organic_cost > 0 else 0
+    chem_roi = ((loss_prevented - chemical_cost) / chemical_cost * 100) if chemical_cost > 0 else 0
+    
+    return f"""
+**💰 COST-BENEFIT ANALYSIS**
+
+**Treatment Costs:**
+- Organic: ₹{organic_cost}
+- Chemical: ₹{chemical_cost}
+
+**Expected Yield Protection:**
+- Total Yield Value: ₹{total_yield_value:,}
+- Loss Prevention (40%): ₹{int(loss_prevented):,}
+
+**Return on Investment (ROI):**
+- Organic ROI: {int(org_roi)}%
+- Chemical ROI: {int(chem_roi)}%
+
+**Net Profit Comparison:**
+- Organic Net: ₹{int(loss_prevented - organic_cost):,}
+- Chemical Net: ₹{int(loss_prevented - chemical_cost):,}
+
+✅ Investment in treatment saves ₹{int(loss_prevented):,} in crop loss!
+"""
+
+def get_farmer_bot_response(user_question, current_diagnosis=None):
+    """Get context-aware response from Farmer Bot"""
+    model = genai.GenerativeModel('gemini-2.5-flash')
+    
+    context = ""
+    if current_diagnosis:
+        context = f"""
+Current Diagnosis Context:
+- Disease: {current_diagnosis.get('disease_name', 'Unknown')}
+- Severity: {current_diagnosis.get('severity', 'Unknown')}
+- Plant: {current_diagnosis.get('plant_species', 'Unknown')}
+"""
+    
+    prompt = f"""You are a helpful agricultural advisor and farmer's assistant. Answer the farmer's question in simple, practical language. Be empathetic and solution-focused.
+
+{context}
+
+Farmer's Question: {user_question}
+
+Provide a concise, actionable answer (2-3 sentences max). Focus on practical solutions suitable for small-scale farmers in India."""
+    
+    try:
+        response = model.generate_content(prompt)
+        return response.text
+    except:
+        return "I'm having trouble understanding. Could you rephrase your question?"
+
 st.markdown("""
 <div class="header-container">
     <div class="header-title">🌿 AI Plant Doctor - Smart Edition</div>
@@ -569,6 +958,40 @@ with st.sidebar:
     
     st.markdown("---")
     
+    # ============ FARMER-BOT ============
+    st.header("🤖 Farmer-Bot AI Assistant")
+    st.write("Ask me anything about your crops!")
+    
+    # Initialize chat history
+    if "farmer_bot_messages" not in st.session_state:
+        st.session_state.farmer_bot_messages = []
+    
+    # Display chat history
+    chat_container = st.container()
+    with chat_container:
+        st.markdown('<div class="chatbot-container">', unsafe_allow_html=True)
+        for i, msg in enumerate(st.session_state.farmer_bot_messages[-5:]):  # Show last 5 messages
+            if msg['role'] == 'farmer':
+                st.markdown(f'<div class="chat-message"><b>👨 You:</b> {msg["content"]}</div>', unsafe_allow_html=True)
+            else:
+                st.markdown(f'<div class="chat-message"><b>🤖 Bot:</b> {msg["content"]}</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Input for farmer question
+    farmer_question = st.text_input("🌾 Ask your question...", key="farmer_question")
+    
+    if farmer_question:
+        # Get bot response
+        bot_response = get_farmer_bot_response(farmer_question)
+        
+        # Store in session
+        st.session_state.farmer_bot_messages.append({'role': 'farmer', 'content': farmer_question})
+        st.session_state.farmer_bot_messages.append({'role': 'bot', 'content': bot_response})
+        
+        st.rerun()
+    
+    st.markdown("---")
+    
     with st.expander("📖 How It Works"):
         st.write("""
         **Plant-Specific Accuracy:**
@@ -585,63 +1008,36 @@ with st.sidebar:
         - Cross-checks disease profiles
         """)
 
-# PLANT TYPE SELECTION - MAIN ACCURACY FEATURE
+# PLANT TYPE SELECTION
 col_plant, col_upload = st.columns([1, 2])
 
 with col_plant:
-
     st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
-
     st.subheader("🌱 Select Plant Type")
-
     
-
     plant_options = ["Select a plant..."] + sorted(list(PLANT_COMMON_DISEASES.keys())) + ["Other (Manual Entry)"]
-
     selected_plant = st.selectbox(
-
         "What plant do you have?",
-
         plant_options,
-
         label_visibility="collapsed",
-
         help="Selecting plant type increases accuracy by 25-30%!"
-
     )
-
     
-
     if selected_plant == "Other (Manual Entry)":
-
         custom_plant = st.text_input("Enter plant name", placeholder="e.g., Banana, Orange, Pepper")
-
         plant_type = custom_plant if custom_plant else "Unknown Plant"
-
     else:
-
         plant_type = selected_plant if selected_plant != "Select a plant..." else None
-
     
-
     if plant_type and plant_type in PLANT_COMMON_DISEASES:
-
         st.markdown(f"""
-
         <div class="success-box">
-
         **Common diseases in {plant_type}:**
-
         
-
         {PLANT_COMMON_DISEASES[plant_type]}
-
         </div>
-
         """, unsafe_allow_html=True)
-
     
-
     st.markdown("</div>", unsafe_allow_html=True)
 
 with col_upload:
@@ -732,12 +1128,6 @@ if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "
                     st.write("• Upload clearer images")
                     st.write("• Enable debug mode to see response")
                     st.markdown('</div>', unsafe_allow_html=True)
-                    
-                    if debug_mode:
-                        with st.expander("Full Response"):
-                            st.markdown('<div class="debug-box">', unsafe_allow_html=True)
-                            st.text(raw_response)
-                            st.markdown('</div>', unsafe_allow_html=True)
                 else:
                     is_valid, validation_msg = validate_json_result(result)
                     
@@ -840,7 +1230,6 @@ if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "
                         for treatment in result.get("organic_treatments", []):
                             st.write(f"• {treatment}")
                         
-                        # Calculate and display organic cost
                         organic_treatments = result.get("organic_treatments", [])
                         total_organic_cost = 0
                         if organic_treatments:
@@ -859,7 +1248,6 @@ if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "
                         for treatment in result.get("chemical_treatments", []):
                             st.write(f"• {treatment}")
                         
-                        # Calculate and display chemical cost
                         chemical_treatments = result.get("chemical_treatments", [])
                         total_chemical_cost = 0
                         if chemical_treatments:
@@ -893,6 +1281,89 @@ if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "
                             {result.get("similar_conditions")}
                         </div>
                         """, unsafe_allow_html=True)
+                    
+                    st.markdown("</div>", unsafe_allow_html=True)
+                    
+                    # ============ NEW FEATURES ============
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    
+                    # COST CALCULATOR
+                    st.markdown("""
+                    <div class="info-section">
+                        <div class="info-title">💰 Cost Calculator & ROI Analysis</div>
+                    """, unsafe_allow_html=True)
+                    
+                    col_cost1, col_cost2, col_cost3 = st.columns(3)
+                    with col_cost1:
+                        yield_kg = st.number_input("Estimated Yield (kg)", value=1000, min_value=100)
+                    with col_cost2:
+                        market_price = st.number_input("Market Price per kg (₹)", value=50, min_value=10)
+                    with col_cost3:
+                        st.write("")  # Spacing
+                    
+                    cost_analysis = get_cost_analysis(
+                        total_organic_cost, 
+                        total_chemical_cost, 
+                        yield_kg, 
+                        market_price
+                    )
+                    st.markdown(cost_analysis)
+                    st.markdown("</div>", unsafe_allow_html=True)
+                    
+                    # CROP ROTATION ADVISOR
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    st.markdown("""
+                    <div class="info-section">
+                        <div class="info-title">🌱 3-Year Crop Rotation Advisor</div>
+                    """, unsafe_allow_html=True)
+                    
+                    col_rot1, col_rot2 = st.columns(2)
+                    with col_rot1:
+                        region = st.selectbox("Select Your Region", REGIONS, key="region_select")
+                    with col_rot2:
+                        soil = st.selectbox("Select Soil Type", SOIL_TYPES, key="soil_select")
+                    
+                    rotation_plan = get_crop_rotation_plan(plant_type, region, soil)
+                    st.markdown(rotation_plan)
+                    st.markdown("</div>", unsafe_allow_html=True)
+                    
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    
+                    # PDF DOWNLOAD SECTION
+                    st.markdown("""
+                    <div class="info-section">
+                        <div class="info-title">📋 Download Bilingual Prescriptions (FPDF2)</div>
+                    """, unsafe_allow_html=True)
+                    
+                    if HAS_PDF:
+                        english_pdf, hindi_pdf = generate_bilingual_prescriptions(result, plant_type)
+                        
+                        if english_pdf and hindi_pdf:
+                            col_pdf1, col_pdf2 = st.columns(2)
+                            
+                            with col_pdf1:
+                                st.download_button(
+                                    label="📥 English Prescription (PDF)",
+                                    data=english_pdf,
+                                    file_name=f"Plant_Prescription_English_{plant_type}_{datetime.now().strftime('%d%m%Y_%H%M%S')}.pdf",
+                                    mime="application/pdf",
+                                    use_container_width=True
+                                )
+                            
+                            with col_pdf2:
+                                st.download_button(
+                                    label="📥 हिंदी प्रेषण (PDF)",
+                                    data=hindi_pdf,
+                                    file_name=f"Plant_Prescription_Hindi_{plant_type}_{datetime.now().strftime('%d%m%Y_%H%M%S')}.pdf",
+                                    mime="application/pdf",
+                                    use_container_width=True
+                                )
+                            st.success("✅ PDFs ready for download!")
+                        else:
+                            st.error("❌ Error generating PDFs. Please try again.")
+                    else:
+                        st.error("❌ FPDF2 is not available. Installing...")
+                        st.info("🔄 Please refresh the page in a moment for PDF generation to work.")
                     
                     st.markdown("</div>", unsafe_allow_html=True)
                     
