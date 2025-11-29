@@ -859,7 +859,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 with st.sidebar:
     page = st.radio(
         "📂 Pages",
-        ["Disease Detector & Treatment Planner", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"]
+        ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"]
     )
 
     if page == "AI Plant Doctor":
@@ -1654,4 +1654,3 @@ elif page == "Cost Calculator & ROI":
                 ✅ Chemical treatment offers higher immediate ROI, but consider organic for long-term sustainability.
                 </div>
                 """, unsafe_allow_html=True)
-
