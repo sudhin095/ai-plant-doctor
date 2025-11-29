@@ -558,21 +558,22 @@ def generate_bilingual_prescriptions(result, plant_type):
     return english_buffer, hindi_buffer
 
 def generate_prescription_pdf_english(result, plant_type):
-    """Generate English Prescription PDF using FPDF2"""
+    """Generate English Prescription PDF using FPDF2 - FIXED VERSION"""
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=14, style="B")
+    pdf.set_auto_page_break(auto=True, margin=10)
     
     # Header
+    pdf.set_font("Arial", size=14, style="B")
     pdf.cell(0, 10, "AI PLANT DOCTOR - PRESCRIPTION", ln=True, align="C")
-    pdf.set_font("Arial", size=10)
+    pdf.set_font("Arial", size=9)
     pdf.cell(0, 8, "Professional Plant Disease Diagnosis & Treatment Plan", ln=True, align="C")
-    pdf.ln(5)
+    pdf.ln(3)
     
-    # Disease Details
-    pdf.set_font("Arial", size=11, style="B")
+    # Disease Details - REDUCED WIDTH
+    pdf.set_font("Arial", size=10, style="B")
     pdf.cell(0, 8, "DIAGNOSIS DETAILS", ln=True)
-    pdf.set_font("Arial", size=10)
+    pdf.set_font("Arial", size=9)
     
     disease_name = result.get("disease_name", "Unknown")
     plant_species = result.get("plant_species", plant_type)
@@ -580,103 +581,116 @@ def generate_prescription_pdf_english(result, plant_type):
     confidence = result.get("confidence", 0)
     disease_type = result.get("disease_type", "Unknown").title()
     
-    pdf.cell(40, 8, "Plant Type:")
-    pdf.cell(0, 8, plant_species, ln=True)
-    pdf.cell(40, 8, "Disease:")
-    pdf.cell(0, 8, disease_name, ln=True)
-    pdf.cell(40, 8, "Severity:")
-    pdf.cell(0, 8, severity, ln=True)
-    pdf.cell(40, 8, "Confidence:")
-    pdf.cell(0, 8, f"{confidence}%", ln=True)
-    pdf.cell(40, 8, "Type:")
-    pdf.cell(0, 8, disease_type, ln=True)
-    pdf.ln(5)
+    # FIXED: Use smaller column widths
+    pdf.cell(35, 6, "Plant Type:")
+    pdf.cell(0, 6, str(plant_species)[:50], ln=True)
+    pdf.cell(35, 6, "Disease:")
+    pdf.cell(0, 6, str(disease_name)[:50], ln=True)
+    pdf.cell(35, 6, "Severity:")
+    pdf.cell(0, 6, severity, ln=True)
+    pdf.cell(35, 6, "Confidence:")
+    pdf.cell(0, 6, f"{confidence}%", ln=True)
+    pdf.cell(35, 6, "Type:")
+    pdf.cell(0, 6, disease_type, ln=True)
+    pdf.ln(3)
     
     # Symptoms
-    pdf.set_font("Arial", size=11, style="B")
+    pdf.set_font("Arial", size=10, style="B")
     pdf.cell(0, 8, "SYMPTOMS OBSERVED", ln=True)
-    pdf.set_font("Arial", size=10)
-    for i, symptom in enumerate(result.get("symptoms", []), 1):
-        pdf.multi_cell(0, 6, f"{i}. {symptom}")
-    pdf.ln(3)
+    pdf.set_font("Arial", size=9)
+    # FIXED: Limit to 5 items, slice text to 80 chars
+    for i, symptom in enumerate(result.get("symptoms", [])[:5], 1):
+        pdf.multi_cell(0, 5, f"{i}. {str(symptom)[:80]}")
+    pdf.ln(2)
     
     # Causes
-    pdf.set_font("Arial", size=11, style="B")
+    pdf.set_font("Arial", size=10, style="B")
     pdf.cell(0, 8, "PROBABLE CAUSES", ln=True)
-    pdf.set_font("Arial", size=10)
-    for i, cause in enumerate(result.get("probable_causes", []), 1):
-        pdf.multi_cell(0, 6, f"{i}. {cause}")
-    pdf.ln(3)
+    pdf.set_font("Arial", size=9)
+    for i, cause in enumerate(result.get("probable_causes", [])[:4], 1):
+        pdf.multi_cell(0, 5, f"{i}. {str(cause)[:80]}")
+    pdf.ln(2)
     
     # Immediate Actions
-    pdf.set_font("Arial", size=11, style="B")
-    pdf.cell(0, 8, "IMMEDIATE ACTIONS REQUIRED", ln=True)
-    pdf.set_font("Arial", size=10)
-    for i, action in enumerate(result.get("immediate_action", []), 1):
-        pdf.multi_cell(0, 6, f"{i}. {action}")
-    pdf.ln(3)
-    
-    # Organic Treatments
-    pdf.set_font("Arial", size=11, style="B")
-    pdf.cell(0, 8, "ORGANIC TREATMENT OPTIONS", ln=True)
+    pdf.set_font("Arial", size=10, style="B")
+    pdf.cell(0, 8, "IMMEDIATE ACTIONS", ln=True)
     pdf.set_font("Arial", size=9)
+    for i, action in enumerate(result.get("immediate_action", [])[:3], 1):
+        pdf.multi_cell(0, 5, f"{i}. {str(action)[:80]}")
+    pdf.ln(2)
     
-    for i, treatment in enumerate(result.get("organic_treatments", []), 1):
+    # Organic Treatments - TABLE
+    pdf.set_font("Arial", size=10, style="B")
+    pdf.cell(0, 8, "ORGANIC TREATMENTS", ln=True)
+    pdf.set_font("Arial", size=8)
+    
+    # FIXED: Smaller font and column widths
+    pdf.cell(8, 5, "No")
+    pdf.cell(55, 5, "Treatment")
+    pdf.cell(25, 5, "Cost")
+    pdf.cell(0, 5, "Freq", ln=True)
+    
+    for i, treatment in enumerate(result.get("organic_treatments", [])[:5], 1):
         cost = get_treatment_cost("organic", treatment)
-        pdf.cell(10, 6, f"{i}.")
-        pdf.cell(80, 6, treatment[:30])
-        pdf.cell(30, 6, f"Rs {cost}")
-        pdf.cell(40, 6, "Spray/7-10 days", ln=True)
-    pdf.ln(3)
+        pdf.cell(8, 5, str(i))
+        pdf.cell(55, 5, str(treatment)[:35])
+        pdf.cell(25, 5, f"Rs {cost}")
+        pdf.cell(0, 5, "7-10d", ln=True)
+    pdf.ln(2)
     
-    # Chemical Treatments
-    pdf.set_font("Arial", size=11, style="B")
-    pdf.cell(0, 8, "CHEMICAL TREATMENT OPTIONS", ln=True)
-    pdf.set_font("Arial", size=9)
+    # Chemical Treatments - TABLE
+    pdf.set_font("Arial", size=10, style="B")
+    pdf.cell(0, 8, "CHEMICAL TREATMENTS", ln=True)
+    pdf.set_font("Arial", size=8)
     
-    for i, treatment in enumerate(result.get("chemical_treatments", []), 1):
+    pdf.cell(8, 5, "No")
+    pdf.cell(55, 5, "Treatment")
+    pdf.cell(25, 5, "Cost")
+    pdf.cell(0, 5, "Dilute", ln=True)
+    
+    for i, treatment in enumerate(result.get("chemical_treatments", [])[:5], 1):
         cost = get_treatment_cost("chemical", treatment)
-        pdf.cell(10, 6, f"{i}.")
-        pdf.cell(80, 6, treatment[:30])
-        pdf.cell(30, 6, f"Rs {cost}")
-        pdf.cell(40, 6, "1:500 dilution", ln=True)
-    pdf.ln(3)
+        pdf.cell(8, 5, str(i))
+        pdf.cell(55, 5, str(treatment)[:35])
+        pdf.cell(25, 5, f"Rs {cost}")
+        pdf.cell(0, 5, "1:500", ln=True)
+    pdf.ln(2)
     
     # Prevention
-    pdf.set_font("Arial", size=11, style="B")
-    pdf.cell(0, 8, "LONG-TERM PREVENTION STRATEGIES", ln=True)
-    pdf.set_font("Arial", size=10)
-    for i, tip in enumerate(result.get("prevention_long_term", []), 1):
-        pdf.multi_cell(0, 6, f"{i}. {tip}")
-    pdf.ln(5)
+    pdf.set_font("Arial", size=10, style="B")
+    pdf.cell(0, 8, "PREVENTION STRATEGIES", ln=True)
+    pdf.set_font("Arial", size=9)
+    for i, tip in enumerate(result.get("prevention_long_term", [])[:4], 1):
+        pdf.multi_cell(0, 5, f"{i}. {str(tip)[:80]}")
+    pdf.ln(3)
     
     # Footer
-    pdf.set_font("Arial", size=8)
-    pdf.cell(0, 6, "This prescription is generated by AI Plant Doctor. Consult your local agricultural officer.", ln=True, align="C")
-    pdf.cell(0, 6, f"Generated on {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}", ln=True, align="C")
+    pdf.set_font("Arial", size=7)
+    pdf.cell(0, 4, "Generated by AI Plant Doctor", ln=True, align="C")
+    pdf.cell(0, 4, f"Date: {datetime.now().strftime('%d-%m-%Y')}", ln=True, align="C")
     
-    # Output to BytesIO
     buffer = BytesIO()
     pdf.output(buffer)
     buffer.seek(0)
     return buffer
 
 def generate_prescription_pdf_hindi(result, plant_type):
-    """Generate Hindi Prescription PDF using FPDF2"""
+    """Generate Hindi Prescription PDF using FPDF2 - FIXED VERSION"""
     pdf = FPDF()
     pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=10)
+    
+    # Header
     pdf.set_font("Arial", size=14, style="B")
+    pdf.cell(0, 10, "AI PLANT DOCTOR - NIDAAN (HINDI)", ln=True, align="C")
+    pdf.set_font("Arial", size=9)
+    pdf.cell(0, 8, "Paudh Rog Nidaan aur Upchar", ln=True, align="C")
+    pdf.ln(3)
     
-    # Header (Hindi)
-    pdf.cell(0, 10, "AI PLANT DOCTOR - PRESCRIPTION (HINDI)", ln=True, align="C")
-    pdf.set_font("Arial", size=10)
-    pdf.cell(0, 8, "व्यावसायिक पौध रोग निदान और उपचार योजना", ln=True, align="C")
-    pdf.ln(5)
-    
-    # Disease Details (Hindi)
-    pdf.set_font("Arial", size=11, style="B")
-    pdf.cell(0, 8, "DIAGNOSIS DETAILS (HINDI)", ln=True)
-    pdf.set_font("Arial", size=10)
+    # Disease Details
+    pdf.set_font("Arial", size=10, style="B")
+    pdf.cell(0, 8, "NIDAAN (DIAGNOSIS)", ln=True)
+    pdf.set_font("Arial", size=9)
     
     disease_name = result.get("disease_name", "Unknown")
     plant_species = result.get("plant_species", plant_type)
@@ -684,82 +698,91 @@ def generate_prescription_pdf_hindi(result, plant_type):
     confidence = result.get("confidence", 0)
     disease_type = result.get("disease_type", "Unknown").title()
     
-    pdf.cell(40, 8, "Plant (Paudh):")
-    pdf.cell(0, 8, plant_species, ln=True)
-    pdf.cell(40, 8, "Disease (Rog):")
-    pdf.cell(0, 8, disease_name, ln=True)
-    pdf.cell(40, 8, "Severity (Gambhirta):")
-    pdf.cell(0, 8, severity, ln=True)
-    pdf.cell(40, 8, "Confidence (Aatmavishwas):")
-    pdf.cell(0, 8, f"{confidence}%", ln=True)
-    pdf.cell(40, 8, "Type (Prakar):")
-    pdf.cell(0, 8, disease_type, ln=True)
-    pdf.ln(5)
-    
-    # Symptoms (Hindi)
-    pdf.set_font("Arial", size=11, style="B")
-    pdf.cell(0, 8, "SYMPTOMS (LAKSHAN)", ln=True)
-    pdf.set_font("Arial", size=10)
-    for i, symptom in enumerate(result.get("symptoms", []), 1):
-        pdf.multi_cell(0, 6, f"{i}. {symptom}")
+    pdf.cell(35, 6, "Paudh:")
+    pdf.cell(0, 6, str(plant_species)[:50], ln=True)
+    pdf.cell(35, 6, "Rog:")
+    pdf.cell(0, 6, str(disease_name)[:50], ln=True)
+    pdf.cell(35, 6, "Gambhirta:")
+    pdf.cell(0, 6, severity, ln=True)
+    pdf.cell(35, 6, "Confidence:")
+    pdf.cell(0, 6, f"{confidence}%", ln=True)
+    pdf.cell(35, 6, "Prakar:")
+    pdf.cell(0, 6, disease_type, ln=True)
     pdf.ln(3)
     
-    # Causes (Hindi)
-    pdf.set_font("Arial", size=11, style="B")
-    pdf.cell(0, 8, "PROBABLE CAUSES (SAMBHAVIT KARAN)", ln=True)
-    pdf.set_font("Arial", size=10)
-    for i, cause in enumerate(result.get("probable_causes", []), 1):
-        pdf.multi_cell(0, 6, f"{i}. {cause}")
-    pdf.ln(3)
-    
-    # Immediate Actions (Hindi)
-    pdf.set_font("Arial", size=11, style="B")
-    pdf.cell(0, 8, "IMMEDIATE ACTIONS (TURANT KARVAYI)", ln=True)
-    pdf.set_font("Arial", size=10)
-    for i, action in enumerate(result.get("immediate_action", []), 1):
-        pdf.multi_cell(0, 6, f"{i}. {action}")
-    pdf.ln(3)
-    
-    # Organic Treatments (Hindi)
-    pdf.set_font("Arial", size=11, style="B")
-    pdf.cell(0, 8, "ORGANIC TREATMENTS (JAIVIK UPCHAR)", ln=True)
+    # Symptoms
+    pdf.set_font("Arial", size=10, style="B")
+    pdf.cell(0, 8, "LAKSHAN (SYMPTOMS)", ln=True)
     pdf.set_font("Arial", size=9)
+    for i, symptom in enumerate(result.get("symptoms", [])[:5], 1):
+        pdf.multi_cell(0, 5, f"{i}. {str(symptom)[:80]}")
+    pdf.ln(2)
     
-    for i, treatment in enumerate(result.get("organic_treatments", []), 1):
-        cost = get_treatment_cost("organic", treatment)
-        pdf.cell(10, 6, f"{i}.")
-        pdf.cell(80, 6, treatment[:30])
-        pdf.cell(30, 6, f"Rs {cost}")
-        pdf.cell(40, 6, "Spray/7-10 din", ln=True)
-    pdf.ln(3)
-    
-    # Chemical Treatments (Hindi)
-    pdf.set_font("Arial", size=11, style="B")
-    pdf.cell(0, 8, "CHEMICAL TREATMENTS (RASAYNIK UPCHAR)", ln=True)
+    # Causes
+    pdf.set_font("Arial", size=10, style="B")
+    pdf.cell(0, 8, "KARAN (CAUSES)", ln=True)
     pdf.set_font("Arial", size=9)
+    for i, cause in enumerate(result.get("probable_causes", [])[:4], 1):
+        pdf.multi_cell(0, 5, f"{i}. {str(cause)[:80]}")
+    pdf.ln(2)
     
-    for i, treatment in enumerate(result.get("chemical_treatments", []), 1):
-        cost = get_treatment_cost("chemical", treatment)
-        pdf.cell(10, 6, f"{i}.")
-        pdf.cell(80, 6, treatment[:30])
-        pdf.cell(30, 6, f"Rs {cost}")
-        pdf.cell(40, 6, "1:500 patlapan", ln=True)
-    pdf.ln(3)
+    # Immediate Actions
+    pdf.set_font("Arial", size=10, style="B")
+    pdf.cell(0, 8, "TURANT KARVAYI (ACTIONS)", ln=True)
+    pdf.set_font("Arial", size=9)
+    for i, action in enumerate(result.get("immediate_action", [])[:3], 1):
+        pdf.multi_cell(0, 5, f"{i}. {str(action)[:80]}")
+    pdf.ln(2)
     
-    # Prevention (Hindi)
-    pdf.set_font("Arial", size=11, style="B")
-    pdf.cell(0, 8, "LONG-TERM PREVENTION (DEERGKAALIN ROKTHAAM)", ln=True)
-    pdf.set_font("Arial", size=10)
-    for i, tip in enumerate(result.get("prevention_long_term", []), 1):
-        pdf.multi_cell(0, 6, f"{i}. {tip}")
-    pdf.ln(5)
-    
-    # Footer (Hindi)
+    # Organic Treatments
+    pdf.set_font("Arial", size=10, style="B")
+    pdf.cell(0, 8, "JAIVIK UPCHAR (ORGANIC)", ln=True)
     pdf.set_font("Arial", size=8)
-    pdf.cell(0, 6, "Yeh prescrption AI Plant Doctor dwara utpann hai.", ln=True, align="C")
-    pdf.cell(0, 6, f"{datetime.now().strftime('%d-%m-%Y %H:%M:%S')} ko utpann", ln=True, align="C")
     
-    # Output to BytesIO
+    pdf.cell(8, 5, "No")
+    pdf.cell(55, 5, "Medicine")
+    pdf.cell(25, 5, "Cost")
+    pdf.cell(0, 5, "Avrti", ln=True)
+    
+    for i, treatment in enumerate(result.get("organic_treatments", [])[:5], 1):
+        cost = get_treatment_cost("organic", treatment)
+        pdf.cell(8, 5, str(i))
+        pdf.cell(55, 5, str(treatment)[:35])
+        pdf.cell(25, 5, f"Rs {cost}")
+        pdf.cell(0, 5, "7-10d", ln=True)
+    pdf.ln(2)
+    
+    # Chemical Treatments
+    pdf.set_font("Arial", size=10, style="B")
+    pdf.cell(0, 8, "RASAYNIK UPCHAR (CHEMICAL)", ln=True)
+    pdf.set_font("Arial", size=8)
+    
+    pdf.cell(8, 5, "No")
+    pdf.cell(55, 5, "Medicine")
+    pdf.cell(25, 5, "Cost")
+    pdf.cell(0, 5, "Dilute", ln=True)
+    
+    for i, treatment in enumerate(result.get("chemical_treatments", [])[:5], 1):
+        cost = get_treatment_cost("chemical", treatment)
+        pdf.cell(8, 5, str(i))
+        pdf.cell(55, 5, str(treatment)[:35])
+        pdf.cell(25, 5, f"Rs {cost}")
+        pdf.cell(0, 5, "1:500", ln=True)
+    pdf.ln(2)
+    
+    # Prevention
+    pdf.set_font("Arial", size=10, style="B")
+    pdf.cell(0, 8, "ROKTHAAM (PREVENTION)", ln=True)
+    pdf.set_font("Arial", size=9)
+    for i, tip in enumerate(result.get("prevention_long_term", [])[:4], 1):
+        pdf.multi_cell(0, 5, f"{i}. {str(tip)[:80]}")
+    pdf.ln(3)
+    
+    # Footer
+    pdf.set_font("Arial", size=7)
+    pdf.cell(0, 4, "AI Plant Doctor dwara utpann", ln=True, align="C")
+    pdf.cell(0, 4, f"Tarikh: {datetime.now().strftime('%d-%m-%Y')}", ln=True, align="C")
+    
     buffer = BytesIO()
     pdf.output(buffer)
     buffer.seek(0)
