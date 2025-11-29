@@ -1,12 +1,4 @@
 import streamlit as st
-
-st.set_page_config(
-    page_title="🌿 AI Plant Doctor - Smart Edition",
-    page_icon="🌿",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
 import google.generativeai as genai
 from PIL import Image
 import os
@@ -14,11 +6,13 @@ import json
 from datetime import datetime
 import re
 from io import BytesIO
-from reportlab.lib.pagesizes import letter
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
-from reportlab.lib.units import inch
+
+st.set_page_config(
+    page_title="🌿 AI Plant Doctor - Smart Edition",
+    page_icon="🌿",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # ============ TREATMENT COSTS DATABASE - ACCURATE INDIA PRICES ============
 TREATMENT_COSTS = {
@@ -541,134 +535,103 @@ def validate_json_result(data):
     
     return True, "Valid"
 
-def generate_prescription_pdf(result, plant_type):
-    """Generate a printable PDF prescription for farmers"""
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter,
-                           rightMargin=0.5*inch, leftMargin=0.5*inch,
-                           topMargin=0.5*inch, bottomMargin=0.5*inch)
+def generate_prescription_text(result, plant_type):
+    """Generate a text-based prescription for downloading"""
+    prescription = f"""
+═══════════════════════════════════════════════════════════════════
+🌿 AI PLANT DOCTOR - PRESCRIPTION
+═══════════════════════════════════════════════════════════════════
+
+PRESCRIPTION DETAILS:
+─────────────────────────────────────────────────────────────────
+Plant Type:              {result.get("plant_species", plant_type)}
+Disease Diagnosed:       {result.get("disease_name", "Unknown")}
+Severity Level:          {result.get("severity", "Unknown").title()}
+Confidence Level:        {result.get("confidence", 0)}%
+Disease Type:            {result.get("disease_type", "Unknown").title()}
+Issued Date:             {datetime.now().strftime("%d-%m-%Y %H:%M")}
+
+═══════════════════════════════════════════════════════════════════
+SYMPTOMS OBSERVED:
+─────────────────────────────────────────────────────────────────
+"""
     
-    elements = []
-    styles = getSampleStyleSheet()
+    for i, symptom in enumerate(result.get("symptoms", []), 1):
+        prescription += f"{i}. {symptom}\n"
     
-    # Custom styles
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=18,
-        textColor=colors.HexColor('#1a2a47'),
-        spaceAfter=6,
-        alignment=1
-    )
+    prescription += f"""
+═══════════════════════════════════════════════════════════════════
+PROBABLE CAUSES:
+─────────────────────────────────────────────────────────────────
+"""
     
-    heading_style = ParagraphStyle(
-        'CustomHeading',
-        parent=styles['Heading2'],
-        fontSize=12,
-        textColor=colors.HexColor('#667eea'),
-        spaceAfter=8,
-        spaceBefore=8,
-        fontName='Helvetica-Bold'
-    )
+    for i, cause in enumerate(result.get("probable_causes", []), 1):
+        prescription += f"{i}. {cause}\n"
     
-    normal_style = ParagraphStyle(
-        'CustomNormal',
-        parent=styles['Normal'],
-        fontSize=10,
-        textColor=colors.HexColor('#1a1f2e'),
-        spaceAfter=4
-    )
+    prescription += f"""
+═══════════════════════════════════════════════════════════════════
+IMMEDIATE ACTIONS REQUIRED:
+─────────────────────────────────────────────────────────────────
+"""
     
-    # Header
-    elements.append(Paragraph("🌿 AI PLANT DOCTOR - PRESCRIPTION", title_style))
-    elements.append(Spacer(1, 0.15*inch))
-    
-    # Prescription info
-    disease_name = result.get("disease_name", "Unknown")
-    plant_species = result.get("plant_species", plant_type)
-    severity = result.get("severity", "Unknown").title()
-    confidence = result.get("confidence", 0)
-    
-    info_data = [
-        ["Plant Type:", plant_species],
-        ["Disease Diagnosed:", disease_name],
-        ["Severity Level:", severity],
-        ["Confidence:", f"{confidence}%"],
-        ["Issued Date:", datetime.now().strftime("%d-%m-%Y %H:%M")],
-    ]
-    
-    info_table = Table(info_data, colWidths=[2*inch, 4*inch])
-    info_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#e8ecf7')),
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#1a1f2e')),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 9),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#667eea')),
-    ]))
-    elements.append(info_table)
-    elements.append(Spacer(1, 0.2*inch))
-    
-    # Symptoms
-    elements.append(Paragraph("SYMPTOMS OBSERVED:", heading_style))
-    for symptom in result.get("symptoms", []):
-        elements.append(Paragraph(f"• {symptom}", normal_style))
-    elements.append(Spacer(1, 0.1*inch))
-    
-    # Immediate Actions
-    elements.append(Paragraph("IMMEDIATE ACTIONS REQUIRED:", heading_style))
     for i, action in enumerate(result.get("immediate_action", []), 1):
-        elements.append(Paragraph(f"{i}. {action}", normal_style))
-    elements.append(Spacer(1, 0.1*inch))
+        prescription += f"{i}. {action}\n"
     
-    # Organic Treatments
-    elements.append(Paragraph("ORGANIC TREATMENT OPTIONS:", heading_style))
+    prescription += f"""
+═══════════════════════════════════════════════════════════════════
+ORGANIC TREATMENT OPTIONS:
+─────────────────────────────────────────────────────────────────
+"""
+    
     organic_treatments = result.get("organic_treatments", [])
     total_organic_cost = 0
-    if organic_treatments:
-        for treatment in organic_treatments[:2]:
-            cost = get_treatment_cost("organic", treatment)
-            total_organic_cost += cost
-            elements.append(Paragraph(f"• {treatment}", normal_style))
+    for treatment in organic_treatments[:2]:
+        cost = get_treatment_cost("organic", treatment)
+        total_organic_cost += cost
+        prescription += f"• {treatment}\n"
     
-    elements.append(Paragraph(f"<b>Estimated Cost (India):</b> ₹{total_organic_cost}", normal_style))
-    elements.append(Spacer(1, 0.1*inch))
+    prescription += f"\nEstimated Cost (India): ₹{total_organic_cost}\n"
     
-    # Chemical Treatments
-    elements.append(Paragraph("CHEMICAL TREATMENT OPTIONS:", heading_style))
+    prescription += f"""
+═══════════════════════════════════════════════════════════════════
+CHEMICAL TREATMENT OPTIONS:
+─────────────────────────────────────────────────────────────────
+"""
+    
     chemical_treatments = result.get("chemical_treatments", [])
     total_chemical_cost = 0
-    if chemical_treatments:
-        for treatment in chemical_treatments[:2]:
-            cost = get_treatment_cost("chemical", treatment)
-            total_chemical_cost += cost
-            elements.append(Paragraph(f"• {treatment}", normal_style))
+    for treatment in chemical_treatments[:2]:
+        cost = get_treatment_cost("chemical", treatment)
+        total_chemical_cost += cost
+        prescription += f"• {treatment}\n"
     
-    elements.append(Paragraph(f"<b>Estimated Cost (India):</b> ₹{total_chemical_cost}", normal_style))
-    elements.append(Spacer(1, 0.1*inch))
+    prescription += f"\nEstimated Cost (India): ₹{total_chemical_cost}\n"
     
-    # Prevention
-    elements.append(Paragraph("LONG-TERM PREVENTION:", heading_style))
-    for tip in result.get("prevention_long_term", []):
-        elements.append(Paragraph(f"• {tip}", normal_style))
-    elements.append(Spacer(1, 0.2*inch))
+    prescription += f"""
+═══════════════════════════════════════════════════════════════════
+LONG-TERM PREVENTION STRATEGIES:
+─────────────────────────────────────────────────────────────────
+"""
     
-    # Footer
-    footer_text = "This prescription has been generated by AI Plant Doctor. Please consult your local agricultural officer for additional guidance."
-    elements.append(Paragraph(footer_text, ParagraphStyle(
-        'Footer',
-        parent=styles['Normal'],
-        fontSize=8,
-        textColor=colors.HexColor('#667eea'),
-        alignment=1,
-        italic=True
-    )))
+    for i, tip in enumerate(result.get("prevention_long_term", []), 1):
+        prescription += f"{i}. {tip}\n"
     
-    # Build PDF
-    doc.build(elements)
-    buffer.seek(0)
-    return buffer
+    prescription += f"""
+═══════════════════════════════════════════════════════════════════
+ADDITIONAL NOTES:
+─────────────────────────────────────────────────────────────────
+{result.get("plant_specific_notes", "N/A")}
+
+{result.get("confidence_reason", "")}
+
+═══════════════════════════════════════════════════════════════════
+DISCLAIMER:
+This prescription has been generated by AI Plant Doctor. Please 
+consult your local agricultural officer for additional guidance.
+═══════════════════════════════════════════════════════════════════
+"""
+    
+    return prescription
 
 st.markdown("""
 <div class="header-container">
@@ -1034,23 +997,21 @@ if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "
                     
                     st.markdown("<br>", unsafe_allow_html=True)
                     
-                    # PDF Download Section
+                    # Prescription Download Section
                     st.markdown("""
                     <div class="info-section">
                         <div class="info-title">📋 Actionable Prescriptions</div>
                     """, unsafe_allow_html=True)
                     
-                    col_pdf1, col_pdf2 = st.columns(2)
+                    prescription_text = generate_prescription_text(result, plant_type)
                     
-                    with col_pdf1:
-                        pdf_buffer = generate_prescription_pdf(result, plant_type)
-                        st.download_button(
-                            label="📥 Download Prescription (PDF)",
-                            data=pdf_buffer,
-                            file_name=f"Plant_Prescription_{plant_type}_{datetime.now().strftime('%d%m%Y_%H%M%S')}.pdf",
-                            mime="application/pdf",
-                            use_container_width=True
-                        )
+                    st.download_button(
+                        label="📥 Download Prescription (.txt)",
+                        data=prescription_text,
+                        file_name=f"Plant_Prescription_{plant_type}_{datetime.now().strftime('%d%m%Y_%H%M%S')}.txt",
+                        mime="text/plain",
+                        use_container_width=True
+                    )
                     
                     st.markdown("</div>", unsafe_allow_html=True)
                     
