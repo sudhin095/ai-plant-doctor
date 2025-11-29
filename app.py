@@ -1,22 +1,4 @@
 import streamlit as st
-import google.generativeai as genai
-from PIL import Image
-import os
-import json
-from datetime import datetime
-import re
-from io import BytesIO
-
-try:
-    from reportlab.lib.pagesizes import letter
-    from reportlab.lib import colors
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-    from reportlab.lib.units import inch
-    REPORTLAB_AVAILABLE = True
-except ImportError:
-    REPORTLAB_AVAILABLE = False
-    st.warning("⚠️ ReportLab not installed. PDF generation disabled. Install with: pip install reportlab")
 
 st.set_page_config(
     page_title="🌿 AI Plant Doctor - Smart Edition",
@@ -24,6 +6,19 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+import google.generativeai as genai
+from PIL import Image
+import os
+import json
+from datetime import datetime
+import re
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.lib.units import inch
 
 # ============ TREATMENT COSTS DATABASE - ACCURATE INDIA PRICES ============
 TREATMENT_COSTS = {
@@ -548,9 +543,6 @@ def validate_json_result(data):
 
 def generate_prescription_pdf(result, plant_type):
     """Generate a printable PDF prescription for farmers"""
-    if not REPORTLAB_AVAILABLE:
-        return None
-    
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter,
                            rightMargin=0.5*inch, leftMargin=0.5*inch,
@@ -1043,25 +1035,24 @@ if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "
                     st.markdown("<br>", unsafe_allow_html=True)
                     
                     # PDF Download Section
-                    if REPORTLAB_AVAILABLE:
-                        st.markdown("""
-                        <div class="info-section">
-                            <div class="info-title">📋 Actionable Prescriptions</div>
-                        """, unsafe_allow_html=True)
-                        
-                        col_pdf1, col_pdf2 = st.columns(2)
-                        
-                        with col_pdf1:
-                            pdf_buffer = generate_prescription_pdf(result, plant_type)
-                            st.download_button(
-                                label="📥 Download Prescription (PDF)",
-                                data=pdf_buffer,
-                                file_name=f"Plant_Prescription_{plant_type}_{datetime.now().strftime('%d%m%Y_%H%M%S')}.pdf",
-                                mime="application/pdf",
-                                use_container_width=True
-                            )
-                        
-                        st.markdown("</div>", unsafe_allow_html=True)
+                    st.markdown("""
+                    <div class="info-section">
+                        <div class="info-title">📋 Actionable Prescriptions</div>
+                    """, unsafe_allow_html=True)
+                    
+                    col_pdf1, col_pdf2 = st.columns(2)
+                    
+                    with col_pdf1:
+                        pdf_buffer = generate_prescription_pdf(result, plant_type)
+                        st.download_button(
+                            label="📥 Download Prescription (PDF)",
+                            data=pdf_buffer,
+                            file_name=f"Plant_Prescription_{plant_type}_{datetime.now().strftime('%d%m%Y_%H%M%S')}.pdf",
+                            mime="application/pdf",
+                            use_container_width=True
+                        )
+                    
+                    st.markdown("</div>", unsafe_allow_html=True)
                     
                     st.markdown("<br>", unsafe_allow_html=True)
                     col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 1])
