@@ -1,4 +1,6 @@
-age
+import streamlit as st
+import google.generativeai as genai
+from PIL import Image
 import os
 import json
 from datetime import datetime
@@ -1084,7 +1086,6 @@ if page == "AI Plant Doctor":
                     st.error(f"Analysis Failed: {str(e)}")
                     progress_placeholder.empty()
 
-    # Display stored diagnosis results
     elif st.session_state.last_diagnosis:
         st.markdown("""
         <div class="success-box">
@@ -1132,6 +1133,7 @@ elif page == "KisanAI Assistant":
     with col_chat_control2:
         if st.button("🗑️ Clear Chat", use_container_width=True):
             st.session_state.farmer_bot_messages = []
+            st.session_state.kisan_response = None
             st.rerun()
     with col_chat_control3:
         if st.button("↻ Refresh", use_container_width=True):
@@ -1154,14 +1156,14 @@ elif page == "KisanAI Assistant":
     st.markdown("<br>", unsafe_allow_html=True)
 
     with st.form("farmer_bot_form", clear_on_submit=True):
-        user_q = st.text_area("Type your question here...", height=100, placeholder="Ask about treatments, prevention, costs, or any farming topic...")
+        user_question = st.text_area("Type your question here...", height=100, placeholder="Ask about treatments, prevention, costs, or any farming topic...")
         submitted = st.form_submit_button("Send Message", use_container_width=True)
 
-    if submitted and user_q.strip():
+    if submitted and user_question.strip():
         st.session_state.farmer_bot_messages.append(
-            {"role": "farmer", "content": user_q.strip()}
+            {"role": "farmer", "content": user_question.strip()}
         )
-        answer = get_farmer_bot_response(user_q.strip(), diagnosis_context=diag)
+        answer = get_farmer_bot_response(user_question.strip(), diagnosis_context=diag)
         st.session_state.farmer_bot_messages.append(
             {"role": "assistant", "content": answer}
         )
