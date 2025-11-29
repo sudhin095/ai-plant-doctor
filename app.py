@@ -7,6 +7,16 @@ from datetime import datetime
 import re
 from io import BytesIO
 
+try:
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+    from reportlab.lib.units import inch
+    HAS_REPORTLAB = True
+except ImportError:
+    HAS_REPORTLAB = False
+
 st.set_page_config(
     page_title="🌿 AI Plant Doctor - Smart Edition",
     page_icon="🌿",
@@ -535,103 +545,173 @@ def validate_json_result(data):
     
     return True, "Valid"
 
-def generate_prescription_text(result, plant_type):
-    """Generate a text-based prescription for downloading"""
-    prescription = f"""
-═══════════════════════════════════════════════════════════════════
-🌿 AI PLANT DOCTOR - PRESCRIPTION
-═══════════════════════════════════════════════════════════════════
-
-PRESCRIPTION DETAILS:
-─────────────────────────────────────────────────────────────────
-Plant Type:              {result.get("plant_species", plant_type)}
-Disease Diagnosed:       {result.get("disease_name", "Unknown")}
-Severity Level:          {result.get("severity", "Unknown").title()}
-Confidence Level:        {result.get("confidence", 0)}%
-Disease Type:            {result.get("disease_type", "Unknown").title()}
-Issued Date:             {datetime.now().strftime("%d-%m-%Y %H:%M")}
-
-═══════════════════════════════════════════════════════════════════
-SYMPTOMS OBSERVED:
-─────────────────────────────────────────────────────────────────
-"""
+def generate_prescription_pdf(result, plant_type):
+    """Generate professional bilingual (English & Hindi) PDF prescription"""
+    if not HAS_REPORTLAB:
+        st.error("⚠️ PDF generation requires reportlab. Please contact support.")
+        return None
     
-    for i, symptom in enumerate(result.get("symptoms", []), 1):
-        prescription += f"{i}. {symptom}\n"
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter,
+                           rightMargin=0.4*inch, leftMargin=0.4*inch,
+                           topMargin=0.4*inch, bottomMargin=0.4*inch)
     
-    prescription += f"""
-═══════════════════════════════════════════════════════════════════
-PROBABLE CAUSES:
-─────────────────────────────────────────────────────────────────
-"""
+    elements = []
+    styles = getSampleStyleSheet()
     
-    for i, cause in enumerate(result.get("probable_causes", []), 1):
-        prescription += f"{i}. {cause}\n"
+    # Custom Styles
+    title_style = ParagraphStyle(
+        'Title',
+        parent=styles['Heading1'],
+        fontSize=16,
+        textColor=colors.HexColor('#1a2a47'),
+        spaceAfter=3,
+        alignment=1,
+        fontName='Helvetica-Bold'
+    )
     
-    prescription += f"""
-═══════════════════════════════════════════════════════════════════
-IMMEDIATE ACTIONS REQUIRED:
-─────────────────────────────────────────────────────────────────
-"""
+    subtitle_style = ParagraphStyle(
+        'Subtitle',
+        parent=styles['Normal'],
+        fontSize=11,
+        textColor=colors.HexColor('#667eea'),
+        spaceAfter=8,
+        alignment=1,
+        fontName='Helvetica-Bold'
+    )
     
-    for i, action in enumerate(result.get("immediate_action", []), 1):
-        prescription += f"{i}. {action}\n"
+    heading_style = ParagraphStyle(
+        'Heading',
+        parent=styles['Heading2'],
+        fontSize=10,
+        textColor=colors.HexColor('#667eea'),
+        spaceAfter=6,
+        spaceBefore=4,
+        fontName='Helvetica-Bold',
+        borderColor=colors.HexColor('#667eea'),
+        borderWidth=1,
+        borderPadding=4,
+        leftIndent=4,
+        rightIndent=4
+    )
     
-    prescription += f"""
-═══════════════════════════════════════════════════════════════════
-ORGANIC TREATMENT OPTIONS:
-─────────────────────────────────────────────────────────────────
-"""
+    normal_style = ParagraphStyle(
+        'Normal',
+        parent=styles['Normal'],
+        fontSize=9,
+        textColor=colors.HexColor('#1a1f2e'),
+        spaceAfter=2,
+        leading=12
+    )
     
-    organic_treatments = result.get("organic_treatments", [])
-    total_organic_cost = 0
-    for treatment in organic_treatments[:2]:
-        cost = get_treatment_cost("organic", treatment)
-        total_organic_cost += cost
-        prescription += f"• {treatment}\n"
+    # Header
+    elements.append(Paragraph("🌿 AI PLANT DOCTOR - PRESCRIPTION", title_style))
+    elements.append(Paragraph("कृत्रिम बुद्धिमत्ता पौध चिकित्सक - प्रेषण", subtitle_style))
+    elements.append(Spacer(1, 0.1*inch))
     
-    prescription += f"\nEstimated Cost (India): ₹{total_organic_cost}\n"
+    # Prescription Details Table
+    disease_name = result.get("disease_name", "Unknown")
+    plant_species = result.get("plant_species", plant_type)
+    severity = result.get("severity", "Unknown").title()
+    confidence = result.get("confidence", 0)
+    disease_type = result.get("disease_type", "Unknown").title()
     
-    prescription += f"""
-═══════════════════════════════════════════════════════════════════
-CHEMICAL TREATMENT OPTIONS:
-─────────────────────────────────────────────────────────────────
-"""
+    info_data = [
+        ["Plant Type / पौध प्रकार:", plant_species],
+        ["Disease / रोग:", disease_name],
+        ["Severity / गंभीरता:", severity],
+        ["Confidence / आत्मविश्वास:", f"{confidence}%"],
+        ["Type / प्रकार:", disease_type],
+        ["Date & Time / तारीख और समय:", datetime.now().strftime("%d-%m-%Y %H:%M")],
+    ]
     
-    chemical_treatments = result.get("chemical_treatments", [])
-    total_chemical_cost = 0
-    for treatment in chemical_treatments[:2]:
-        cost = get_treatment_cost("chemical", treatment)
-        total_chemical_cost += cost
-        prescription += f"• {treatment}\n"
+    info_table = Table(info_data, colWidths=[2.2*inch, 3.3*inch])
+    info_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#e8ecf7')),
+        ('BACKGROUND', (1, 0), (1, -1), colors.HexColor('#f5f7ff')),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#1a1f2e')),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#667eea')),
+    ]))
+    elements.append(info_table)
+    elements.append(Spacer(1, 0.12*inch))
     
-    prescription += f"\nEstimated Cost (India): ₹{total_chemical_cost}\n"
+    # Symptoms Section
+    elements.append(Paragraph("SYMPTOMS OBSERVED / देखे गए लक्षण:", heading_style))
+    for symptom in result.get("symptoms", [])[:3]:
+        elements.append(Paragraph(f"• {symptom}", normal_style))
+    elements.append(Spacer(1, 0.08*inch))
     
-    prescription += f"""
-═══════════════════════════════════════════════════════════════════
-LONG-TERM PREVENTION STRATEGIES:
-─────────────────────────────────────────────────────────────────
-"""
+    # Causes Section
+    elements.append(Paragraph("PROBABLE CAUSES / संभावित कारण:", heading_style))
+    for cause in result.get("probable_causes", [])[:2]:
+        elements.append(Paragraph(f"• {cause}", normal_style))
+    elements.append(Spacer(1, 0.08*inch))
     
-    for i, tip in enumerate(result.get("prevention_long_term", []), 1):
-        prescription += f"{i}. {tip}\n"
+    # Immediate Actions
+    elements.append(Paragraph("IMMEDIATE ACTIONS / तुरंत कार्रवाई:", heading_style))
+    for i, action in enumerate(result.get("immediate_action", [])[:2], 1):
+        elements.append(Paragraph(f"{i}. {action}", normal_style))
+    elements.append(Spacer(1, 0.08*inch))
     
-    prescription += f"""
-═══════════════════════════════════════════════════════════════════
-ADDITIONAL NOTES:
-─────────────────────────────────────────────────────────────────
-{result.get("plant_specific_notes", "N/A")}
-
-{result.get("confidence_reason", "")}
-
-═══════════════════════════════════════════════════════════════════
-DISCLAIMER:
-This prescription has been generated by AI Plant Doctor. Please 
-consult your local agricultural officer for additional guidance.
-═══════════════════════════════════════════════════════════════════
-"""
+    # Treatment Options Table
+    elements.append(Paragraph("TREATMENT OPTIONS / उपचार विकल्प:", heading_style))
     
-    return prescription
+    organic_treatments = result.get("organic_treatments", [])[:1]
+    chemical_treatments = result.get("chemical_treatments", [])[:1]
+    
+    total_organic = sum(get_treatment_cost("organic", t) for t in organic_treatments)
+    total_chemical = sum(get_treatment_cost("chemical", t) for t in chemical_treatments)
+    
+    treatment_data = [
+        ["ORGANIC / जैविक", "CHEMICAL / रासायनिक"],
+        [", ".join(organic_treatments), ", ".join(chemical_treatments)],
+        [f"Cost: ₹{total_organic}", f"Cost: ₹{total_chemical}"]
+    ]
+    
+    treatment_table = Table(treatment_data, colWidths=[2.75*inch, 2.75*inch])
+    treatment_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#f0f4ff')),
+        ('BACKGROUND', (0, 2), (-1, 2), colors.HexColor('#e8ecf7')),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#667eea')),
+    ]))
+    elements.append(treatment_table)
+    elements.append(Spacer(1, 0.08*inch))
+    
+    # Prevention
+    elements.append(Paragraph("PREVENTION / रोकथाम:", heading_style))
+    for tip in result.get("prevention_long_term", [])[:2]:
+        elements.append(Paragraph(f"• {tip}", normal_style))
+    elements.append(Spacer(1, 0.08*inch))
+    
+    # Footer
+    footer_text = "This prescription is generated by AI Plant Doctor. Consult your local agricultural officer. | यह प्रेषण AI पौध चिकित्सक द्वारा उत्पन्न है। अपने स्थानीय कृषि अधिकारी से परामर्श लें।"
+    elements.append(Paragraph(footer_text, ParagraphStyle(
+        'Footer',
+        parent=styles['Normal'],
+        fontSize=7,
+        textColor=colors.HexColor('#667eea'),
+        alignment=1,
+        italic=True
+    )))
+    
+    # Build PDF
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer
 
 st.markdown("""
 <div class="header-container">
@@ -939,7 +1019,6 @@ if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "
                         for treatment in result.get("organic_treatments", []):
                             st.write(f"• {treatment}")
                         
-                        # Calculate and display organic cost
                         organic_treatments = result.get("organic_treatments", [])
                         total_organic_cost = 0
                         if organic_treatments:
@@ -958,7 +1037,6 @@ if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "
                         for treatment in result.get("chemical_treatments", []):
                             st.write(f"• {treatment}")
                         
-                        # Calculate and display chemical cost
                         chemical_treatments = result.get("chemical_treatments", [])
                         total_chemical_cost = 0
                         if chemical_treatments:
@@ -997,21 +1075,24 @@ if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "
                     
                     st.markdown("<br>", unsafe_allow_html=True)
                     
-                    # Prescription Download Section
+                    # PDF Download Section
                     st.markdown("""
                     <div class="info-section">
-                        <div class="info-title">📋 Actionable Prescriptions</div>
+                        <div class="info-title">📋 Bilingual Prescription (English & Hindi)</div>
                     """, unsafe_allow_html=True)
                     
-                    prescription_text = generate_prescription_text(result, plant_type)
-                    
-                    st.download_button(
-                        label="📥 Download Prescription (.txt)",
-                        data=prescription_text,
-                        file_name=f"Plant_Prescription_{plant_type}_{datetime.now().strftime('%d%m%Y_%H%M%S')}.txt",
-                        mime="text/plain",
-                        use_container_width=True
-                    )
+                    if HAS_REPORTLAB:
+                        pdf_buffer = generate_prescription_pdf(result, plant_type)
+                        if pdf_buffer:
+                            st.download_button(
+                                label="📥 Download Prescription (PDF)",
+                                data=pdf_buffer,
+                                file_name=f"Plant_Prescription_{plant_type}_{datetime.now().strftime('%d%m%Y_%H%M%S')}.pdf",
+                                mime="application/pdf",
+                                use_container_width=True
+                            )
+                    else:
+                        st.warning("⚠️ ReportLab not installed. Run: pip install reportlab")
                     
                     st.markdown("</div>", unsafe_allow_html=True)
                     
