@@ -744,18 +744,12 @@ def validate_json_result(data):
 
 
 def generate_crop_rotation_plan(plant_type, region, soil_type, market_focus):
+    """Generate accurate crop rotation plan"""
     if plant_type in CROP_ROTATION_DATA:
         return CROP_ROTATION_DATA[plant_type]
     else:
-        return {
-            "rotations": ["Legumes or Pulses", "Cereals (Wheat/Maize)", "Oilseeds or Vegetables"],
-            "info": {
-                plant_type: f"Primary crop. Requires disease break and soil replenishment.",
-                "Legumes or Pulses": "Nitrogen-fixing crops. Soil improvement and disease cycle break.",
-                "Cereals (Wheat/Maize)": "Different nutrient profile. Continues income generation.",
-                "Oilseeds or Vegetables": "Diverse crop selection. Completes rotation cycle."
-            }
-        }
+        # For unknown plants, use AI to generate accurate rotation plan
+        return get_manual_rotation_plan(plant_type)
 
 
 def get_manual_rotation_plan(plant_name):
@@ -765,18 +759,22 @@ def get_manual_rotation_plan(plant_name):
     except Exception:
         return None
     
-    prompt = f"""You are an agricultural expert. Provide a 3-year crop rotation plan for {plant_name}.
-    
-Return ONLY valid JSON in this exact format (no markdown, no explanations):
+    prompt = f"""You are an agricultural expert with deep knowledge of crop rotation and soil health.
+
+For the plant: {plant_name}
+
+Provide ONLY a valid JSON response in this exact format (no markdown, no explanations, no code blocks):
 {{
   "rotations": ["Crop1", "Crop2", "Crop3"],
   "info": {{
-    "{plant_name}": "Brief info about {plant_name}",
-    "Crop1": "Why Crop1 is good after {plant_name}",
-    "Crop2": "Why Crop2 is good after Crop1",
-    "Crop3": "Why Crop3 completes the cycle"
+    "{plant_name}": "Detailed info about {plant_name}: its family, common diseases, soil requirements, and why it needs rotation",
+    "Crop1": "Why this crop is good after {plant_name}: disease break, nutrient recovery, pest cycle interruption",
+    "Crop2": "Why this crop follows Crop1: soil health improvement, market value, climate compatibility",
+    "Crop3": "Why this completes the cycle: prepares soil for {plant_name} again, different nutrient profile, beneficial properties"
   }}
-}}"""
+}}
+
+Make sure all information is accurate, detailed, and specific to {plant_name}."""
     
     try:
         response = model.generate_content(prompt)
@@ -786,7 +784,16 @@ Return ONLY valid JSON in this exact format (no markdown, no explanations):
     except Exception:
         pass
     
-    return None
+    # Fallback default if API fails
+    return {
+        "rotations": ["Legumes or Pulses", "Cereals (Wheat/Maize)", "Oilseeds or Vegetables"],
+        "info": {
+            plant_name: f"Primary crop. Requires disease break and soil replenishment.",
+            "Legumes or Pulses": "Nitrogen-fixing crops. Soil improvement and disease cycle break.",
+            "Cereals (Wheat/Maize)": "Different nutrient profile. Continues income generation.",
+            "Oilseeds or Vegetables": "Diverse crop selection. Completes rotation cycle."
+        }
+    }
 
 
 def get_farmer_bot_response(user_question, diagnosis_context=None):
@@ -1327,8 +1334,24 @@ elif page == "Crop Rotation Advisor":
             plant_type = default_plant
             st.success(f"Selected: {plant_type}")
         else:
+            # Create comprehensive plant list including manual entry
             plant_options = sorted(list(PLANT_COMMON_DISEASES.keys()))
-            plant_type = st.selectbox("Select Plant", plant_options, label_visibility="collapsed")
+            selected_option = st.selectbox(
+                "Select plant or choose 'Other Manual Type'",
+                plant_options + ["Other Manual Type"],
+                label_visibility="collapsed"
+            )
+            
+            if selected_option == "Other Manual Type":
+                plant_type = st.text_input(
+                    "Enter plant name",
+                    placeholder="e.g., Banana, Mango, Carrot, Ginger",
+                    label_visibility="collapsed"
+                )
+                if plant_type:
+                    st.info(f"📝 Will generate rotation plan for: **{plant_type}**")
+            else:
+                plant_type = selected_option
 
     with col_inputs2:
         st.markdown("""
@@ -1343,35 +1366,21 @@ elif page == "Crop Rotation Advisor":
     market_focus = st.selectbox("Market Focus", MARKET_FOCUS, label_visibility="visible")
 
     st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Manual Plant Entry
-    st.markdown("""
-    <div class="info-section">
-        <div class="info-title">📝 Other Manual Type</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    manual_plant = st.text_input("Enter any plant name for rotation plan (e.g., Banana, Mango, Carrot):", placeholder="Type plant name...")
 
     if st.button("📋 Generate Rotation Plan", use_container_width=True, type="primary"):
-        if manual_plant.strip():
-            plant_type = manual_plant.strip()
-        
-        with st.spinner(f"Generating rotation plan for {plant_type}..."):
-            rotations = generate_crop_rotation_plan(plant_type, region, soil_type, market_focus)
-            
-            if rotations is None and manual_plant.strip():
-                rotations = get_manual_rotation_plan(manual_plant.strip())
-                if rotations is None:
-                    rotations = generate_crop_rotation_plan(manual_plant.strip(), region, soil_type, market_focus)
-            
-            st.session_state.crop_rotation_result = {
-                "plant_type": plant_type,
-                "rotations": rotations.get("rotations", []),
-                "info": rotations.get("info", {}),
-                "region": region,
-                "soil_type": soil_type
-            }
+        if plant_type:
+            with st.spinner(f"Generating accurate rotation plan for {plant_type}..."):
+                rotations = generate_crop_rotation_plan(plant_type, region, soil_type, market_focus)
+                
+                st.session_state.crop_rotation_result = {
+                    "plant_type": plant_type,
+                    "rotations": rotations.get("rotations", []),
+                    "info": rotations.get("info", {}),
+                    "region": region,
+                    "soil_type": soil_type
+                }
+        else:
+            st.warning("Please select or enter a plant type first!")
     
     # Display rotation results if they exist
     if st.session_state.crop_rotation_result:
@@ -1401,8 +1410,8 @@ elif page == "Crop Rotation Advisor":
             st.markdown(f"""
             <div class="rotation-card">
                 <div class="rotation-year">🔄 Year 2</div>
-                <div class="crop-name">{rotations[0]}</div>
-                <div class="crop-description">{info.get(rotations[0], 'Rotation crop to break disease cycle.')}</div>
+                <div class="crop-name">{rotations[0] if len(rotations) > 0 else 'Crop 2'}</div>
+                <div class="crop-description">{info.get(rotations[0], 'Rotation crop to break disease cycle.') if len(rotations) > 0 else 'Rotation crop'}</div>
             </div>
             """, unsafe_allow_html=True)
         
@@ -1410,8 +1419,8 @@ elif page == "Crop Rotation Advisor":
             st.markdown(f"""
             <div class="rotation-card">
                 <div class="rotation-year">🌿 Year 3</div>
-                <div class="crop-name">{rotations[1]}</div>
-                <div class="crop-description">{info.get(rotations[1], 'Alternative crop for diversification.')}</div>
+                <div class="crop-name">{rotations[1] if len(rotations) > 1 else 'Crop 3'}</div>
+                <div class="crop-description">{info.get(rotations[1], 'Alternative crop for diversification.') if len(rotations) > 1 else 'Alternative crop'}</div>
             </div>
             """, unsafe_allow_html=True)
         
