@@ -49,16 +49,96 @@ TREATMENT_COSTS = {
 
 # ============ CROP ROTATION DATABASE ============
 CROP_ROTATION_DATA = {
-    "Tomato": ["Beans", "Cabbage", "Cucumber"],
-    "Rose": ["Marigold", "Chrysanthemum", "Herbs"],
-    "Apple": ["Legume Cover Crops", "Grasses", "Berries"],
-    "Lettuce": ["Spinach", "Broccoli", "Cauliflower"],
-    "Grape": ["Legume Cover Crops", "Cereals", "Vegetables"],
-    "Pepper": ["Onion", "Garlic", "Spinach"],
-    "Cucumber": ["Maize", "Okra", "Legumes"],
-    "Strawberry": ["Garlic", "Onion", "Leafy Greens"],
-    "Corn": ["Soybean", "Pulses", "Oilseeds"],
-    "Potato": ["Peas", "Mustard", "Cereals"],
+    "Tomato": {
+        "rotations": ["Beans", "Cabbage", "Cucumber"],
+        "info": {
+            "Tomato": "High-value solanaceae crop. Susceptible to early/late blight, fusarium wilt, and bacterial diseases. Benefits from crop rotation of 3+ years.",
+            "Beans": "Nitrogen-fixing legume. Improves soil nitrogen content. Breaks disease cycle for tomato. Compatible with tomato crop rotation.",
+            "Cabbage": "Brassica family. Helps control tomato diseases. Requires different nutrient profile. Good rotation choice.",
+            "Cucumber": "Cucurbitaceae family. No common diseases with tomato. Light feeder after beans. Completes rotation cycle."
+        }
+    },
+    "Rose": {
+        "rotations": ["Marigold", "Chrysanthemum", "Herbs"],
+        "info": {
+            "Rose": "Ornamental crop. Susceptible to black spot, powdery mildew, rose rosette virus. Needs disease break.",
+            "Marigold": "Natural pest repellent. Flowers attract beneficial insects. Cleanses soil. Excellent companion.",
+            "Chrysanthemum": "Different pest/disease profile. Breaks rose pathogen cycle. Similar care requirements.",
+            "Herbs": "Basil, rosemary improve soil health. Aromatics confuse rose pests. Reduces chemical inputs."
+        }
+    },
+    "Apple": {
+        "rotations": ["Legume Cover Crops", "Grasses", "Berries"],
+        "info": {
+            "Apple": "Long-term perennial crop. Susceptible to apple scab, fire blight, rust. Needs 4-5 year rotation minimum.",
+            "Legume Cover Crops": "Nitrogen fixation. Soil improvement. Breaks pathogen cycle. Reduces input costs.",
+            "Grasses": "Erosion control. Soil structure improvement. Natural pest predator habitat. Beneficial insects.",
+            "Berries": "Different root depth. Utilize different nutrients. Continues income during apple off-year."
+        }
+    },
+    "Lettuce": {
+        "rotations": ["Spinach", "Broccoli", "Cauliflower"],
+        "info": {
+            "Lettuce": "Cool-season leafy crop. Susceptible to downy mildew, tip burn, mosaic virus. Quick 60-70 day cycle.",
+            "Spinach": "Similar family (Amaranthaceae). Resistant to lettuce diseases. Tolerates cold. Soil enrichment.",
+            "Broccoli": "Brassica family. Different pest profile. Breaks disease cycle. Heavy feeder needs composting.",
+            "Cauliflower": "Brassica family. Follows spinach. Light-sensitive. Completes 3-crop cycle for lettuce disease control."
+        }
+    },
+    "Grape": {
+        "rotations": ["Legume Cover Crops", "Cereals", "Vegetables"],
+        "info": {
+            "Grape": "Perennial vine crop. Powdery mildew, downy mildew, phylloxera major concerns. 5+ year rotation needed.",
+            "Legume Cover Crops": "Nitrogen replenishment. Soil structure restoration. Disease vector elimination.",
+            "Cereals": "Wheat/maize. Different nutrient uptake. Soil consolidation. Nematode cycle break.",
+            "Vegetables": "Diverse crops reduce soil depletion. Polyculture benefits. Re-establishes soil microbiology."
+        }
+    },
+    "Pepper": {
+        "rotations": ["Onion", "Garlic", "Spinach"],
+        "info": {
+            "Pepper": "Solanaceae crop. Anthracnose, bacterial wilt, phytophthora major issues. 3-year rotation essential.",
+            "Onion": "Allium family. Different disease profile. Fungicide applications reduced. Breaks solanaceae cycle.",
+            "Garlic": "Allium family. Natural pest deterrent. Soil antimicrobial properties. Autumn/winter crop.",
+            "Spinach": "Cool-season crop. No common pepper diseases. Nitrogen-fixing partners. Spring/fall compatible."
+        }
+    },
+    "Cucumber": {
+        "rotations": ["Maize", "Okra", "Legumes"],
+        "info": {
+            "Cucumber": "Cucurbitaceae family. Powdery mildew, downy mildew, beetle damage. 2-3 year rotation suggested.",
+            "Maize": "Tall crop provides shade break. Different root system. Utilizes soil nitrogen. Strong market demand.",
+            "Okra": "Malvaceae family. No overlapping pests. Nitrogen-fixing tendency. Heat-tolerant summer crop.",
+            "Legumes": "Nitrogen restoration. Disease-free break for cucumber. Pea/bean varieties available for season."
+        }
+    },
+    "Strawberry": {
+        "rotations": ["Garlic", "Onion", "Leafy Greens"],
+        "info": {
+            "Strawberry": "Low-growing perennial. Leaf scorch, powdery mildew, red stele root rot issues. 3-year bed rotation.",
+            "Garlic": "Deep-rooted. Antimicrobial soil activity. Plant autumn, harvest spring. Excellent succession crop.",
+            "Onion": "Bulb crop. Disease-free break. Allergenic properties deter strawberry pests. Rotation crop.",
+            "Leafy Greens": "Spinach/lettuce. Quick cycle. Utilizes residual nutrients. Spring/fall timing options."
+        }
+    },
+    "Corn": {
+        "rotations": ["Soybean", "Pulses", "Oilseeds"],
+        "info": {
+            "Corn": "Heavy nitrogen feeder. Leaf blotch, rust, corn borer, fumonisin concerns. 3+ year rotation critical.",
+            "Soybean": "Nitrogen-fixing legume. Reduces fertilizer needs 40-50%. Breaks corn pest cycle naturally.",
+            "Pulses": "Chickpea/lentil. Additional nitrogen fixation. High market value. Diverse pest profile than corn.",
+            "Oilseeds": "Sunflower/safflower. Soil structure improvement. Different nutrient uptake. Income diversification."
+        }
+    },
+    "Potato": {
+        "rotations": ["Peas", "Mustard", "Cereals"],
+        "info": {
+            "Potato": "Solanaceae crop. Late blight, early blight, nematodes persistent issue. 4-year rotation required.",
+            "Peas": "Nitrogen-fixing legume. Cold-season crop. Breaks potato pathogen cycle. Soil health restoration.",
+            "Mustard": "Oil crop. Biofumigation properties. Natural nematode control. Green manure if plowed.",
+            "Cereals": "Wheat/barley. Different root depth. Soil consolidation. Completes disease-break rotation cycle."
+        }
+    }
 }
 
 REGIONS = ["North India", "South India", "East India", "West India", "Central India"]
@@ -442,13 +522,27 @@ st.markdown("""
         margin-bottom: 10px;
     }
     
+    .crop-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #667eea;
+        margin: 10px 0;
+    }
+    
+    .crop-description {
+        font-size: 0.95rem;
+        color: #b0c4ff;
+        margin-top: 10px;
+        line-height: 1.6;
+    }
+    
     .kisan-response-box {
         background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
         border: 3px solid #667eea;
         border-radius: 15px;
         padding: 25px;
         margin: 20px 0;
-        font-size: 1.3rem;
+        font-size: 1.25rem;
         line-height: 1.8;
         color: #b0c4ff;
         font-weight: 500;
@@ -650,36 +744,53 @@ def validate_json_result(data):
 
 
 def generate_crop_rotation_plan(plant_type, region, soil_type, market_focus):
-    rotations = CROP_ROTATION_DATA.get(
-        plant_type,
-        ["Legumes or Pulses", "Cereals (Wheat/Maize)", "Oilseeds or Vegetables"]
-    )
-    return rotations
+    if plant_type in CROP_ROTATION_DATA:
+        return CROP_ROTATION_DATA[plant_type]
+    else:
+        return {
+            "rotations": ["Legumes or Pulses", "Cereals (Wheat/Maize)", "Oilseeds or Vegetables"],
+            "info": {
+                plant_type: f"Primary crop. Requires disease break and soil replenishment.",
+                "Legumes or Pulses": "Nitrogen-fixing crops. Soil improvement and disease cycle break.",
+                "Cereals (Wheat/Maize)": "Different nutrient profile. Continues income generation.",
+                "Oilseeds or Vegetables": "Diverse crop selection. Completes rotation cycle."
+            }
+        }
 
 
-def generate_cost_roi_text(plant_name, disease_name, organic_cost, chemical_cost,
-                           yield_kg, market_price):
-    total_value = yield_kg * market_price
-    loss_prevented = total_value * 0.4
-
-    org_roi = int(((loss_prevented - organic_cost) / organic_cost * 100)) if organic_cost > 0 else 0
-    chem_roi = int(((loss_prevented - chemical_cost) / chemical_cost * 100)) if chemical_cost > 0 else 0
-
-    organic_net = int(loss_prevented - organic_cost)
-    chemical_net = int(loss_prevented - chemical_cost)
-
-    return {
-        "total_value": int(total_value),
-        "loss_prevented": int(loss_prevented),
-        "org_roi": org_roi,
-        "chem_roi": chem_roi,
-        "organic_net": organic_net,
-        "chemical_net": chemical_net
-    }
+def get_manual_rotation_plan(plant_name):
+    """Generate rotation plan for manually entered plant using Gemini"""
+    try:
+        model = genai.GenerativeModel('gemini-2.5-flash')
+    except Exception:
+        return None
+    
+    prompt = f"""You are an agricultural expert. Provide a 3-year crop rotation plan for {plant_name}.
+    
+Return ONLY valid JSON in this exact format (no markdown, no explanations):
+{{
+  "rotations": ["Crop1", "Crop2", "Crop3"],
+  "info": {{
+    "{plant_name}": "Brief info about {plant_name}",
+    "Crop1": "Why Crop1 is good after {plant_name}",
+    "Crop2": "Why Crop2 is good after Crop1",
+    "Crop3": "Why Crop3 completes the cycle"
+  }}
+}}"""
+    
+    try:
+        response = model.generate_content(prompt)
+        result = extract_json_robust(response.text)
+        if result and "rotations" in result and "info" in result:
+            return result
+    except Exception:
+        pass
+    
+    return None
 
 
 def get_farmer_bot_response(user_question, diagnosis_context=None):
-    """Context-aware Farmer Assistant using Gemini"""
+    """Context-aware Farmer Assistant using Gemini with improved response"""
     try:
         model = genai.GenerativeModel('gemini-2.5-flash')
     except Exception:
@@ -692,17 +803,23 @@ Current Diagnosis:
 - Plant: {diagnosis_context.get('plant_type', 'Unknown')}
 - Disease: {diagnosis_context.get('disease_name', 'Unknown')}
 - Severity: {diagnosis_context.get('severity', 'Unknown')}
+- Confidence: {diagnosis_context.get('confidence', 'Unknown')}%
 """
 
-    prompt = f"""You are a helpful agricultural advisor for Indian farmers named KisanAI.
-Answer in simple, practical language (max 3-4 sentences).
-Focus on low-cost, realistic solutions.
+    prompt = f"""You are KisanAI, an expert agricultural advisor for Indian farmers with deep expertise in crop management, disease control, and sustainable farming.
 
 {context_text}
 
 Farmer's Question: {user_question}
 
-Answer directly with practical advice."""
+IMPORTANT: Provide a comprehensive, detailed response (5-8 sentences) that includes:
+1. Direct answer to the question
+2. Practical, cost-effective solutions
+3. Seasonal timing if applicable
+4. Resource availability in India
+5. Long-term sustainability advice
+
+Write in simple Hindi-influenced English. Focus on low-cost, readily available solutions."""
     
     try:
         response = model.generate_content(prompt)
@@ -1170,7 +1287,7 @@ elif page == "KisanAI Assistant":
         st.session_state.kisan_response = answer
         st.rerun()
     
-    # Display KisanAI response below the text box
+    # Display KisanAI response below the text box (ONLY if response exists)
     if st.session_state.kisan_response:
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(f"""
@@ -1225,19 +1342,42 @@ elif page == "Crop Rotation Advisor":
 
     market_focus = st.selectbox("Market Focus", MARKET_FOCUS, label_visibility="visible")
 
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Manual Plant Entry
+    st.markdown("""
+    <div class="info-section">
+        <div class="info-title">📝 Other Manual Type</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    manual_plant = st.text_input("Enter any plant name for rotation plan (e.g., Banana, Mango, Carrot):", placeholder="Type plant name...")
+
     if st.button("📋 Generate Rotation Plan", use_container_width=True, type="primary"):
-        rotations = generate_crop_rotation_plan(plant_type, region, soil_type, market_focus)
-        st.session_state.crop_rotation_result = {
-            "plant_type": plant_type,
-            "rotations": rotations,
-            "region": region,
-            "soil_type": soil_type
-        }
+        if manual_plant.strip():
+            plant_type = manual_plant.strip()
+        
+        with st.spinner(f"Generating rotation plan for {plant_type}..."):
+            rotations = generate_crop_rotation_plan(plant_type, region, soil_type, market_focus)
+            
+            if rotations is None and manual_plant.strip():
+                rotations = get_manual_rotation_plan(manual_plant.strip())
+                if rotations is None:
+                    rotations = generate_crop_rotation_plan(manual_plant.strip(), region, soil_type, market_focus)
+            
+            st.session_state.crop_rotation_result = {
+                "plant_type": plant_type,
+                "rotations": rotations.get("rotations", []),
+                "info": rotations.get("info", {}),
+                "region": region,
+                "soil_type": soil_type
+            }
     
     # Display rotation results if they exist
     if st.session_state.crop_rotation_result:
         result = st.session_state.crop_rotation_result
         rotations = result["rotations"]
+        info = result["info"]
         
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("""
@@ -1252,8 +1392,8 @@ elif page == "Crop Rotation Advisor":
             st.markdown(f"""
             <div class="rotation-card">
                 <div class="rotation-year">📌 Year 1</div>
-                <div style="font-size: 1.2rem; font-weight: 600; color: #667eea;">{result['plant_type']}</div>
-                <div style="font-size: 0.9rem; color: #b0c4ff; margin-top: 10px;">Current Crop<br>Maintain disease management</div>
+                <div class="crop-name">{result['plant_type']}</div>
+                <div class="crop-description">{info.get(result['plant_type'], 'Primary crop for cultivation.')}</div>
             </div>
             """, unsafe_allow_html=True)
         
@@ -1261,8 +1401,8 @@ elif page == "Crop Rotation Advisor":
             st.markdown(f"""
             <div class="rotation-card">
                 <div class="rotation-year">🔄 Year 2</div>
-                <div style="font-size: 1.2rem; font-weight: 600; color: #667eea;">{rotations[0]}</div>
-                <div style="font-size: 0.9rem; color: #b0c4ff; margin-top: 10px;">Rotation Crop<br>Break disease cycle</div>
+                <div class="crop-name">{rotations[0]}</div>
+                <div class="crop-description">{info.get(rotations[0], 'Rotation crop to break disease cycle.')}</div>
             </div>
             """, unsafe_allow_html=True)
         
@@ -1270,8 +1410,8 @@ elif page == "Crop Rotation Advisor":
             st.markdown(f"""
             <div class="rotation-card">
                 <div class="rotation-year">🌿 Year 3</div>
-                <div style="font-size: 1.2rem; font-weight: 600; color: #667eea;">{rotations[1]}</div>
-                <div style="font-size: 0.9rem; color: #b0c4ff; margin-top: 10px;">Alternative Crop<br>Further diversification</div>
+                <div class="crop-name">{rotations[1]}</div>
+                <div class="crop-description">{info.get(rotations[1], 'Alternative crop for diversification.')}</div>
             </div>
             """, unsafe_allow_html=True)
         
@@ -1395,14 +1535,14 @@ elif page == "Cost Calculator & ROI":
         st.markdown("<br>", unsafe_allow_html=True)
 
         if st.button("📊 Calculate ROI Analysis", use_container_width=True, type="primary"):
-            analysis = generate_cost_roi_text(
-                plant_name=plant_name,
-                disease_name=disease_name,
-                organic_cost=organic_cost_input,
-                chemical_cost=chemical_cost_input,
-                yield_kg=yield_kg,
-                market_price=market_price
-            )
+            analysis = {
+                "total_value": int(yield_kg * market_price),
+                "loss_prevented": int(yield_kg * market_price * 0.4),
+                "org_roi": int(((yield_kg * market_price * 0.4 - organic_cost_input) / organic_cost_input * 100)) if organic_cost_input > 0 else 0,
+                "chem_roi": int(((yield_kg * market_price * 0.4 - chemical_cost_input) / chemical_cost_input * 100)) if chemical_cost_input > 0 else 0,
+                "organic_net": int(yield_kg * market_price * 0.4 - organic_cost_input),
+                "chemical_net": int(yield_kg * market_price * 0.4 - chemical_cost_input)
+            }
             st.session_state.cost_roi_result = {
                 "plant_name": plant_name,
                 "disease_name": disease_name,
