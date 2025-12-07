@@ -1,78 +1,4 @@
-import streamlit as st
-import google.generativeai as genai
-from PIL import Image
-import os
-import json
-from datetime import datetime
-import re
-
-st.set_page_config(
-    page_title="🌿 AI Plant Doctor - Smart Edition",
-    page_icon="🌿",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# ============ TREATMENT COSTS DATABASE - ACCURATE INDIA PRICES ============
-TREATMENT_COSTS = {
-    "organic": {
-        "Neem Oil Spray": 250,
-        "Sulfur Powder": 180,
-        "Bordeaux Mixture": 280,
-        "Copper Fungicide (Organic)": 350,
-        "Potassium Bicarbonate": 320,
-        "Bacillus subtilis": 400,
-        "Trichoderma": 450,
-        "Spinosad": 550,
-        "Azadirachtin": 380,
-        "Lime Sulfur": 220,
-        "Sulfur Dust": 150,
-        "Karanja Oil": 280,
-        "Cow Urine Extract": 120,
-    },
-    "chemical": {
-        "Carbendazim (Bavistin)": 120,
-        "Mancozeb (Indofil)": 180,
-        "Copper Oxychloride": 150,
-        "Chlorothalonil": 200,
-        "Fluconazole (Contaf)": 400,
-        "Tebuconazole (Folicur)": 350,
-        "Imidacloprid (Confidor)": 280,
-        "Deltamethrin (Decis)": 240,
-        "Profenofos (Meothrin)": 190,
-        "Thiamethoxam (Actara)": 320,
-        "Azoxystrobin (Amistar)": 450,
-        "Hexaconazole (Contaf Plus)": 380,
-        "Phosphorous Acid": 280,
-    }
-}
-
-# ============ CROP ROTATION DATABASE ============
-CROP_ROTATION_DATA = {
-    "Tomato": {
-        "rotations": ["Beans", "Cabbage", "Cucumber"],
-        "info": {
-            "Tomato": "High-value solanaceae crop. Susceptible to early/late blight, fusarium wilt, and bacterial diseases. Benefits from crop rotation of 3+ years.",
-            "Beans": "Nitrogen-fixing legume. Improves soil nitrogen content. Breaks disease cycle for tomato. Compatible with tomato crop rotation.",
-            "Cabbage": "Brassica family. Helps control tomato diseases. Requires different nutrient profile. Good rotation choice.",
-            "Cucumber": "Cucurbitaceae family. No common diseases with tomato. Light feeder after beans. Completes rotation cycle."
-        }
-    },
-    "Rose": {
-        "rotations": ["Marigold", "Chrysanthemum", "Herbs"],
-        "info": {
-            "Rose": "Ornamental crop. Susceptible to black spot, powdery mildew, rose rosette virus. Needs disease break.",
-            "Marigold": "Natural pest repellent. Flowers attract beneficial insects. Cleanses soil. Excellent companion.",
-            "Chrysanthemum": "Different pest/disease profile. Breaks rose pathogen cycle. Similar care requirements.",
-            "Herbs": "Basil, rosemary improve soil health. Aromatics confuse rose pests. Reduces chemical inputs."
-        }
-    },
-    "Apple": {
-        "rotations": ["Legume Cover Crops", "Grasses", "Berries"],
-        "info": {
-            "Apple": "Long-term perennial crop. Susceptible to apple scab, fire blight, rust. Needs 4-5 year rotation minimum.",
-            "Legume Cover Crops": "Nitrogen fixation. Soil improvement. Breaks pathogen cycle. Reduces input costs.",
-            "Grasses": "Erosion control. Soil structure improvement. Natural pest predator habitat. Beneficial insects.",
+il structure improvement. Natural pest predator habitat. Beneficial insects.",
             "Berries": "Different root depth. Utilize different nutrients. Continues income during apple off-year."
         }
     },
@@ -157,81 +83,6 @@ PLANT_COMMON_DISEASES = {
     "Corn": "Leaf blotch, Rust, Stewart's wilt, Fusarium ear rot, Corn borer",
     "Potato": "Late blight, Early blight, Verticillium wilt, Potato scab, Rhizoctonia",
 }
-
-# ============ TREATMENT QUANTITY CALCULATOR - NEW FUNCTION ============
-def calculate_treatment_quantity(treatment_name, infected_plants, severity):
-    """
-    Calculate treatment quantity needed based on number of infected plants and disease severity.
-    Returns quantity in units with multiplier based on severity.
-    """
-    # Base quantity per plant (in ml or g)
-    treatment_quantities = {
-        # Organic treatments with per-plant requirements (ml or g)
-        "Neem Oil Spray": 50,
-        "Sulfur Powder": 30,
-        "Bordeaux Mixture": 40,
-        "Copper Fungicide (Organic)": 35,
-        "Potassium Bicarbonate": 25,
-        "Bacillus subtilis": 20,
-        "Trichoderma": 20,
-        "Spinosad": 15,
-        "Azadirachtin": 25,
-        "Lime Sulfur": 40,
-        "Sulfur Dust": 30,
-        "Karanja Oil": 50,
-        "Cow Urine Extract": 60,
-        
-        # Chemical treatments with per-plant requirements (ml or g)
-        "Carbendazim (Bavistin)": 10,
-        "Mancozeb (Indofil)": 15,
-        "Copper Oxychloride": 12,
-        "Chlorothalonil": 10,
-        "Fluconazole (Contaf)": 8,
-        "Tebuconazole (Folicur)": 8,
-        "Imidacloprid (Confidor)": 10,
-        "Deltamethrin (Decis)": 8,
-        "Profenofos (Meothrin)": 12,
-        "Thiamethoxam (Actara)": 10,
-        "Azoxystrobin (Amistar)": 8,
-        "Hexaconazole (Contaf Plus)": 8,
-        "Phosphorous Acid": 15,
-    }
-    
-    # Get base quantity per plant
-    base_quantity = treatment_quantities.get(treatment_name, 20)
-    
-    # Severity multipliers for applications
-    severity_multipliers = {
-        "healthy": 0,
-        "mild": 1,
-        "moderate": 2,
-        "severe": 3
-    }
-    
-    severity_lower = severity.lower() if severity else "moderate"
-    multiplier = severity_multipliers.get(severity_lower, 2)
-    
-    # Calculate total quantity needed
-    total_quantity = base_quantity * infected_plants * multiplier
-    
-    # Determine unit based on treatment type
-    if "Oil" in treatment_name or "Spray" in treatment_name or "Extract" in treatment_name or "Acid" in treatment_name:
-        unit = "ml"
-    elif any(x in treatment_name for x in ["Deltamethrin", "Profenofos", "Imidacloprid", "Tebuconazole", "Fluconazole", "Azoxystrobin", "Hexaconazole", "Chlorothalonil"]):
-        unit = "ml"
-    else:
-        unit = "g"
-    
-    applications_needed = multiplier if multiplier > 0 else 1
-    
-    return {
-        "total_quantity": total_quantity,
-        "unit": unit,
-        "per_plant": base_quantity,
-        "infected_plants": infected_plants,
-        "applications": applications_needed,
-        "severity": severity
-    }
 
 # ============ GLOBAL STYLES ============
 st.markdown("""
@@ -367,15 +218,6 @@ st.markdown("""
         font-size: 1rem;
         color: #b0c4ff;
         font-weight: 600;
-    }
-    
-    .quantity-box {
-        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-        border: 2px solid #667eea;
-        border-radius: 10px;
-        padding: 15px;
-        margin: 10px 0;
-        font-size: 0.95rem;
     }
     
     .severity-badge {
@@ -762,6 +604,20 @@ def get_treatment_cost(treatment_type, treatment_name):
     
     return 300 if treatment_type == "organic" else 250
 
+def calculate_treatment_cost(severity, num_treatments=1):
+    """Calculate cost multiplier based on disease severity"""
+    severity_multipliers = {
+        "healthy": 0,
+        "mild": 1,
+        "moderate": 1.5,
+        "severe": 2
+    }
+    
+    severity_lower = severity.lower() if severity else "moderate"
+    multiplier = severity_multipliers.get(severity_lower, 1.5)
+    
+    return multiplier * num_treatments
+
 def resize_image(image, max_width=600, max_height=500):
     image.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
     return image
@@ -945,9 +801,10 @@ with st.sidebar:
         with st.expander("How It Works"):
             st.write("""
             1. Select your plant type  
-            2. Upload leaf image(s)  
-            3. AI specializes in your plant  
-            4. Gets 97% accuracy
+            2. Enter number of infected crops
+            3. Upload leaf image(s)  
+            4. AI specializes in your plant  
+            5. Gets 97% accuracy
             """)
     
     elif page == "KisanAI Assistant":
@@ -994,6 +851,9 @@ if "cost_roi_result" not in st.session_state:
 if "kisan_response" not in st.session_state:
     st.session_state.kisan_response = None
 
+if "infected_plants_count" not in st.session_state:
+    st.session_state.infected_plants_count = 10
+
 # ============ PAGE 1: AI PLANT DOCTOR ============
 if page == "AI Plant Doctor":
     col_plant, col_upload = st.columns([1, 2])
@@ -1038,6 +898,25 @@ if page == "AI Plant Doctor":
             label_visibility="collapsed"
         )
         st.markdown("</div>", unsafe_allow_html=True)
+
+    # ============ NEW: INFECTED PLANTS COUNT INPUT - BELOW PLANT SELECTION ============
+    st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
+    st.subheader("📊 Number of Infected Crops")
+    st.caption("Enter the total number of infected plants/trees in your field")
+    
+    infected_plants_count = st.number_input(
+        "Number of infected plants/trees in your field",
+        min_value=1,
+        max_value=10000,
+        value=10,
+        step=1,
+        label_visibility="collapsed"
+    )
+    
+    st.session_state.infected_plants_count = infected_plants_count
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
 
     if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "Select a plant...":
         if len(uploaded_files) > 3:
@@ -1147,33 +1026,55 @@ if page == "AI Plant Doctor":
 
                         st.markdown("<br>", unsafe_allow_html=True)
 
-                        # ============ NEW: CROP COUNT INPUT SECTION ============
-                        st.markdown("""
-                        <div class="info-section">
-                            <div class="info-title">📊 Treatment Calculation - Infected Plants Count</div>
-                        </div>
-                        """, unsafe_allow_html=True)
+                        col_left, col_right = st.columns(2)
 
-                        col_crop_info1, col_crop_info2 = st.columns([2, 1])
+                        with col_left:
+                            st.markdown("""
+                            <div class="info-section">
+                                <div class="info-title">🔍 Symptoms</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                            for symptom in result.get("symptoms", []):
+                                st.write(f"• {symptom}")
 
-                        with col_crop_info1:
-                            infected_plants_count = st.number_input(
-                                "Number of infected plants/trees in your field",
-                                min_value=1,
-                                max_value=10000,
-                                value=10,
-                                step=1,
-                                help="Enter the total number of plants/trees affected by this disease in your field"
-                            )
-
-                        with col_crop_info2:
-                            st.write("")
-                            st.write("")
-                            st.write(f"✓ **{infected_plants_count} plants** selected")
+                        with col_right:
+                            st.markdown("""
+                            <div class="info-section">
+                                <div class="info-title">🎯 Differential Diagnosis</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                            for diagnosis in result.get("differential_diagnosis", []):
+                                st.write(f"• {diagnosis}")
 
                         st.markdown("<br>", unsafe_allow_html=True)
 
-                        # ============ UPDATED: TREATMENTS WITH QUANTITY CALCULATIONS ============
+                        col_left, col_right = st.columns(2)
+
+                        with col_left:
+                            st.markdown("""
+                            <div class="info-section">
+                                <div class="info-title">💡 Probable Causes</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                            for cause in result.get("probable_causes", []):
+                                st.write(f"• {cause}")
+
+                        with col_right:
+                            st.markdown("""
+                            <div class="info-section">
+                                <div class="info-title">⚡ Immediate Actions</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                            for action in result.get("immediate_action", []):
+                                st.write(f"• {action}")
+
+                        st.markdown("<br>", unsafe_allow_html=True)
+
+                        # ============ TREATMENTS WITH COSTS BELOW EACH SECTION ============
                         col_treat1, col_treat2 = st.columns(2)
 
                         with col_treat1:
@@ -1186,35 +1087,19 @@ if page == "AI Plant Doctor":
                             for treatment in result.get("organic_treatments", []):
                                 st.write(f"• {treatment}")
 
+                            # Calculate organic treatment cost
                             organic_treatments = result.get("organic_treatments", [])
                             total_organic_cost = 0
                             
                             if organic_treatments:
-                                st.markdown("<div style='margin-top: 15px; padding: 15px; background: rgba(102, 126, 234, 0.1); border-radius: 8px;'>", unsafe_allow_html=True)
-                                st.write("**📋 Treatment Quantity Calculation:**")
-                                
-                                for idx, treatment in enumerate(organic_treatments[:2], 1):
-                                    cost = get_treatment_cost("organic", treatment)
-                                    total_organic_cost += cost
-                                    
-                                    # Calculate treatment quantity
-                                    qty_info = calculate_treatment_quantity(treatment, infected_plants_count, severity)
-                                    
-                                    st.markdown(f"""
-                                    <div class="quantity-box">
-                                    <b>{idx}. {treatment}</b><br>
-                                    • Base per plant: {qty_info['per_plant']}{qty_info['unit']}<br>
-                                    • Infected plants: {qty_info['infected_plants']}<br>
-                                    • Applications: {qty_info['applications']} (for {severity.title()} severity)<br>
-                                    • <b>Total needed: {qty_info['total_quantity']}{qty_info['unit']}</b><br>
-                                    • Cost: Rs {cost}/unit
-                                    </div>
-                                    """, unsafe_allow_html=True)
-                                
-                                st.markdown("</div>", unsafe_allow_html=True)
+                                for treatment in organic_treatments[:2]:
+                                    base_cost = get_treatment_cost("organic", treatment)
+                                    cost_multiplier = calculate_treatment_cost(severity, num_treatments=2)
+                                    treatment_total_cost = base_cost * cost_multiplier * infected_plants_count / 100
+                                    total_organic_cost += treatment_total_cost
 
                             st.markdown(
-                                f'<div class="cost-info">💰 Organic Treatment Budget: Rs {total_organic_cost}</div>',
+                                f'<div class="cost-info">💰 Total Organic Treatment Cost: Rs {int(total_organic_cost)}</div>',
                                 unsafe_allow_html=True
                             )
 
@@ -1228,41 +1113,24 @@ if page == "AI Plant Doctor":
                             for treatment in result.get("chemical_treatments", []):
                                 st.write(f"• {treatment}")
 
+                            # Calculate chemical treatment cost
                             chemical_treatments = result.get("chemical_treatments", [])
                             total_chemical_cost = 0
                             
                             if chemical_treatments:
-                                st.markdown("<div style='margin-top: 15px; padding: 15px; background: rgba(102, 126, 234, 0.1); border-radius: 8px;'>", unsafe_allow_html=True)
-                                st.write("**📋 Treatment Quantity Calculation:**")
-                                
-                                for idx, treatment in enumerate(chemical_treatments[:2], 1):
-                                    cost = get_treatment_cost("chemical", treatment)
-                                    total_chemical_cost += cost
-                                    
-                                    # Calculate treatment quantity
-                                    qty_info = calculate_treatment_quantity(treatment, infected_plants_count, severity)
-                                    
-                                    st.markdown(f"""
-                                    <div class="quantity-box">
-                                    <b>{idx}. {treatment}</b><br>
-                                    • Base per plant: {qty_info['per_plant']}{qty_info['unit']}<br>
-                                    • Infected plants: {qty_info['infected_plants']}<br>
-                                    • Applications: {qty_info['applications']} (for {severity.title()} severity)<br>
-                                    • <b>Total needed: {qty_info['total_quantity']}{qty_info['unit']}</b><br>
-                                    • Cost: Rs {cost}/unit
-                                    </div>
-                                    """, unsafe_allow_html=True)
-                                
-                                st.markdown("</div>", unsafe_allow_html=True)
+                                for treatment in chemical_treatments[:2]:
+                                    base_cost = get_treatment_cost("chemical", treatment)
+                                    cost_multiplier = calculate_treatment_cost(severity, num_treatments=2)
+                                    treatment_total_cost = base_cost * cost_multiplier * infected_plants_count / 100
+                                    total_chemical_cost += treatment_total_cost
 
                             st.markdown(
-                                f'<div class="cost-info">💰 Chemical Treatment Budget: Rs {total_chemical_cost}</div>',
+                                f'<div class="cost-info">💰 Total Chemical Treatment Cost: Rs {int(total_chemical_cost)}</div>',
                                 unsafe_allow_html=True
                             )
 
                         st.markdown("<br>", unsafe_allow_html=True)
 
-                        # Rest of the sections (Prevention, Plant Notes, etc.)
                         col_left, col_right = st.columns(2)
 
                         with col_left:
@@ -1284,7 +1152,7 @@ if page == "AI Plant Doctor":
                             
                             st.write(result.get("plant_specific_notes", "No specific notes"))
 
-                        st.markdown("<br>", unsafe_allow_html=True)
+                        st.markdown("</div>", unsafe_allow_html=True)
 
                         # Save to session state
                         st.session_state.last_diagnosis = {
@@ -1439,7 +1307,7 @@ elif page == "Cost Calculator & ROI":
         with col1:
             treatment_cost = st.number_input(
                 "Total Treatment Cost (Rs)",
-                value=diagnosis.get("organic_cost", 0) + diagnosis.get("chemical_cost", 0),
+                value=int(diagnosis.get("organic_cost", 0) + diagnosis.get("chemical_cost", 0)),
                 min_value=0
             )
 
