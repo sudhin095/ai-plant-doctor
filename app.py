@@ -6,7 +6,15 @@ import json
 from datetime import datetime
 import re
 import numpy as np
-import cv2
+
+# Safe cv2 import: app works even if OpenCV is not installed
+try:
+    import cv2
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
+    cv2 = None
+
 import torch
 import torch.nn.functional as F
 
@@ -742,10 +750,10 @@ def extract_json_robust(response_text):
         pass
     
     cleaned = response_text
-    if "```json" in cleaned:
-        cleaned = cleaned.split("```json")[1].split("```")[0]
+    if "```
+        cleaned = cleaned.split("```json").split("```
     elif "```" in cleaned:
-        cleaned = cleaned.split("```")[1].split("```")[0]
+        cleaned = cleaned.split("``````")[0]
     
     try:
         return json.loads(cleaned.strip())
@@ -836,9 +844,18 @@ def predict_hybrid(image, yolo_model, vit_model, device):
                         "confidence": conf,
                         "bbox": [x1, y1, x2, y2]
                     })
-                    cv2.rectangle(annotated_img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                    cv2.putText(annotated_img, f"Disease {conf:.2f}", (x1, y1-10), 
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                    # Only draw boxes if OpenCV is available
+                    if CV2_AVAILABLE:
+                        cv2.rectangle(annotated_img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                        cv2.putText(
+                            annotated_img,
+                            f"Disease {conf:.2f}",
+                            (x1, y1-10),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.5,
+                            (0, 255, 0),
+                            2
+                        )
         
         # ViT Classification
         vit_input = image.resize((224, 224))
@@ -1444,6 +1461,7 @@ elif page == "KisanAI Assistant":
         st.markdown("""
         <div class="info-section">
             <div class="info-title">Current Diagnosis Context</div>
+        </div>
         """, unsafe_allow_html=True)
         col_ctx1, col_ctx2, col_ctx3 = st.columns(3)
         with col_ctx1:
