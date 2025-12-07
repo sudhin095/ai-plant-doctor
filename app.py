@@ -1,4 +1,78 @@
-il structure improvement. Natural pest predator habitat. Beneficial insects.",
+import streamlit as st
+import google.generativeai as genai
+from PIL import Image
+import os
+import json
+from datetime import datetime
+import re
+
+st.set_page_config(
+    page_title="🌿 AI Plant Doctor - Smart Edition",
+    page_icon="🌿",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# ============ TREATMENT COSTS DATABASE - ACCURATE INDIA PRICES ============
+TREATMENT_COSTS = {
+    "organic": {
+        "Neem Oil Spray": 250,
+        "Sulfur Powder": 180,
+        "Bordeaux Mixture": 280,
+        "Copper Fungicide (Organic)": 350,
+        "Potassium Bicarbonate": 320,
+        "Bacillus subtilis": 400,
+        "Trichoderma": 450,
+        "Spinosad": 550,
+        "Azadirachtin": 380,
+        "Lime Sulfur": 220,
+        "Sulfur Dust": 150,
+        "Karanja Oil": 280,
+        "Cow Urine Extract": 120,
+    },
+    "chemical": {
+        "Carbendazim (Bavistin)": 120,
+        "Mancozeb (Indofil)": 180,
+        "Copper Oxychloride": 150,
+        "Chlorothalonil": 200,
+        "Fluconazole (Contaf)": 400,
+        "Tebuconazole (Folicur)": 350,
+        "Imidacloprid (Confidor)": 280,
+        "Deltamethrin (Decis)": 240,
+        "Profenofos (Meothrin)": 190,
+        "Thiamethoxam (Actara)": 320,
+        "Azoxystrobin (Amistar)": 450,
+        "Hexaconazole (Contaf Plus)": 380,
+        "Phosphorous Acid": 280,
+    }
+}
+
+# ============ CROP ROTATION DATABASE ============
+CROP_ROTATION_DATA = {
+    "Tomato": {
+        "rotations": ["Beans", "Cabbage", "Cucumber"],
+        "info": {
+            "Tomato": "High-value solanaceae crop. Susceptible to early/late blight, fusarium wilt, and bacterial diseases. Benefits from crop rotation of 3+ years.",
+            "Beans": "Nitrogen-fixing legume. Improves soil nitrogen content. Breaks disease cycle for tomato. Compatible with tomato crop rotation.",
+            "Cabbage": "Brassica family. Helps control tomato diseases. Requires different nutrient profile. Good rotation choice.",
+            "Cucumber": "Cucurbitaceae family. No common diseases with tomato. Light feeder after beans. Completes rotation cycle."
+        }
+    },
+    "Rose": {
+        "rotations": ["Marigold", "Chrysanthemum", "Herbs"],
+        "info": {
+            "Rose": "Ornamental crop. Susceptible to black spot, powdery mildew, rose rosette virus. Needs disease break.",
+            "Marigold": "Natural pest repellent. Flowers attract beneficial insects. Cleanses soil. Excellent companion.",
+            "Chrysanthemum": "Different pest/disease profile. Breaks rose pathogen cycle. Similar care requirements.",
+            "Herbs": "Basil, rosemary improve soil health. Aromatics confuse rose pests. Reduces chemical inputs."
+        }
+    },
+    "Apple": {
+        "rotations": ["Legume Cover Crops", "Grasses", "Berries"],
+        "info": {
+            "Apple": "Long-term perennial crop. Susceptible to apple scab, fire blight, rust. Needs 4-5 year rotation minimum.",
+            "Legume Cover Crops": "Nitrogen fixation. Soil improvement. Breaks pathogen cycle. Reduces input costs.",
+            "Grasses": "Erosion control. Soil structure improvement. Natural pest predator habitat. Beneficial insects.",
             "Berries": "Different root depth. Utilize different nutrients. Continues income during apple off-year."
         }
     },
