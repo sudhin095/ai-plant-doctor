@@ -161,10 +161,7 @@ PLANT_COMMON_DISEASES = {
 # ============ GLOBAL STYLES ============
 st.markdown("""
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-    }
+    * { margin: 0; padding: 0; }
     
     .stApp {
         background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
@@ -175,10 +172,7 @@ st.markdown("""
         background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
     }
     
-    p, span, div, label {
-        color: #e4e6eb;
-        font-size: 1.1rem;
-    }
+    p, span, div, label { color: #e4e6eb; font-size: 1.1rem; }
     
     .header-container {
         background: linear-gradient(135deg, #1a2a47 0%, #2d4a7a 100%);
@@ -250,19 +244,8 @@ st.markdown("""
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    .disease-name {
-        font-size: 2.8rem;
-        font-weight: 700;
-        margin-bottom: 15px;
-    }
-    
-    .disease-meta {
-        font-size: 1.1rem;
-        opacity: 0.95;
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-    }
+    .disease-name { font-size: 2.8rem; font-weight: 700; margin-bottom: 15px; }
+    .disease-meta { font-size: 1.1rem; opacity: 0.95; display: flex; gap: 20px; flex-wrap: wrap; }
     
     .info-section {
         background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
@@ -323,30 +306,6 @@ st.markdown("""
     .type-nutrient { background-color: #0d3a1a; color: #81c784; }
     .type-healthy { background-color: #0d3a1a; color: #81c784; }
     
-    .debug-box {
-        background: #0f1419;
-        border: 1px solid #667eea;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 10px 0;
-        font-family: monospace;
-        font-size: 0.95rem;
-        max-height: 400px;
-        overflow-y: auto;
-        color: #b0c4ff;
-        white-space: pre-wrap;
-    }
-    
-    .warning-box {
-        background: linear-gradient(135deg, #4d2600 0%, #3d2000 100%);
-        border: 1px solid #ffc107;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 10px 0;
-        color: #ffcc80;
-        font-size: 1.1rem;
-    }
-    
     .success-box {
         background: linear-gradient(135deg, #1b5e20 0%, #0d3a1a 100%);
         border: 1px solid #4caf50;
@@ -357,13 +316,13 @@ st.markdown("""
         font-size: 1.1rem;
     }
     
-    .error-box {
-        background: linear-gradient(135deg, #5a1a1a 0%, #3d0d0d 100%);
-        border: 1px solid #ff6b6b;
+    .warning-box {
+        background: linear-gradient(135deg, #4d2600 0%, #3d2000 100%);
+        border: 1px solid #ffc107;
         border-radius: 8px;
         padding: 15px;
         margin: 10px 0;
-        color: #ef9a9a;
+        color: #ffcc80;
         font-size: 1.1rem;
     }
     
@@ -382,78 +341,6 @@ st.markdown("""
     .stButton > button:hover {
         transform: translateY(-2px) !important;
         box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
-    }
-    
-    .image-container {
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(102, 126, 234, 0.2);
-    }
-    
-    .tips-card {
-        background: linear-gradient(135deg, #1a2a47 0%, #2d3050 100%);
-        border: 2px solid #667eea;
-        border-radius: 10px;
-        padding: 15px;
-        margin: 10px 0;
-    }
-    
-    .tips-card-title {
-        font-weight: 700;
-        color: #b0c4ff;
-        margin-bottom: 10px;
-        font-size: 1.2rem;
-    }
-    
-    [data-testid="stSidebar"] {
-        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
-    }
-    
-    [data-testid="metric-container"] {
-        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
-        border: 1px solid rgba(102, 126, 234, 0.2);
-        border-radius: 8px;
-    }
-    
-    [data-testid="stExpander"] {
-        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
-        border: 1px solid rgba(102, 126, 234, 0.2);
-    }
-    
-    .streamlit-expanderHeader {
-        color: #b0c4ff !important;
-        font-size: 1.1rem !important;
-    }
-    
-    input, textarea, select {
-        background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%) !important;
-        border: 1px solid rgba(102, 126, 234, 0.3) !important;
-        color: #e4e6eb !important;
-        font-size: 1.1rem !important;
-    }
-    
-    h2, h3, h4 {
-        font-size: 1.4rem !important;
-        color: #b0c4ff !important;
-    }
-    
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-    
-    ::-webkit-scrollbar-track {
-        background: #0f1419;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-        background: #667eea;
-        border-radius: 4px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-        background: #764ba2;
     }
     
     .chatbot-container {
@@ -560,6 +447,20 @@ st.markdown("""
         color: #b0c4ff;
         font-weight: 500;
     }
+    
+    [data-testid="stSidebar"] { background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%); }
+    [data-testid="metric-container"] { background: linear-gradient(135deg, #2a3040 0%, #353d50 100%); border: 1px solid rgba(102, 126, 234, 0.2); border-radius: 8px; }
+    [data-testid="stExpander"] { background: linear-gradient(135deg, #2a3040 0%, #353d50 100%); border: 1px solid rgba(102, 126, 234, 0.2); }
+    .streamlit-expanderHeader { color: #b0c4ff !important; font-size: 1.1rem !important; }
+    
+    input, textarea, select {
+        background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%) !important;
+        border: 1px solid rgba(102, 126, 234, 0.3) !important;
+        color: #e4e6eb !important;
+        font-size: 1.1rem !important;
+    }
+    
+    h2, h3, h4 { font-size: 1.4rem !important; color: #b0c4ff !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -570,7 +471,6 @@ except Exception:
     st.error("GEMINI_API_KEY not found in environment variables!")
     st.stop()
 
-# SMART PROMPT WITH PLANT TYPE SPECIALIZATION
 EXPERT_PROMPT_TEMPLATE = """You are an elite plant pathologist with 40 years of specialized experience diagnosing diseases in {plant_type}.
 You are an expert specifically in {plant_type} diseases and health issues.
 
@@ -596,42 +496,14 @@ RESPOND WITH EXACTLY THIS JSON:
   "confidence": 85,
   "confidence_reason": "Detailed explanation specific to {plant_type}",
   "image_quality": "Excellent/Good/Fair/Poor - explanation",
-  "symptoms": [
-    "Specific symptom seen in {plant_type}",
-    "Secondary symptom",
-    "Tertiary symptom if present"
-  ],
-  "differential_diagnosis": [
-    "Disease A (common in {plant_type}): Why it might be this",
-    "Disease B (common in {plant_type}): Why it might be this",
-    "Disease C: Why this is unlikely for {plant_type}"
-  ],
-  "probable_causes": [
-    "Primary cause relevant to {plant_type}",
-    "Secondary cause",
-    "Environmental factor"
-  ],
-  "immediate_action": [
-    "Action 1: Specific to {plant_type}",
-    "Action 2: Specific to {plant_type}",
-    "Action 3: Specific to {plant_type}"
-  ],
-  "organic_treatments": [
-    "Treatment 1: Product and application for {plant_type}",
-    "Treatment 2: Alternative for {plant_type}",
-    "Timing: When to apply for {plant_type}"
-  ],
-  "chemical_treatments": [
-    "Chemical 1: Safe for {plant_type} with dilution",
-    "Chemical 2: Alternative safe for {plant_type}",
-    "Safety: Important precautions for {plant_type}"
-  ],
-  "prevention_long_term": [
-    "Prevention strategy 1 for {plant_type}",
-    "Prevention strategy 2 for {plant_type}",
-    "Resistant varieties: If available for {plant_type}"
-  ],
-  "plant_specific_notes": "Important notes specific to {plant_type} care and disease management",
+  "symptoms": ["Symptom 1", "Symptom 2", "Symptom 3"],
+  "differential_diagnosis": ["Disease A (common in {plant_type}): Why", "Disease B (common in {plant_type}): Why"],
+  "probable_causes": ["Cause 1", "Cause 2", "Cause 3"],
+  "immediate_action": ["Action 1: Specific to {plant_type}", "Action 2"],
+  "organic_treatments": ["Treatment 1", "Treatment 2", "Timing"],
+  "chemical_treatments": ["Chemical 1", "Chemical 2", "Safety notes"],
+  "prevention_long_term": ["Prevention 1", "Prevention 2"],
+  "plant_specific_notes": "Important notes specific to {plant_type} care",
   "similar_conditions": "Other {plant_type} conditions that look similar"
 }}"""
 
@@ -664,7 +536,6 @@ def get_severity_badge_class(severity):
     return "severity-moderate"
 
 def get_treatment_cost(treatment_type, treatment_name):
-    """Get ACCURATE Indian market cost for treatment"""
     costs = TREATMENT_COSTS.get(treatment_type, {})
     treatment_name_lower = treatment_name.lower()
     
@@ -679,17 +550,9 @@ def get_treatment_cost(treatment_type, treatment_name):
     return 300 if treatment_type == "organic" else 250
 
 def calculate_treatment_cost(severity, num_treatments=1):
-    """Calculate cost multiplier based on disease severity"""
-    severity_multipliers = {
-        "healthy": 0,
-        "mild": 1,
-        "moderate": 1.5,
-        "severe": 2
-    }
-    
+    severity_multipliers = {"healthy": 0, "mild": 1, "moderate": 1.5, "severe": 2}
     severity_lower = severity.lower() if severity else "moderate"
     multiplier = severity_multipliers.get(severity_lower, 1.5)
-    
     return multiplier * num_treatments
 
 def resize_image(image, max_width=600, max_height=500):
@@ -697,7 +560,6 @@ def resize_image(image, max_width=600, max_height=500):
     return image
 
 def enhance_image_for_analysis(image):
-    """Enhance image contrast and clarity for better AI analysis"""
     from PIL import ImageEnhance
     enhancer = ImageEnhance.Contrast(image)
     image = enhancer.enhance(1.3)
@@ -735,10 +597,7 @@ def extract_json_robust(response_text):
     return None
 
 def validate_json_result(data):
-    required_fields = [
-        "disease_name", "disease_type", "severity", 
-        "confidence", "symptoms", "probable_causes"
-    ]
+    required_fields = ["disease_name", "disease_type", "severity", "confidence", "symptoms", "probable_causes"]
     
     if not isinstance(data, dict):
         return False, "Response is not a dictionary"
@@ -750,35 +609,29 @@ def validate_json_result(data):
     return True, "Valid"
 
 def generate_crop_rotation_plan(plant_type, region, soil_type, market_focus):
-    """Generate accurate crop rotation plan"""
     if plant_type in CROP_ROTATION_DATA:
         return CROP_ROTATION_DATA[plant_type]
     else:
         return get_manual_rotation_plan(plant_type)
 
 def get_manual_rotation_plan(plant_name):
-    """Generate rotation plan for manually entered plant using Gemini"""
     try:
         model = genai.GenerativeModel('gemini-2.5-flash')
     except Exception:
         return None
     
-    prompt = f"""You are an agricultural expert with deep knowledge of crop rotation and soil health.
-
+    prompt = f"""You are an agricultural expert with deep knowledge of crop rotation.
 For the plant: {plant_name}
-
-Provide ONLY a valid JSON response in this exact format (no markdown, no explanations, no code blocks):
+Provide ONLY valid JSON (no markdown, no explanations):
 {{
   "rotations": ["Crop1", "Crop2", "Crop3"],
   "info": {{
-    "{plant_name}": "Detailed info about {plant_name}: its family, common diseases, soil requirements, and why it needs rotation",
-    "Crop1": "Why this crop is good after {plant_name}: disease break, nutrient recovery, pest cycle interruption",
-    "Crop2": "Why this crop follows Crop1: soil health improvement, market value, climate compatibility",
-    "Crop3": "Why this completes the cycle: prepares soil for {plant_name} again, different nutrient profile, beneficial properties"
+    "{plant_name}": "About this plant and why rotation needed",
+    "Crop1": "Why good after {plant_name}",
+    "Crop2": "Why follows Crop1",
+    "Crop3": "Why completes cycle"
   }}
-}}
-
-Make sure all information is accurate, detailed, and specific to {plant_name}."""
+}}"""
     
     try:
         response = model.generate_content(prompt)
@@ -799,7 +652,6 @@ Make sure all information is accurate, detailed, and specific to {plant_name}.""
     }
 
 def get_farmer_bot_response(user_question, diagnosis_context=None):
-    """Context-aware Farmer Assistant using Gemini"""
     try:
         model = genai.GenerativeModel('gemini-2.5-flash')
     except Exception:
@@ -815,13 +667,20 @@ Current Diagnosis:
 - Confidence: {diagnosis_context.get('confidence', 'Unknown')}%
 """
 
-    prompt = f"""You are an expert agricultural advisor for farmers.
+    prompt = f"""You are an expert agricultural advisor for farmers with deep expertise in crop management, disease control, and sustainable farming practices.
 
 {context_text}
 
 Farmer's Question: {user_question}
 
-Provide a comprehensive response with practical, cost-effective solutions suitable for farming conditions."""
+IMPORTANT: Provide a comprehensive, detailed response (5-8 sentences) that includes:
+1. Direct answer to the question
+2. Practical, cost-effective solutions suitable for farming conditions
+3. Seasonal timing and weather considerations if applicable
+4. Resource availability and sourcing information
+5. Long-term sustainability and soil health recommendations
+
+Use clear, professional English. Focus on actionable, readily available solutions with proven effectiveness."""
     
     try:
         response = model.generate_content(prompt)
@@ -851,10 +710,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 # ============ SIDEBAR NAVIGATION ============
 with st.sidebar:
-    page = st.radio(
-        "📂 Pages",
-        ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"]
-    )
+    page = st.radio("📂 Pages", ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"])
 
     if page == "AI Plant Doctor":
         st.header("Settings")
@@ -937,11 +793,7 @@ if page == "AI Plant Doctor":
         st.subheader("Select Plant Type")
         
         plant_options = ["Select a plant..."] + sorted(list(PLANT_COMMON_DISEASES.keys())) + ["Other (Manual Entry)"]
-        selected_plant = st.selectbox(
-            "What plant do you have?",
-            plant_options,
-            label_visibility="collapsed"
-        )
+        selected_plant = st.selectbox("What plant do you have?", plant_options, label_visibility="collapsed")
         
         if selected_plant == "Other (Manual Entry)":
             custom_plant = st.text_input("Enter plant name", placeholder="e.g., Banana, Orange")
@@ -965,15 +817,10 @@ if page == "AI Plant Doctor":
         st.subheader("Upload Leaf Images")
         st.caption("Up to 3 images for best results")
         
-        uploaded_files = st.file_uploader(
-            "Select images",
-            type=['jpg', 'jpeg', 'png'],
-            accept_multiple_files=True,
-            label_visibility="collapsed"
-        )
+        uploaded_files = st.file_uploader("Select images", type=['jpg', 'jpeg', 'png'], accept_multiple_files=True, label_visibility="collapsed")
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # ============ NEW: INFECTED PLANTS COUNT INPUT - BELOW PLANT SELECTION ============
+    # ============ INFECTED PLANTS COUNT INPUT - BELOW PLANT SELECTION ============
     st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
     st.subheader("📊 Number of Infected Crops")
     st.caption("Enter the total number of infected plants/trees in your field")
@@ -1001,8 +848,8 @@ if page == "AI Plant Doctor":
 
         if show_tips:
             st.markdown(f"""
-            <div class="tips-card">
-                <div class="tips-card-title">Analyzing {plant_type}</div>
+            <div class="upload-container">
+                <b>Analyzing {plant_type}</b><br>
                 Plant-specific diagnosis in progress...
             </div>
             """, unsafe_allow_html=True)
@@ -1050,13 +897,6 @@ if page == "AI Plant Doctor":
                     response = model.generate_content([prompt] + enhanced_images)
                     raw_response = response.text
 
-                    if debug_mode:
-                        with st.expander("Raw Response"):
-                            st.markdown('<div class="debug-box">', unsafe_allow_html=True)
-                            displayed = raw_response[:3000] + "..." if len(raw_response) > 3000 else raw_response
-                            st.text(displayed)
-                            st.markdown('</div>', unsafe_allow_html=True)
-
                     result = extract_json_robust(raw_response)
 
                     if result is None:
@@ -1103,22 +943,12 @@ if page == "AI Plant Doctor":
                         col_left, col_right = st.columns(2)
 
                         with col_left:
-                            st.markdown("""
-                            <div class="info-section">
-                                <div class="info-title">🔍 Symptoms</div>
-                            </div>
-                            """, unsafe_allow_html=True)
-                            
+                            st.markdown('<div class="info-section"><div class="info-title">🔍 Symptoms</div></div>', unsafe_allow_html=True)
                             for symptom in result.get("symptoms", []):
                                 st.write(f"• {symptom}")
 
                         with col_right:
-                            st.markdown("""
-                            <div class="info-section">
-                                <div class="info-title">🎯 Differential Diagnosis</div>
-                            </div>
-                            """, unsafe_allow_html=True)
-                            
+                            st.markdown('<div class="info-section"><div class="info-title">🎯 Differential Diagnosis</div></div>', unsafe_allow_html=True)
                             for diagnosis in result.get("differential_diagnosis", []):
                                 st.write(f"• {diagnosis}")
 
@@ -1127,22 +957,12 @@ if page == "AI Plant Doctor":
                         col_left, col_right = st.columns(2)
 
                         with col_left:
-                            st.markdown("""
-                            <div class="info-section">
-                                <div class="info-title">💡 Probable Causes</div>
-                            </div>
-                            """, unsafe_allow_html=True)
-                            
+                            st.markdown('<div class="info-section"><div class="info-title">💡 Probable Causes</div></div>', unsafe_allow_html=True)
                             for cause in result.get("probable_causes", []):
                                 st.write(f"• {cause}")
 
                         with col_right:
-                            st.markdown("""
-                            <div class="info-section">
-                                <div class="info-title">⚡ Immediate Actions</div>
-                            </div>
-                            """, unsafe_allow_html=True)
-                            
+                            st.markdown('<div class="info-section"><div class="info-title">⚡ Immediate Actions</div></div>', unsafe_allow_html=True)
                             for action in result.get("immediate_action", []):
                                 st.write(f"• {action}")
 
@@ -1152,19 +972,13 @@ if page == "AI Plant Doctor":
                         col_treat1, col_treat2 = st.columns(2)
 
                         with col_treat1:
-                            st.markdown("""
-                            <div class="info-section">
-                                <div class="info-title">🌿 Organic Treatments</div>
-                            </div>
-                            """, unsafe_allow_html=True)
+                            st.markdown('<div class="info-section"><div class="info-title">🌿 Organic Treatments</div></div>', unsafe_allow_html=True)
                             
-                            for treatment in result.get("organic_treatments", []):
+                            organic_treatments = result.get("organic_treatments", [])
+                            for treatment in organic_treatments:
                                 st.write(f"• {treatment}")
 
-                            # Calculate organic treatment cost
-                            organic_treatments = result.get("organic_treatments", [])
                             total_organic_cost = 0
-                            
                             if organic_treatments:
                                 for treatment in organic_treatments[:2]:
                                     base_cost = get_treatment_cost("organic", treatment)
@@ -1178,19 +992,13 @@ if page == "AI Plant Doctor":
                             )
 
                         with col_treat2:
-                            st.markdown("""
-                            <div class="info-section">
-                                <div class="info-title">💊 Chemical Treatments</div>
-                            </div>
-                            """, unsafe_allow_html=True)
+                            st.markdown('<div class="info-section"><div class="info-title">💊 Chemical Treatments</div></div>', unsafe_allow_html=True)
                             
-                            for treatment in result.get("chemical_treatments", []):
+                            chemical_treatments = result.get("chemical_treatments", [])
+                            for treatment in chemical_treatments:
                                 st.write(f"• {treatment}")
 
-                            # Calculate chemical treatment cost
-                            chemical_treatments = result.get("chemical_treatments", [])
                             total_chemical_cost = 0
-                            
                             if chemical_treatments:
                                 for treatment in chemical_treatments[:2]:
                                     base_cost = get_treatment_cost("chemical", treatment)
@@ -1206,29 +1014,17 @@ if page == "AI Plant Doctor":
                         st.markdown("<br>", unsafe_allow_html=True)
 
                         col_left, col_right = st.columns(2)
-
                         with col_left:
-                            st.markdown("""
-                            <div class="info-section">
-                                <div class="info-title">🛡️ Prevention & Long Term</div>
-                            </div>
-                            """, unsafe_allow_html=True)
-                            
+                            st.markdown('<div class="info-section"><div class="info-title">🛡️ Prevention & Long Term</div></div>', unsafe_allow_html=True)
                             for prevention in result.get("prevention_long_term", []):
                                 st.write(f"✓ {prevention}")
 
                         with col_right:
-                            st.markdown("""
-                            <div class="info-section">
-                                <div class="info-title">📌 Plant-Specific Notes</div>
-                            </div>
-                            """, unsafe_allow_html=True)
-                            
+                            st.markdown('<div class="info-section"><div class="info-title">📌 Plant-Specific Notes</div></div>', unsafe_allow_html=True)
                             st.write(result.get("plant_specific_notes", "No specific notes"))
 
                         st.markdown("</div>", unsafe_allow_html=True)
 
-                        # Save to session state
                         st.session_state.last_diagnosis = {
                             "plant_type": plant_type,
                             "disease_name": disease_name,
@@ -1246,49 +1042,81 @@ if page == "AI Plant Doctor":
 
                 except Exception as e:
                     st.error(f"Error analyzing image: {str(e)}")
-                    if debug_mode:
-                        st.exception(e)
+                    progress_placeholder.empty()
 
 # ============ PAGE 2: KISAN AI ASSISTANT ============
 elif page == "KisanAI Assistant":
     st.markdown("""
     <div class="page-header">
-        <div class="page-title">🌾 KisanAI Assistant</div>
-        <div class="page-subtitle">Ask your farming questions - Get instant expert advice</div>
+        <div class="page-title">🤖 KisanAI Assistant</div>
+        <div class="page-subtitle">Your Personal Agricultural Advisor</div>
     </div>
     """, unsafe_allow_html=True)
 
-    col1, col2 = st.columns([2, 1])
+    diag = st.session_state.last_diagnosis
+    if diag:
+        st.markdown("""
+        <div class="info-section">
+            <div class="info-title">Current Diagnosis Context</div>
+        </div>
+        """, unsafe_allow_html=True)
+        col_ctx1, col_ctx2, col_ctx3 = st.columns(3)
+        with col_ctx1:
+            st.write(f"**🌱 Plant:** {diag.get('plant_type', 'Unknown')}")
+        with col_ctx2:
+            st.write(f"**🦠 Disease:** {diag.get('disease_name', 'Unknown')}")
+        with col_ctx3:
+            st.write(f"**⚠️ Severity:** {diag.get('severity', 'Unknown').title()}")
+    else:
+        st.markdown("""
+        <div class="warning-box">
+        No recent diagnosis found. Run AI Plant Doctor first for better context-aware responses.
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    col_chat_control1, col_chat_control2, col_chat_control3 = st.columns([2, 1, 1])
+    with col_chat_control2:
+        if st.button("🗑️ Clear Chat", use_container_width=True):
+            st.session_state.farmer_bot_messages = []
+            st.session_state.kisan_response = None
+            st.rerun()
+    with col_chat_control3:
+        if st.button("↻ Refresh", use_container_width=True):
+            st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.markdown('<div class="chatbot-container">', unsafe_allow_html=True)
+    if len(st.session_state.farmer_bot_messages) == 0:
+        st.markdown('<div class="chat-message" style="text-align: center;"><b>👋 Welcome to KisanAI!</b><br>Ask me anything about your crops, diseases, treatments, or farming practices.</div>', unsafe_allow_html=True)
+    else:
+        for msg in st.session_state.farmer_bot_messages[-20:]:
+            if msg["role"] == "farmer":
+                st.markdown(f'<div class="chat-message"><b>👨 You:</b> {msg["content"]}</div>', unsafe_allow_html=True)
+            else:
+                st.markdown(f'<div class="chat-message"><b>🤖 KisanAI:</b> {msg["content"]}</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    with st.form("farmer_bot_form", clear_on_submit=True):
+        user_question = st.text_area("Type your question here...", height=100, placeholder="Ask about treatments, prevention, costs, or any farming topic...")
+        submitted = st.form_submit_button("Send Message", use_container_width=True)
+
+    if submitted and user_question.strip():
+        st.session_state.farmer_bot_messages.append({"role": "farmer", "content": user_question.strip()})
+        answer = get_farmer_bot_response(user_question.strip(), diagnosis_context=diag)
+        st.session_state.farmer_bot_messages.append({"role": "assistant", "content": answer})
+        st.session_state.kisan_response = answer
+        st.rerun()
     
-    with col1:
-        user_question = st.text_area(
-            "Ask your farming question",
-            placeholder="e.g., When should I apply treatment? How much water does my crop need? What's the best organic alternative?",
-            height=100,
-            label_visibility="collapsed"
-        )
-
-    with col2:
-        st.write("")
-        st.write("")
-        ask_btn = st.button("Ask KisanAI", use_container_width=True, type="primary")
-
-    if ask_btn and user_question:
-        diagnosis_context = st.session_state.last_diagnosis if st.session_state.last_diagnosis else None
-        
-        with st.spinner("Getting expert advice..."):
-            response = get_farmer_bot_response(user_question, diagnosis_context)
-            st.session_state.kisan_response = response
-            
-            st.markdown(f"""
-            <div class="kisan-response-box">
-            {response}
-            </div>
-            """, unsafe_allow_html=True)
-
     if st.session_state.kisan_response:
+        st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(f"""
         <div class="kisan-response-box">
+        <b>🤖 KisanAI's Response:</b><br><br>
         {st.session_state.kisan_response}
         </div>
         """, unsafe_allow_html=True)
@@ -1297,153 +1125,297 @@ elif page == "KisanAI Assistant":
 elif page == "Crop Rotation Advisor":
     st.markdown("""
     <div class="page-header">
-        <div class="page-title">🔄 Crop Rotation Advisor</div>
-        <div class="page-subtitle">Plan sustainable crop rotation for healthy soil</div>
+        <div class="page-title">🌱 Crop Rotation Advisor</div>
+        <div class="page-subtitle">Sustainable 3-Year Crop Rotation Planning</div>
     </div>
     """, unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2)
+    diag = st.session_state.last_diagnosis
+    default_plant = diag["plant_type"] if diag and diag.get("plant_type") else None
+
+    col_inputs1, col_inputs2 = st.columns(2)
     
-    with col1:
-        rotation_plant = st.selectbox(
-            "Select plant for rotation planning",
-            ["Select..."] + sorted(list(PLANT_COMMON_DISEASES.keys())) + ["Custom Plant"]
-        )
-
-    with col2:
-        region = st.selectbox("Your Region", REGIONS)
-
-    if rotation_plant != "Select...":
-        if rotation_plant == "Custom Plant":
-            rotation_plant = st.text_input("Enter plant name")
-
-        if rotation_plant:
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                soil_type = st.selectbox("Soil Type", SOIL_TYPES)
-            with col2:
-                market_focus = st.selectbox("Market Focus", MARKET_FOCUS)
-            with col3:
-                st.write("")
-                st.write("")
-                rotation_btn = st.button("Generate Plan", use_container_width=True, type="primary")
-
-            if rotation_btn:
-                with st.spinner("Generating rotation plan..."):
-                    rotation_plan = generate_crop_rotation_plan(rotation_plant, region, soil_type, market_focus)
-                    st.session_state.crop_rotation_result = rotation_plan
-
-    if st.session_state.crop_rotation_result:
-        rotation_data = st.session_state.crop_rotation_result
-        
+    with col_inputs1:
         st.markdown("""
         <div class="info-section">
-            <div class="info-title">✅ 3-Year Rotation Plan</div>
+            <div class="info-title">Current Crop Selection</div>
         </div>
         """, unsafe_allow_html=True)
+        
+        use_last = False
+        if default_plant:
+            use_last = st.checkbox(f"Use diagnosed plant: **{default_plant}**", value=True)
+        
+        if use_last and default_plant:
+            plant_type = default_plant
+            st.success(f"Selected: {plant_type}")
+        else:
+            plant_options = sorted(list(PLANT_COMMON_DISEASES.keys()))
+            selected_option = st.selectbox("Select plant or choose 'Other Manual Type'", plant_options + ["Other Manual Type"], label_visibility="collapsed")
+            
+            if selected_option == "Other Manual Type":
+                plant_type = st.text_input("Enter plant name", placeholder="e.g., Banana, Mango, Carrot, Ginger", label_visibility="collapsed")
+                if plant_type:
+                    st.info(f"📝 Will generate rotation plan for: **{plant_type}**")
+            else:
+                plant_type = selected_option
 
-        rotation_crops = rotation_data.get("rotations", [])
-        info = rotation_data.get("info", {})
+    with col_inputs2:
+        st.markdown("""
+        <div class="info-section">
+            <div class="info-title">Regional & Soil Details</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        region = st.selectbox("Region", REGIONS)
+        soil_type = st.selectbox("Soil Type", SOIL_TYPES)
 
-        for year, crop in enumerate(rotation_crops, 1):
+    market_focus = st.selectbox("Market Focus", MARKET_FOCUS, label_visibility="visible")
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    if st.button("📋 Generate Rotation Plan", use_container_width=True, type="primary"):
+        if plant_type:
+            with st.spinner(f"Generating accurate rotation plan for {plant_type}..."):
+                rotations = generate_crop_rotation_plan(plant_type, region, soil_type, market_focus)
+                
+                st.session_state.crop_rotation_result = {
+                    "plant_type": plant_type,
+                    "rotations": rotations.get("rotations", []),
+                    "info": rotations.get("info", {}),
+                    "region": region,
+                    "soil_type": soil_type
+                }
+        else:
+            st.warning("Please select or enter a plant type first!")
+    
+    if st.session_state.crop_rotation_result:
+        result = st.session_state.crop_rotation_result
+        rotations = result["rotations"]
+        info = result["info"]
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("""
+        <div class="info-section">
+            <div class="info-title">Your 3-Year Rotation Strategy</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col_year1, col_year2, col_year3 = st.columns(3)
+        
+        with col_year1:
             st.markdown(f"""
             <div class="rotation-card">
-                <div class="rotation-year">Year {year}: {crop}</div>
-                <div class="crop-description">{info.get(crop, 'No information available')}</div>
+                <div class="rotation-year">📌 Year 1</div>
+                <div class="crop-name">{result['plant_type']}</div>
+                <div class="crop-description">{info.get(result['plant_type'], 'Primary crop for cultivation.')}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col_year2:
+            st.markdown(f"""
+            <div class="rotation-card">
+                <div class="rotation-year">🔄 Year 2</div>
+                <div class="crop-name">{rotations[0] if len(rotations) > 0 else 'Crop 2'}</div>
+                <div class="crop-description">{info.get(rotations[0], 'Rotation crop to break disease cycle.') if len(rotations) > 0 else 'Rotation crop'}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col_year3:
+            st.markdown(f"""
+            <div class="rotation-card">
+                <div class="rotation-year">🌿 Year 3</div>
+                <div class="crop-name">{rotations[1] if len(rotations) > 1 else 'Crop 3'}</div>
+                <div class="crop-description">{info.get(rotations[1], 'Alternative crop for diversification.') if len(rotations) > 1 else 'Alternative crop'}</div>
             </div>
             """, unsafe_allow_html=True)
 
-# ============ PAGE 4: COST CALCULATOR & ROI ============
+# ============ PAGE 4: COST CALCULATOR ============
 elif page == "Cost Calculator & ROI":
     st.markdown("""
     <div class="page-header">
         <div class="page-title">💰 Cost Calculator & ROI Analysis</div>
-        <div class="page-subtitle">Analyze treatment investment and returns</div>
+        <div class="page-subtitle">Investment Analysis for Treatment Options</div>
     </div>
     """, unsafe_allow_html=True)
 
-    if st.session_state.last_diagnosis:
-        diagnosis = st.session_state.last_diagnosis
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.metric("Disease", diagnosis["disease_name"])
-        with col2:
-            st.metric("Plant", diagnosis["plant_type"])
-        with col3:
-            st.metric("Severity", diagnosis["severity"].title())
+    diag = st.session_state.last_diagnosis
+
+    if not diag:
+        st.markdown("""
+        <div class="warning-box">
+        No diagnosis data found. Run AI Plant Doctor first to get disease and treatment information.
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div class="info-section">
+            <div class="info-title">Diagnosis Information</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        plant_name = diag.get("plant_type", "Unknown")
+        disease_name = diag.get("disease_name", "Unknown")
+
+        col_diag1, col_diag2, col_diag3, col_diag4 = st.columns(4)
+        with col_diag1:
+            st.markdown(f"""
+            <div class="stat-box">
+                <div class="stat-label">Plant</div>
+                <div class="stat-value">{plant_name}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col_diag2:
+            st.markdown(f"""
+            <div class="stat-box">
+                <div class="stat-label">Disease</div>
+                <div class="stat-value">{disease_name[:15]}...</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col_diag3:
+            st.markdown(f"""
+            <div class="stat-box">
+                <div class="stat-label">Severity</div>
+                <div class="stat-value">{diag.get('severity', 'Unknown').title()}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col_diag4:
+            st.markdown(f"""
+            <div class="stat-box">
+                <div class="stat-label">Confidence</div>
+                <div class="stat-value">{diag.get('confidence', 0)}%</div>
+            </div>
+            """, unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        col1, col2, col3 = st.columns(3)
+        st.markdown("""
+        <div class="info-section">
+            <div class="info-title">Input Treatment Costs & Yield Data</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        col_input1, col_input2, col_input3, col_input4 = st.columns(4)
         
-        with col1:
-            treatment_cost = st.number_input(
-                "Total Treatment Cost (Rs)",
-                value=int(diagnosis.get("organic_cost", 0) + diagnosis.get("chemical_cost", 0)),
-                min_value=0
-            )
+        with col_input1:
+            organic_cost_input = st.number_input("Organic Treatment Cost (Rs)", value=int(diag.get("organic_cost", 500)), min_value=0, step=50)
+        
+        with col_input2:
+            chemical_cost_input = st.number_input("Chemical Treatment Cost (Rs)", value=int(diag.get("chemical_cost", 300)), min_value=0, step=50)
+        
+        with col_input3:
+            yield_kg = st.number_input("Expected Yield (kg)", value=1000, min_value=100, step=100)
+        
+        with col_input4:
+            market_price = st.number_input("Market Price per kg (Rs)", value=40, min_value=1, step=5)
 
-        with col2:
-            crop_yield = st.number_input(
-                "Expected Crop Yield (kg)",
-                value=1000,
-                min_value=1
-            )
+        st.markdown("<br>", unsafe_allow_html=True)
 
-        with col3:
-            market_price = st.number_input(
-                "Market Price per kg (Rs)",
-                value=40,
-                min_value=1
-            )
-
-        if st.button("Calculate ROI", use_container_width=False, type="primary"):
-            crop_value = crop_yield * market_price
-            loss_percentage = 0.4  # 40% loss if untreated
-            loss_if_untreated = crop_value * loss_percentage
-            profit = loss_if_untreated - treatment_cost
-            roi = (profit / treatment_cost * 100) if treatment_cost > 0 else 0
-
-            st.markdown(f"""
-            <div class="stat-box">
-                <div class="stat-label">Total Crop Value</div>
-                <div class="stat-value">Rs {crop_value:,.0f}</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-            col1, col2, col3 = st.columns(3)
+        if st.button("📊 Calculate ROI Analysis", use_container_width=True, type="primary"):
+            analysis = {
+                "total_value": int(yield_kg * market_price),
+                "loss_prevented": int(yield_kg * market_price * 0.4),
+                "org_roi": int(((yield_kg * market_price * 0.4 - organic_cost_input) / organic_cost_input * 100)) if organic_cost_input > 0 else 0,
+                "chem_roi": int(((yield_kg * market_price * 0.4 - chemical_cost_input) / chemical_cost_input * 100)) if chemical_cost_input > 0 else 0,
+                "organic_net": int(yield_kg * market_price * 0.4 - organic_cost_input),
+                "chemical_net": int(yield_kg * market_price * 0.4 - chemical_cost_input)
+            }
+            st.session_state.cost_roi_result = {
+                "plant_name": plant_name,
+                "disease_name": disease_name,
+                "analysis": analysis,
+                "organic_cost_input": organic_cost_input,
+                "chemical_cost_input": chemical_cost_input
+            }
+        
+        if st.session_state.cost_roi_result:
+            result = st.session_state.cost_roi_result
+            analysis = result["analysis"]
             
-            with col1:
-                st.markdown(f"""
-                <div class="stat-box">
-                    <div class="stat-label">Loss if Untreated</div>
-                    <div class="stat-value">Rs {loss_if_untreated:,.0f}</div>
-                </div>
-                """, unsafe_allow_html=True)
-
-            with col2:
-                st.markdown(f"""
-                <div class="stat-box">
-                    <div class="stat-label">Treatment Cost</div>
-                    <div class="stat-value">Rs {treatment_cost:,.0f}</div>
-                </div>
-                """, unsafe_allow_html=True)
-
-            with col3:
-                st.markdown(f"""
-                <div class="stat-box">
-                    <div class="stat-label">Net Profit</div>
-                    <div class="stat-value">Rs {profit:,.0f}</div>
-                </div>
-                """, unsafe_allow_html=True)
-
-            st.markdown(f"""
-            <div class="success-box">
-            <b>Return on Investment (ROI): {roi:.1f}%</b><br>
-            For every Rs 1 you spend on treatment, you earn Rs {(roi/100)+1:.2f} back!
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("""
+            <div class="info-section">
+                <div class="info-title">Investment Analysis Results</div>
             </div>
             """, unsafe_allow_html=True)
-    else:
-        st.info("First diagnose a disease in the 'AI Plant Doctor' page to see cost analysis")
+
+            result_col1, result_col2 = st.columns(2)
+            
+            with result_col1:
+                st.markdown(f"""
+                <div class="stat-box">
+                    <div class="stat-label">Total Yield Value</div>
+                    <div class="stat-value">Rs {analysis['total_value']:,}</div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                st.markdown(f"""
+                <div class="stat-box">
+                    <div class="stat-label">Loss Prevention (40%)</div>
+                    <div class="stat-value" style="color: #4caf50;">Rs {analysis['loss_prevented']:,}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with result_col2:
+                st.markdown(f"""
+                <div class="stat-box">
+                    <div class="stat-label">Organic ROI</div>
+                    <div class="stat-value" style="color: #81c784;">{analysis['org_roi']}%</div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                st.markdown(f"""
+                <div class="stat-box">
+                    <div class="stat-label">Chemical ROI</div>
+                    <div class="stat-value" style="color: #64b5f6;">{analysis['chem_roi']}%</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            st.markdown("""
+            <div class="info-section">
+                <div class="info-title">Net Profit Comparison</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            comp_col1, comp_col2 = st.columns(2)
+            
+            with comp_col1:
+                st.markdown(f"""
+                <div class="stat-box">
+                    <div class="stat-label">🌱 Organic Net Profit</div>
+                    <div class="stat-value" style="color: #81c784;">Rs {analysis['organic_net']:,}</div>
+                    <div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">
+                    Cost: Rs {result['organic_cost_input']}<br>
+                    Savings: Rs {analysis['organic_net']}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with comp_col2:
+                st.markdown(f"""
+                <div class="stat-box">
+                    <div class="stat-label">💊 Chemical Net Profit</div>
+                    <div class="stat-value" style="color: #64b5f6;">Rs {analysis['chemical_net']:,}</div>
+                    <div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">
+                    Cost: Rs {result['chemical_cost_input']}<br>
+                    Savings: Rs {analysis['chemical_net']}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            if analysis['org_roi'] > analysis['chem_roi']:
+                st.markdown("""
+                <div class="success-box">
+                ✅ Organic treatment provides better ROI! Invest in organic methods for sustainable farming.
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown("""
+                <div class="success-box">
+                ✅ Chemical treatment offers higher immediate ROI, but consider organic for long-term sustainability.
+                </div>
+                """, unsafe_allow_html=True)
