@@ -931,3 +931,4 @@ elif page == "Crop Rotation Advisor":
 elif page == "Cost Calculator & ROI":
     # Your original code unchanged
     pass
+
