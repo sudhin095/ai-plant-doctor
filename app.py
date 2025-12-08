@@ -931,7 +931,7 @@ def convert_hybrid_to_diagnosis(hybrid_result, plant_type):
 
 
 def generate_crop_rotation_plan(plant_type, region, soil_type, market_focus):
-    """Generate accurate crop rotation plan"""
+    "Generate accurate crop rotation plan"
     if plant_type in CROP_ROTATION_DATA:
         return CROP_ROTATION_DATA[plant_type]
     else:
@@ -939,7 +939,7 @@ def generate_crop_rotation_plan(plant_type, region, soil_type, market_focus):
 
 
 def get_manual_rotation_plan(plant_name):
-    """Generate rotation plan for manually entered plant using Gemini"""
+    "Generate rotation plan for manually entered plant using Gemini"
     try:
         model = genai.GenerativeModel('gemini-2.5-flash')
     except Exception:
@@ -1913,6 +1913,7 @@ elif page == "Cost Calculator & ROI":
                 ✅ Chemical treatment offers higher immediate ROI, but consider organic for long-term sustainability.
                 </div>
                 """, unsafe_allow_html=True)
+
 
 
 
