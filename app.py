@@ -732,12 +732,12 @@ def enhance_image_for_analysis(image):
     return image
 
 
-# NEW, SAFE VERSION – NO RAW ```
 def extract_json_robust(response_text):
+    """Extract JSON from plain text or fenced code blocks without using raw ```
     if not response_text:
         return None
 
-    # Try raw text first
+    # Try raw JSON first
     try:
         return json.loads(response_text)
     except Exception:
@@ -747,13 +747,13 @@ def extract_json_robust(response_text):
     backticks = "`" * 3
     json_fence = backticks + "json"
 
-    # Fenced ```json ... ```
+    # Handle ```json ... ```
     if json_fence in cleaned:
         cleaned = cleaned.split(json_fence, 1)[2]
         if backticks in cleaned:
             cleaned = cleaned.split(backticks, 1)
 
-    # Generic ``` ... ```
+    # Handle generic ``` ... ```
     elif backticks in cleaned:
         cleaned = cleaned.split(backticks, 1)[2]
         if backticks in cleaned:
@@ -1126,7 +1126,6 @@ if "cost_roi_result" not in st.session_state:
 if "kisan_response" not in st.session_state:
     st.session_state.kisan_response = None
 
-# Optional: defaults for settings (in case sidebar not run yet in a rerun)
 if "model_choice" not in st.session_state:
     st.session_state.model_choice = "Hybrid YOLOv8+ViT (FREE)"
 if "debug_mode" not in st.session_state:
@@ -1139,6 +1138,7 @@ if "confidence_min" not in st.session_state:
 
 # ============ PAGE 1: AI PLANT DOCTOR ============
 if page == "AI Plant Doctor":
+    # FIXED: proper spec argument for columns
     col_plant, col_upload = st.columns()[3][2]
 
     with col_plant:
@@ -1225,7 +1225,7 @@ if page == "AI Plant Doctor":
         st.markdown("</div>", unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
-        col_b1, col_b2, col_b3 = st.columns()[2]
+        col_b1, col_b2, col_b3 = st.columns(3)
 
         with col_b2:
             analyze_btn = st.button(f"Analyze {plant_type}", width="stretch", type="primary")
@@ -1237,13 +1237,13 @@ if page == "AI Plant Doctor":
                 try:
                     if "Hybrid" in st.session_state.model_choice:
                         # ===== HYBRID PATH =====
-                        progress_placeholder.info(f"🔍 Loading Hybrid Pipeline (YOLOv8 + ViT)...")
+                        progress_placeholder.info("🔍 Loading Hybrid Pipeline (YOLOv8 + ViT)...")
                         
                         yolo_model, yolo_ok, y_err = load_yolo_model()
                         vit_model, device, vit_ok, v_err = load_vit_model()
                         
                         if not yolo_ok or not vit_ok:
-                            st.error(f"Model Error: Install dependencies\npip install ultralytics timm torch")
+                            st.error("Model Error: Install dependencies\npip install ultralytics timm torch")
                             progress_placeholder.empty()
                         else:
                             result = None
@@ -1516,7 +1516,7 @@ elif page == "KisanAI Assistant":
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    col_chat_control1, col_chat_control2, col_chat_control3 = st.columns()[3][2]
+    col_chat_control1, col_chat_control2, col_chat_control3 = st.columns(3)
     with col_chat_control1:
         st.write("")
     with col_chat_control2:
@@ -1914,4 +1914,3 @@ elif page == "Cost Calculator & ROI":
                 ✅ Chemical treatment offers higher immediate ROI, but consider organic for long-term sustainability.
                 </div>
                 """, unsafe_allow_html=True)
-
