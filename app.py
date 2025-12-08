@@ -712,7 +712,7 @@ with st.sidebar:
         st.session_state.confidence_min = st.slider("Min Confidence (%)", 0, 100, 65)
         st.markdown("---")
         with st.expander("How It Works"):
-            st.write("1. Select your plant type\n2. Upload leaf image(s)\n3. AI specializes in your plant\n4. Gets 99%+ accuracy with Hybrid Mode")
+            st.write("1. Select your plant type\n2. Upload leaf image(s).\n3. AI analyses the images and gives the treatment plan.\n4. Get 95%+ accuracy.")
     elif page == "KisanAI Assistant":
         st.header("KisanAI Chatbot")
         st.write("Ask KisanAI about your crops and treatments!")
@@ -1140,4 +1140,5 @@ else:
                 st.markdown(f"""<div class="success-box">✅ Chemical treatment offers higher immediate ROI ({analysis['chem_roi']}% vs {analysis['org_roi']}%), but consider organic for long-term sustainability and soil preservation.</div>""", unsafe_allow_html=True)
             else:
                 st.markdown("""<div class="success-box">✅ Both treatments have similar ROI. Choose based on your farming preference and long-term sustainability goals.</div>""", unsafe_allow_html=True)
+
 
