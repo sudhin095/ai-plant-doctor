@@ -990,29 +990,29 @@ def get_farmer_bot_response(user_question, diagnosis_context=None):
 
     context_text = ""
     if diagnosis_context:
-        context_text = f"""
-Current Diagnosis:
-- Plant: {diagnosis_context.get('plant_type', 'Unknown')}
-- Disease: {diagnosis_context.get('disease_name', 'Unknown')}
-- Severity: {diagnosis_context.get('severity', 'Unknown')}
-- Confidence: {diagnosis_context.get('confidence', 'Unknown')}%
-"""
+        context_text = (
+            "Current Diagnosis:\n"
+            f"- Plant: {diagnosis_context.get('plant_type', 'Unknown')}\n"
+            f"- Disease: {diagnosis_context.get('disease_name', 'Unknown')}\n"
+            f"- Severity: {diagnosis_context.get('severity', 'Unknown')}\n"
+            f"- Confidence: {diagnosis_context.get('confidence', 'Unknown')}%\n"
+        )
 
-    prompt = f"""You are an expert agricultural advisor for farmers with deep expertise in crop management, disease control, and sustainable farming practices.
+    # Build prompt without problematic raw apostrophes in a triple-quoted f-string
+    prompt = (
+        "You are an expert agricultural advisor for farmers with deep expertise in "
+        "crop management, disease control, and sustainable farming practices.\n\n"
+        f"{context_text}\n"
+        f"Farmer question: {user_question}\n\n"
+        "IMPORTANT: Provide a comprehensive, detailed response (5-8 sentences) that includes:\n"
+        "1. Direct answer to the question\n"
+        "2. Practical, cost-effective solutions suitable for farming conditions\n"
+        "3. Seasonal timing and weather considerations if applicable\n"
+        "4. Resource availability and sourcing information\n"
+        "5. Long-term sustainability and soil health recommendations\n\n"
+        "Use clear, professional English. Focus on actionable, readily available solutions with proven effectiveness."
+    )
 
-{context_text}
-
-Farmer's Question: {user_question}
-
-IMPORTANT: Provide a comprehensive, detailed response (5-8 sentences) that includes:
-1. Direct answer to the question
-2. Practical, cost-effective solutions suitable for farming conditions
-3. Seasonal timing and weather considerations if applicable
-4. Resource availability and sourcing information
-5. Long-term sustainability and soil health recommendations
-
-Use clear, professional English. Focus on actionable, readily available solutions with proven effectiveness."""
-    
     try:
         response = model.generate_content(prompt)
         return response.text.strip()
@@ -1138,7 +1138,6 @@ if "confidence_min" not in st.session_state:
 
 # ============ PAGE 1: AI PLANT DOCTOR ============
 if page == "AI Plant Doctor":
-    # FIXED: proper spec argument for columns
     col_plant, col_upload = st.columns()[3][2]
 
     with col_plant:
