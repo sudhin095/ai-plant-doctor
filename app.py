@@ -1914,3 +1914,4 @@ elif page == "Cost Calculator & ROI":
                 ✅ Chemical treatment offers higher immediate ROI, but consider organic for long-term sustainability.
                 </div>
                 """, unsafe_allow_html=True)
+
