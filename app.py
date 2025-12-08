@@ -688,17 +688,17 @@ def get_farmer_bot_response(user_question, diagnosis_context=None):
     except Exception:
         return "Server error. Please try again."
 
-st.markdown("""<div class="header-container"><div class="header-title">🌿 AI Plant Doctor - Smart Edition</div><div class="header-subtitle">Hybrid YOLOv8+ViT Detection - 100% FREE & Offline Capable</div></div>""", unsafe_allow_html=True)
+st.markdown("""<div class="header-container"><div class="header-title">🌿 AI Plant Doctor - Smart Edition</div><div
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.markdown('<div class="feature-card">✅ Plant-Specific</div>', unsafe_allow_html=True)
 with col2:
-    st.markdown('<div class="feature-card">🎯 Hybrid Detection</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🎯 Disease Detection</div>', unsafe_allow_html=True)
 with col3:
     st.markdown('<div class="feature-card">🔬 Expert</div>', unsafe_allow_html=True)
 with col4:
-    st.markdown('<div class="feature-card">🚀 99%+ Accurate</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🚀 95%+ Accurate</div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -706,7 +706,7 @@ with st.sidebar:
     page = st.radio("📂 Pages", ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"])
     if page == "AI Plant Doctor":
         st.header("Settings")
-        st.session_state.model_choice = st.radio("AI Model", ["Hybrid YOLOv8+ViT (FREE)", "Gemini 2.5 Flash", "Gemini 2.5 Pro"], help="Hybrid: Real-time + 100% free\nGemini: Advanced reasoning", index=0)
+        st.session_state.model_choice = st.radio("AI Model", ["Gemini 2.5 Flash"], help="Hybrid: Real-time + 100% free\nGemini: Advanced reasoning", index=0)
         st.session_state.debug_mode = st.checkbox("Debug Mode", value=False)
         st.session_state.show_tips = st.checkbox("Show Tips", value=True)
         st.session_state.confidence_min = st.slider("Min Confidence (%)", 0, 100, 65)
@@ -1140,3 +1140,4 @@ else:
                 st.markdown(f"""<div class="success-box">✅ Chemical treatment offers higher immediate ROI ({analysis['chem_roi']}% vs {analysis['org_roi']}%), but consider organic for long-term sustainability and soil preservation.</div>""", unsafe_allow_html=True)
             else:
                 st.markdown("""<div class="success-box">✅ Both treatments have similar ROI. Choose based on your farming preference and long-term sustainability goals.</div>""", unsafe_allow_html=True)
+
