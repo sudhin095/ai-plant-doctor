@@ -689,17 +689,17 @@ def get_farmer_bot_response(user_question, diagnosis_context=None):
         return "Server error. Please try again."
 
 # FIXED
-st.markdown("""<div class="header-container"><div class="header-title">🌿 AI Plant Doctor - Smart Edition</div>...</div>""", unsafe_allow_html=True)
+st.markdown("""<div class="header-container"><div class="header-title">🌿 AI Plant Doctor - Smart Edition</div></div>""", unsafe_allow_html=True)
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.markdown('<div class="feature-card">✅ Plant-Specific</div>', unsafe_allow_html=True)
 with col2:
-    st.markdown('<div class="feature-card">🎯 Hybrid Detection</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🎯 Disease Detection</div>', unsafe_allow_html=True)
 with col3:
     st.markdown('<div class="feature-card">🔬 Expert</div>', unsafe_allow_html=True)
 with col4:
-    st.markdown('<div class="feature-card">🚀 99%+ Accurate</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🚀 95%+ Accurate</div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1141,5 +1141,6 @@ else:
                 st.markdown(f"""<div class="success-box">✅ Chemical treatment offers higher immediate ROI ({analysis['chem_roi']}% vs {analysis['org_roi']}%), but consider organic for long-term sustainability and soil preservation.</div>""", unsafe_allow_html=True)
             else:
                 st.markdown("""<div class="success-box">✅ Both treatments have similar ROI. Choose based on your farming preference and long-term sustainability goals.</div>""", unsafe_allow_html=True)
+
 
 
