@@ -1040,7 +1040,7 @@ def get_farmer_bot_response(user_question, diagnosis_context=None):
 st.markdown("""
 <div class="header-container">
     <div class="header-title">🌿 AI Plant Doctor - Smart Edition</div>
-    <div class="header-subtitle">Hybrid YOLOv8+ViT Detection - 100% FREE & Offline Capable</div>
+    <div class="header-subtitle"></div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -1048,11 +1048,11 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.markdown('<div class="feature-card">✅ Plant-Specific</div>', unsafe_allow_html=True)
 with col2:
-    st.markdown('<div class="feature-card">🎯 Hybrid Detection</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🎯 Disease Detection</div>', unsafe_allow_html=True)
 with col3:
     st.markdown('<div class="feature-card">🔬 Expert</div>', unsafe_allow_html=True)
 with col4:
-    st.markdown('<div class="feature-card">🚀 99%+ Accurate</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🚀 95%+ Accurate</div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1068,7 +1068,7 @@ with st.sidebar:
 
         st.session_state.model_choice = st.radio(
             "AI Model",
-            ["Hybrid YOLOv8+ViT (FREE)", "Gemini 2.5 Flash", "Gemini 2.5 Pro"],
+            ["Hybrid YOLOv8+ViT", "Gemini 2.5 Flash"],
             help="Hybrid: Real-time + 100% free\nGemini: Advanced reasoning",
             index=0
         )
@@ -1975,3 +1975,4 @@ elif page == "Cost Calculator & ROI":
                 ⚠️ <b>High Treatment Cost.</b> Treatment cost approaches or exceeds loss value. Consider spot-treatment, disease-resistant varieties, or preventive measures for future crops.
                 </div>
                 """, unsafe_allow_html=True)
+
