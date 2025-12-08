@@ -33,129 +33,130 @@ st.set_page_config(
 # ============ TREATMENT COSTS & QUANTITIES DATABASE ============
 TREATMENT_COSTS = {
     "organic": {
-        "Cow Urine Extract": {"cost": 80, "quantity": "2-3 liters per 100 plants", "dilution": "1:5 with water"},
-        "Sulfur Dust": {"cost": 120, "quantity": "500g per 100 plants", "dilution": "Direct dust - 5-10g per plant"},
-        "Sulfur Powder": {"cost": 150, "quantity": "200g per 100 plants", "dilution": "3% suspension - 20ml per plant"},
-        "Lime Sulfur": {"cost": 180, "quantity": "1 liter per 100 plants", "dilution": "1:10 with water"},
-        "Neem Oil Spray": {"cost": 200, "quantity": "500ml per 100 plants", "dilution": "3% solution - 5ml per liter"},
-        "Bordeaux Mixture": {"cost": 250, "quantity": "300g per 100 plants", "dilution": "1% solution - 10g per liter"},
-        "Karanja Oil": {"cost": 220, "quantity": "400ml per 100 plants", "dilution": "2.5% solution - 2.5ml per liter"},
-        "Copper Fungicide (Organic)": {"cost": 280, "quantity": "250g per 100 plants", "dilution": "0.5% solution - 5g per liter"},
-        "Potassium Bicarbonate": {"cost": 300, "quantity": "150g per 100 plants", "dilution": "1% solution - 10g per liter"},
-        "Bacillus subtilis": {"cost": 350, "quantity": "100g per 100 plants", "dilution": "0.1% solution - 1g per liter"},
-        "Azadirachtin": {"cost": 380, "quantity": "200ml per 100 plants", "dilution": "0.3% solution - 3ml per liter"},
-        "Trichoderma": {"cost": 400, "quantity": "500g per 100 plants", "dilution": "0.5% solution - 5g per liter"},
-        "Spinosad": {"cost": 480, "quantity": "100ml per 100 plants", "dilution": "0.02% solution - 0.2ml per liter"},
+        "Neem Oil Spray": {
+            "cost": 200, 
+            "quantity": "500ml per 100 plants", 
+            "dilution": "3% solution - 5ml per liter",
+            "description": "Natural bio-pesticide extracted from neem tree seeds. Disrupts insect reproduction and feeding, works against fungal and bacterial diseases. Safe for humans and beneficial insects. Apply every 7-10 days, preferably in early morning or evening."
+        },
+        "Sulfur Powder": {
+            "cost": 150, 
+            "quantity": "200g per 100 plants", 
+            "dilution": "3% suspension - 20ml per plant",
+            "description": "Traditional fungicide highly effective against powdery mildew, rust, and mites. Acts by damaging fungal cell membranes. Cannot be used when temperature exceeds 30°C. Reapply after rain or every 7-10 days. Avoid mixing with copper-based fungicides."
+        },
+        "Bordeaux Mixture": {
+            "cost": 250, 
+            "quantity": "300g per 100 plants", 
+            "dilution": "1% solution - 10g per liter",
+            "description": "Copper-based fungicide used for over 100 years. Excellent for late blight, early blight, and leaf spot diseases. Copper acts as a protectant preventing spore germination. Mix fresh solution before use. Apply at 7-10 day intervals. Leave visible blue residue on leaves."
+        },
+        "Lime Sulfur": {
+            "cost": 180, 
+            "quantity": "1 liter per 100 plants", 
+            "dilution": "1:10 with water",
+            "description": "Contact fungicide and miticide effective against powdery mildew, rust, and spider mites. Works by dissolving insect protective wax coating. Apply when temperature is below 27°C. Better applied in cooler months. Can cause phytotoxicity if overused. Use once every 15 days."
+        },
+        "Sulfur Dust": {
+            "cost": 120, 
+            "quantity": "500g per 100 plants", 
+            "dilution": "Direct dust - 5-10g per plant",
+            "description": "Fine sulfur powder directly dusted on affected areas. Simple, chemical-free application requiring no mixing. Best for powdery mildew and red spider mites. Apply in early morning when leaves are moist with dew. Avoid application in hot weather (>30°C) to prevent leaf burn."
+        },
+        "Cow Urine Extract": {
+            "cost": 80, 
+            "quantity": "2-3 liters per 100 plants", 
+            "dilution": "1:5 with water",
+            "description": "Organic extract rich in ammonia, nitrogen, and minerals. Boosts plant immunity and acts as mild pesticide. Increases plant vigor and disease resistance. Apply as foliar spray early morning or evening. Can be used frequently (every 3-4 days) without harm. Improves overall plant health."
+        },
+        "Karanja Oil": {
+            "cost": 220, 
+            "quantity": "400ml per 100 plants", 
+            "dilution": "2% solution - 5ml per liter",
+            "description": "Plant-based oil with insecticidal and fungicidal properties. Contains compounds that disrupt insect feeding and reproduction. Effective against aphids, mites, beetles, and fungal diseases. Apply every 10-12 days. Acts as both preventive and curative. Biodegrades quickly in environment."
+        },
+        "Copper Fungicide": {
+            "cost": 200, 
+            "quantity": "200g per 100 plants", 
+            "dilution": "0.5% solution - 5g per liter",
+            "description": "Broad-spectrum copper-based fungicide effective against bacterial and fungal diseases. Copper ions prevent pathogen spore germination. Apply preventively before disease appears. Can be tank-mixed with other fungicides. Do not apply to copper-sensitive plants. Reapply after rain."
+        },
+        "Garlic Extract": {
+            "cost": 100, 
+            "quantity": "1 liter per 100 plants", 
+            "dilution": "1:4 with water",
+            "description": "Natural pesticide made from crushed garlic bulbs. Contains sulfur compounds and allicin that repel insects and inhibit fungal growth. Improves plant resistance to various diseases. Apply as foliar spray every 5-7 days. Can be made at home from fresh garlic. Eco-friendly and safe."
+        },
+        "Bacillus thuringiensis (Bt)": {
+            "cost": 150, 
+            "quantity": "300ml per 100 plants", 
+            "dilution": "1-2ml per liter",
+            "description": "Biological insecticide containing naturally occurring bacteria. Produces proteins toxic only to specific insect larvae (caterpillars, moths). Safe for humans, pets, and beneficial insects. Effective against Helicoverpa, Spodoptera, and other leaf-eating caterpillars. Apply when insects are young. Breaks down quickly in sun."
+        }
     },
     "chemical": {
-        "Carbendazim (Bavistin)": {"cost": 80, "quantity": "100g per 100 plants", "dilution": "0.1% solution - 1g per liter"},
-        "Copper Oxychloride": {"cost": 100, "quantity": "200g per 100 plants", "dilution": "0.25% solution - 2.5g per liter"},
-        "Mancozeb (Indofil)": {"cost": 140, "quantity": "150g per 100 plants", "dilution": "0.2% solution - 2g per liter"},
-        "Profenofos (Meothrin)": {"cost": 150, "quantity": "100ml per 100 plants", "dilution": "0.05% solution - 0.5ml per liter"},
-        "Chlorothalonil": {"cost": 180, "quantity": "120g per 100 plants", "dilution": "0.15% solution - 1.5g per liter"},
-        "Deltamethrin (Decis)": {"cost": 200, "quantity": "50ml per 100 plants", "dilution": "0.005% solution - 0.05ml per liter"},
-        "Imidacloprid (Confidor)": {"cost": 240, "quantity": "80ml per 100 plants", "dilution": "0.008% solution - 0.08ml per liter"},
-        "Fluconazole (Contaf)": {"cost": 350, "quantity": "150ml per 100 plants", "dilution": "0.06% solution - 0.6ml per liter"},
-        "Tebuconazole (Folicur)": {"cost": 320, "quantity": "120ml per 100 plants", "dilution": "0.05% solution - 0.5ml per liter"},
-        "Thiamethoxam (Actara)": {"cost": 290, "quantity": "100g per 100 plants", "dilution": "0.04% solution - 0.4g per liter"},
-        "Azoxystrobin (Amistar)": {"cost": 400, "quantity": "80ml per 100 plants", "dilution": "0.02% solution - 0.2ml per liter"},
-        "Hexaconazole (Contaf Plus)": {"cost": 350, "quantity": "100ml per 100 plants", "dilution": "0.04% solution - 0.4ml per liter"},
-        "Phosphorous Acid": {"cost": 250, "quantity": "200ml per 100 plants", "dilution": "0.3% solution - 3ml per liter"},
+        "Mancozeb (Indofil)": {
+            "cost": 250, 
+            "quantity": "200g per 100 plants", 
+            "dilution": "0.2% solution - 2g per liter",
+            "description": "Broad-spectrum protectant fungicide effective against late blight, early blight, and leaf spot diseases. Prevents spore germination by blocking fungal respiration. Requires 3-5 minutes drying before rain protection. Apply preventively every 7-10 days during disease season. Reapply after heavy rain. Use recommended PPE during application."
+        },
+        "Carbendazim (Bavistin)": {
+            "cost": 200, 
+            "quantity": "50g per 100 plants", 
+            "dilution": "0.1% solution - 1g per liter",
+            "description": "Systemic fungicide absorbed by plants and transported to all parts. Curative action stops disease progression even after infection. Highly effective against powdery mildew, anthracnose, and blights. Use at first disease signs. Avoid repeated application (max 2-3 times). Do not use continuously due to resistance risk."
+        },
+        "Copper Oxychloride": {
+            "cost": 180, 
+            "quantity": "250g per 100 plants", 
+            "dilution": "0.25% solution - 2.5g per liter",
+            "description": "Contact fungicide with both protective and some curative properties. Copper kills fungal cells by disrupting internal processes. Excellent for bacterial and fungal leaf spots, blights, and fruit rots. Provides residual protection for 7-14 days. Apply at first disease signs. Safe to use frequently. Requires complete leaf coverage."
+        },
+        "Hexaconazole": {
+            "cost": 300, 
+            "quantity": "50ml per 100 plants", 
+            "dilution": "0.05% - 0.5ml per liter",
+            "description": "Systemic triazole fungicide with preventive and curative activity. Inhibits fungal sterol synthesis stopping growth. Fast-acting, effective against powdery mildew, rust, and scab diseases. Translocates within plant providing internal protection. Use early in disease development. Avoid overdosing. Residual effect lasts 10-14 days."
+        },
+        "Propineb": {
+            "cost": 220, 
+            "quantity": "200g per 100 plants", 
+            "dilution": "0.15% - 1.5g per liter",
+            "description": "Dithiocarbamate fungicide effective against late blight and other fungal diseases. Works by preventing fungal enzyme function. Contact fungicide requiring complete plant coverage for effectiveness. Apply preventively every 7-10 days during wet seasons. Reapply after rain. Compatible with most insecticides for tank mixing."
+        },
+        "Chlorothalonil": {
+            "cost": 280, 
+            "quantity": "150g per 100 plants", 
+            "dilution": "0.1% - 1g per liter",
+            "description": "Multi-site protectant fungicide effective against wide range of fungal diseases. Low toxicity to mammals. Prevents spore germination and mycelium growth. Apply before infection signs appear for best results. Every 7-14 day application recommended. Excellent tank-mix partner with systemic fungicides. Creates protective coating on leaves."
+        },
+        "Azoxystrobin": {
+            "cost": 350, 
+            "quantity": "40g per 100 plants", 
+            "dilution": "0.08% - 0.8g per liter",
+            "description": "Systemic strobilurin fungicide with both preventive and curative action. Inhibits fungal respiration (energy production) stopping growth. Extended residual activity of 14-21 days. Excellent for powdery mildew, rust, and leaf spot diseases. Can be used at lower doses. Effective at cooler temperatures. Rotate with other fungicides."
+        },
+        "Tebuconazole": {
+            "cost": 320, 
+            "quantity": "50ml per 100 plants", 
+            "dilution": "0.06% - 0.6ml per liter",
+            "description": "Systemic triazole with strong curative properties for established infections. Acts within 48 hours of application stopping disease spread. Excellent for powdery mildew, rust, scab, and blights. Rainfast within 2 hours. Provides 3-4 week protection after application. Use early for best results. Phytotoxic at high doses."
+        },
+        "Metalaxyl": {
+            "cost": 290, 
+            "quantity": "50g per 100 plants", 
+            "dilution": "0.2% - 2g per liter",
+            "description": "Specific systemic fungicide for oomycete diseases (late blight, downy mildew). Penetrates leaves and translocates protecting new growth. Highly effective at preventing infection even before symptoms appear. Use preventively or early in infection. Avoid repeated use alone to prevent resistance. Tank-mix with contact fungicides."
+        },
+        "Iprodione": {
+            "cost": 260, 
+            "quantity": "200g per 100 plants", 
+            "dilution": "0.1% - 1g per liter",
+            "description": "Broad-spectrum dicarboximide fungicide with both protective and curative activity. Effective against botrytis, anthracnose, and scab diseases. Prevents spore germination and mycelium development. Apply at 7-10 day intervals. Good residual activity of 10-14 days. Compatible with most other fungicides. Excellent for humid conditions."
+        }
     }
 }
-
-# ============ CROP ROTATION DATABASE ============
-CROP_ROTATION_DATA = {
-    "Tomato": {
-        "rotations": ["Beans", "Cabbage", "Cucumber"],
-        "info": {
-            "Tomato": "High-value solanaceae crop. Susceptible to early/late blight, fusarium wilt, and bacterial diseases. Benefits from crop rotation of 3+ years.",
-            "Beans": "Nitrogen-fixing legume. Improves soil nitrogen content. Breaks disease cycle for tomato. Compatible with tomato crop rotation.",
-            "Cabbage": "Brassica family. Helps control tomato diseases. Requires different nutrient profile. Good rotation choice.",
-            "Cucumber": "Cucurbitaceae family. No common diseases with tomato. Light feeder after beans. Completes rotation cycle."
-        }
-    },
-    "Rose": {
-        "rotations": ["Marigold", "Chrysanthemum", "Herbs"],
-        "info": {
-            "Rose": "Ornamental crop. Susceptible to black spot, powdery mildew, rose rosette virus. Needs disease break.",
-            "Marigold": "Natural pest repellent. Flowers attract beneficial insects. Cleanses soil. Excellent companion.",
-            "Chrysanthemum": "Different pest/disease profile. Breaks rose pathogen cycle. Similar care requirements.",
-            "Herbs": "Basil, rosemary improve soil health. Aromatics confuse rose pests. Reduces chemical inputs."
-        }
-    },
-    "Apple": {
-        "rotations": ["Legume Cover Crops", "Grasses", "Berries"],
-        "info": {
-            "Apple": "Long-term perennial crop. Susceptible to apple scab, fire blight, rust. Needs 4-5 year rotation minimum.",
-            "Legume Cover Crops": "Nitrogen fixation. Soil improvement. Breaks pathogen cycle. Reduces input costs.",
-            "Grasses": "Erosion control. Soil structure improvement. Natural pest predator habitat. Beneficial insects.",
-            "Berries": "Different root depth. Utilize different nutrients. Continues income during apple off-year."
-        }
-    },
-    "Lettuce": {
-        "rotations": ["Spinach", "Broccoli", "Cauliflower"],
-        "info": {
-            "Lettuce": "Cool-season leafy crop. Susceptible to downy mildew, tip burn, mosaic virus. Quick 60-70 day cycle.",
-            "Spinach": "Similar family (Amaranthaceae). Resistant to lettuce diseases. Tolerates cold. Soil enrichment.",
-            "Broccoli": "Brassica family. Different pest profile. Breaks disease cycle. Heavy feeder needs composting.",
-            "Cauliflower": "Brassica family. Follows spinach. Light-sensitive. Completes 3-crop cycle for lettuce disease control."
-        }
-    },
-    "Grape": {
-        "rotations": ["Legume Cover Crops", "Cereals", "Vegetables"],
-        "info": {
-            "Grape": "Perennial vine crop. Powdery mildew, downy mildew, phylloxera major concerns. 5+ year rotation needed.",
-            "Legume Cover Crops": "Nitrogen replenishment. Soil structure restoration. Disease vector elimination.",
-            "Cereals": "Wheat/maize. Different nutrient uptake. Soil consolidation. Nematode cycle break.",
-            "Vegetables": "Diverse crops reduce soil depletion. Polyculture benefits. Re-establishes soil microbiology."
-        }
-    },
-    "Pepper": {
-        "rotations": ["Onion", "Garlic", "Spinach"],
-        "info": {
-            "Pepper": "Solanaceae crop. Anthracnose, bacterial wilt, phytophthora major issues. 3-year rotation essential.",
-            "Onion": "Allium family. Different disease profile. Fungicide applications reduced. Breaks solanaceae cycle.",
-            "Garlic": "Allium family. Natural pest deterrent. Soil antimicrobial properties. Autumn/winter crop.",
-            "Spinach": "Cool-season crop. No common pepper diseases. Nitrogen-fixing partners. Spring/fall compatible."
-        }
-    },
-    "Cucumber": {
-        "rotations": ["Maize", "Okra", "Legumes"],
-        "info": {
-            "Cucumber": "Cucurbitaceae family. Powdery mildew, downy mildew, beetle damage. 2-3 year rotation suggested.",
-            "Maize": "Tall crop provides shade break. Different root system. Utilizes soil nitrogen. Strong market demand.",
-            "Okra": "Malvaceae family. No overlapping pests. Nitrogen-fixing tendency. Heat-tolerant summer crop.",
-            "Legumes": "Nitrogen restoration. Disease-free break for cucumber. Pea/bean varieties available for season."
-        }
-    },
-    "Strawberry": {
-        "rotations": ["Garlic", "Onion", "Leafy Greens"],
-        "info": {
-            "Strawberry": "Low-growing perennial. Leaf scorch, powdery mildew, red stele root rot issues. 3-year bed rotation.",
-            "Garlic": "Deep-rooted. Antimicrobial soil activity. Plant autumn, harvest spring. Excellent succession crop.",
-            "Onion": "Bulb crop. Disease-free break. Allergenic properties deter strawberry pests. Rotation crop.",
-            "Leafy Greens": "Spinach/lettuce. Quick cycle. Utilizes residual nutrients. Spring/fall timing options."
-        }
-    },
-    "Corn": {
-        "rotations": ["Soybean", "Pulses", "Oilseeds"],
-        "info": {
-            "Corn": "Heavy nitrogen feeder. Leaf blotch, rust, corn borer, fumonisin concerns. 3+ year rotation critical.",
-            "Soybean": "Nitrogen-fixing legume. Reduces fertilizer needs 40-50%. Breaks corn pest cycle naturally.",
-            "Pulses": "Chickpea/lentil. Additional nitrogen fixation. High market value. Diverse pest profile than corn.",
-            "Oilseeds": "Sunflower/safflower. Soil structure improvement. Different nutrient uptake. Income diversification."
-        }
-    },
-    "Potato": {
-        "rotations": ["Peas", "Mustard", "Cereals"],
-        "info": {
-            "Potato": "Solanaceae crop. Late blight, early blight, nematodes persistent issue. 4-year rotation required.",
-            "Peas": "Nitrogen-fixing legume. Cold-season crop. Breaks potato pathogen cycle. Soil health restoration.",
-            "Mustard": "Oil crop. Biofumigation properties. Natural nematode control. Green manure if plowed.",
-            "Cereals": "Wheat/barley. Different root depth. Soil consolidation. Completes disease-break rotation cycle."
-        }
-    }
 }
 
 REGIONS = ["North India", "South India", "East India", "West India", "Central India"]
@@ -1141,7 +1142,3 @@ else:
                 st.markdown(f"""<div class="success-box">✅ Chemical treatment offers higher immediate ROI ({analysis['chem_roi']}% vs {analysis['org_roi']}%), but consider organic for long-term sustainability and soil preservation.</div>""", unsafe_allow_html=True)
             else:
                 st.markdown("""<div class="success-box">✅ Both treatments have similar ROI. Choose based on your farming preference and long-term sustainability goals.</div>""", unsafe_allow_html=True)
-
-
-
-
