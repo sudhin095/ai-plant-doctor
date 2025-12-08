@@ -825,7 +825,7 @@ def load_vit_model():
 
 
 def predict_hybrid(image, yolo_model, vit_model, device):
-    """Hybrid YOLOv8 + ViT prediction"""
+    "Hybrid YOLOv8 + ViT prediction"
     try:
         img_array = np.array(image)
         
@@ -1913,6 +1913,7 @@ elif page == "Cost Calculator & ROI":
                 ✅ Chemical treatment offers higher immediate ROI, but consider organic for long-term sustainability.
                 </div>
                 """, unsafe_allow_html=True)
+
 
 
 
