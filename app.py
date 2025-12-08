@@ -795,7 +795,7 @@ def validate_json_result(data):
 # ============ HYBRID YOLO + VIT FUNCTIONS ============
 @st.cache_resource
 def load_yolo_model():
-    """Load YOLOv8 Nano model for disease localization"""
+    ""Load YOLOv8 Nano model for disease localization""
     if not YOLO_AVAILABLE:
         return None, False, "YOLOv8 not installed"
     try:
@@ -1913,4 +1913,5 @@ elif page == "Cost Calculator & ROI":
                 ✅ Chemical treatment offers higher immediate ROI, but consider organic for long-term sustainability.
                 </div>
                 """, unsafe_allow_html=True)
+
 
