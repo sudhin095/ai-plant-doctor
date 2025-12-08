@@ -1036,16 +1036,17 @@ with st.sidebar:
     if page == "AI Plant Doctor":
         st.header("Settings")
 
-        model_choice = st.radio(
+        st.session_state.model_choice = st.radio(
             "AI Model",
             ["Hybrid YOLOv8+ViT (FREE)", "Gemini 2.5 Flash", "Gemini 2.5 Pro"],
-            help="Hybrid: Real-time + 100% free\nGemini: Advanced reasoning"
+            help="Hybrid: Real-time + 100% free\nGemini: Advanced reasoning",
+            index=0
         )
 
-        debug_mode = st.checkbox("Debug Mode", value=False)
-        show_tips = st.checkbox("Show Tips", value=True)
+        st.session_state.debug_mode = st.checkbox("Debug Mode", value=False)
+        st.session_state.show_tips = st.checkbox("Show Tips", value=True)
 
-        confidence_min = st.slider("Min Confidence (%)", 0, 100, 65)
+        st.session_state.confidence_min = st.slider("Min Confidence (%)", 0, 100, 65)
 
         st.markdown("---")
 
@@ -1072,7 +1073,7 @@ with st.sidebar:
     st.markdown("---")
     st.header("Model Info")
 
-    if "Hybrid" in model_choice:
+    if "Hybrid" in st.session_state.model_choice:
         st.success("⚡ Hybrid Mode Active")
         st.write("""
         **YOLOv8:** Localization
@@ -1180,11 +1181,11 @@ if page == "AI Plant Doctor":
 
         images = [Image.open(f) for f in uploaded_files]
 
-        if show_tips:
+        if st.session_state.show_tips:
             st.markdown(f"""
             <div class="tips-card">
                 <div class="tips-card-title">Analyzing {plant_type}</div>
-                {'Hybrid YOLOv8+ViT' if 'Hybrid' in model_choice else 'Gemini'} diagnosis in progress...
+                {'Hybrid YOLOv8+ViT' if 'Hybrid' in st.session_state.model_choice else 'Gemini'} diagnosis in progress...
             </div>
             """, unsafe_allow_html=True)
 
@@ -1279,7 +1280,7 @@ if page == "AI Plant Doctor":
 
                         confidence = result.get("confidence", 0)
 
-                        if confidence < confidence_min:
+                        if confidence < st.session_state.confidence_min:
                             st.warning(f"Low Confidence ({confidence}%)")
 
                         st.markdown("<div class='result-container'>", unsafe_allow_html=True)
