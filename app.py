@@ -884,7 +884,7 @@ def predict_hybrid(image, yolo_model, vit_model, device):
 
 
 def convert_hybrid_to_diagnosis(hybrid_result, plant_type):
-    """Convert hybrid result to diagnosis JSON"""
+    "Convert hybrid result to diagnosis JSON"
     if not hybrid_result:
         return None
     
@@ -1913,6 +1913,7 @@ elif page == "Cost Calculator & ROI":
                 ✅ Chemical treatment offers higher immediate ROI, but consider organic for long-term sustainability.
                 </div>
                 """, unsafe_allow_html=True)
+
 
 
 
