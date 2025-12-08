@@ -688,7 +688,7 @@ def get_farmer_bot_response(user_question, diagnosis_context=None):
     except Exception:
         return "Server error. Please try again."
 
-st.markdown("""<div class="header-container"><div class="header-title">🌿 AI Plant Doctor - Smart Edition</div><div)
+st.markdown("""<div class="header-title">🌿 AI Plant Doctor - Smart Edition</div><div)
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
