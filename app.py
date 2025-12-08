@@ -732,33 +732,47 @@ def enhance_image_for_analysis(image):
     return image
 
 
+# NEW, SAFE VERSION – NO RAW ```
 def extract_json_robust(response_text):
     if not response_text:
         return None
-    
+
+    # Try raw text first
     try:
         return json.loads(response_text)
     except Exception:
         pass
-    
+
     cleaned = response_text
-    if '```
-        cleaned = cleaned.split('```json').split('```
-    elif '```' in cleaned:
-        cleaned = cleaned.split('``````')[0]
-    
+    backticks = "`" * 3
+    json_fence = backticks + "json"
+
+    # Fenced ```json ... ```
+    if json_fence in cleaned:
+        cleaned = cleaned.split(json_fence, 1)[2]
+        if backticks in cleaned:
+            cleaned = cleaned.split(backticks, 1)
+
+    # Generic ``` ... ```
+    elif backticks in cleaned:
+        cleaned = cleaned.split(backticks, 1)[2]
+        if backticks in cleaned:
+            cleaned = cleaned.split(backticks, 1)
+
+    # Try cleaned snippet
     try:
         return json.loads(cleaned.strip())
     except Exception:
         pass
-    
+
+    # Fallback: first {...} block via regex
     match = re.search(r'\{[\s\S]*\}', response_text)
     if match:
         try:
             return json.loads(match.group())
         except Exception:
             pass
-    
+
     return None
 
 
@@ -827,11 +841,11 @@ def predict_hybrid(image, yolo_model, vit_model, device):
         annotated_img = img_array.copy()
         
         if yolo_results and len(yolo_results) > 0:
-            result = yolo_results[0]
+            result = yolo_results
             if result.boxes:
                 for box in result.boxes:
-                    x1, y1, x2, y2 = [int(v) for v in box.xyxy[0].tolist()]
-                    conf = float(box.conf[0])
+                    x1, y1, x2, y2 = [int(v) for v in box.xyxy.tolist()]
+                    conf = float(box.conf)
                     detections.append({
                         "confidence": conf,
                         "bbox": [x1, y1, x2, y2]
@@ -1026,26 +1040,6 @@ with col4:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ============ INITIALIZE SESSION STATE ============
-if "model_choice" not in st.session_state:
-    st.session_state.model_choice = "Hybrid YOLOv8+ViT (FREE)"
-if "debug_mode" not in st.session_state:
-    st.session_state.debug_mode = False
-if "show_tips" not in st.session_state:
-    st.session_state.show_tips = True
-if "confidence_min" not in st.session_state:
-    st.session_state.confidence_min = 65
-if "last_diagnosis" not in st.session_state:
-    st.session_state.last_diagnosis = None
-if "farmer_bot_messages" not in st.session_state:
-    st.session_state.farmer_bot_messages = []
-if "crop_rotation_result" not in st.session_state:
-    st.session_state.crop_rotation_result = None
-if "cost_roi_result" not in st.session_state:
-    st.session_state.cost_roi_result = None
-if "kisan_response" not in st.session_state:
-    st.session_state.kisan_response = None
-
 # ============ SIDEBAR NAVIGATION ============
 with st.sidebar:
     page = st.radio(
@@ -1056,17 +1050,17 @@ with st.sidebar:
     if page == "AI Plant Doctor":
         st.header("Settings")
 
-        st.radio(
+        st.session_state.model_choice = st.radio(
             "AI Model",
             ["Hybrid YOLOv8+ViT (FREE)", "Gemini 2.5 Flash", "Gemini 2.5 Pro"],
             help="Hybrid: Real-time + 100% free\nGemini: Advanced reasoning",
-            key="model_choice"
+            index=0
         )
 
-        st.checkbox("Debug Mode", value=False, key="debug_mode")
-        st.checkbox("Show Tips", value=True, key="show_tips")
+        st.session_state.debug_mode = st.checkbox("Debug Mode", value=False)
+        st.session_state.show_tips = st.checkbox("Show Tips", value=True)
 
-        st.slider("Min Confidence (%)", 0, 100, 65, key="confidence_min")
+        st.session_state.confidence_min = st.slider("Min Confidence (%)", 0, 100, 65)
 
         st.markdown("---")
 
@@ -1116,9 +1110,36 @@ with st.sidebar:
         st.write(f"✓ {plant}")
 
 
+# ============ INITIALIZE SESSION STATE ============
+if "last_diagnosis" not in st.session_state:
+    st.session_state.last_diagnosis = None
+
+if "farmer_bot_messages" not in st.session_state:
+    st.session_state.farmer_bot_messages = []
+
+if "crop_rotation_result" not in st.session_state:
+    st.session_state.crop_rotation_result = None
+
+if "cost_roi_result" not in st.session_state:
+    st.session_state.cost_roi_result = None
+
+if "kisan_response" not in st.session_state:
+    st.session_state.kisan_response = None
+
+# Optional: defaults for settings (in case sidebar not run yet in a rerun)
+if "model_choice" not in st.session_state:
+    st.session_state.model_choice = "Hybrid YOLOv8+ViT (FREE)"
+if "debug_mode" not in st.session_state:
+    st.session_state.debug_mode = False
+if "show_tips" not in st.session_state:
+    st.session_state.show_tips = True
+if "confidence_min" not in st.session_state:
+    st.session_state.confidence_min = 65
+
+
 # ============ PAGE 1: AI PLANT DOCTOR ============
 if page == "AI Plant Doctor":
-    col_plant, col_upload = st.columns([1, 2])
+    col_plant, col_upload = st.columns()[3][2]
 
     with col_plant:
         st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
@@ -1204,7 +1225,7 @@ if page == "AI Plant Doctor":
         st.markdown("</div>", unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
-        col_b1, col_b2, col_b3 = st.columns([1, 1, 1])
+        col_b1, col_b2, col_b3 = st.columns()[2]
 
         with col_b2:
             analyze_btn = st.button(f"Analyze {plant_type}", width="stretch", type="primary")
@@ -1225,6 +1246,7 @@ if page == "AI Plant Doctor":
                             st.error(f"Model Error: Install dependencies\npip install ultralytics timm torch")
                             progress_placeholder.empty()
                         else:
+                            result = None
                             for idx, image in enumerate(images):
                                 progress_placeholder.info(f"🔍 Hybrid scan: {idx+1}/{len(images)}...")
                                 
@@ -1325,7 +1347,7 @@ if page == "AI Plant Doctor":
                                 <div class="info-title">Symptoms</div>
                             """, unsafe_allow_html=True)
                             for symptom in result.get("symptoms", []):
-                                st.write(f"• {symptom}")
+                                st.write(f"-  {symptom}")
                             st.markdown("</div>", unsafe_allow_html=True)
 
                             if result.get("differential_diagnosis"):
@@ -1334,7 +1356,7 @@ if page == "AI Plant Doctor":
                                     <div class="info-title">Other Possibilities</div>
                                 """, unsafe_allow_html=True)
                                 for diagnosis in result.get("differential_diagnosis", []):
-                                    st.write(f"• {diagnosis}")
+                                    st.write(f"-  {diagnosis}")
                                 st.markdown("</div>", unsafe_allow_html=True)
 
                         with col_right:
@@ -1343,7 +1365,7 @@ if page == "AI Plant Doctor":
                                 <div class="info-title">Causes</div>
                             """, unsafe_allow_html=True)
                             for cause in result.get("probable_causes", []):
-                                st.write(f"• {cause}")
+                                st.write(f"-  {cause}")
                             st.markdown("</div>", unsafe_allow_html=True)
 
                             st.markdown("""
@@ -1362,7 +1384,7 @@ if page == "AI Plant Doctor":
                                 <div class="info-title">Organic Treatments</div>
                             """, unsafe_allow_html=True)
                             for treatment in result.get("organic_treatments", []):
-                                st.write(f"• {treatment}")
+                                st.write(f"-  {treatment}")
 
                             organic_treatments = result.get("organic_treatments", [])
                             total_organic_cost = 0
@@ -1389,7 +1411,7 @@ if page == "AI Plant Doctor":
                                 <div class="info-title">Chemical Treatments</div>
                             """, unsafe_allow_html=True)
                             for treatment in result.get("chemical_treatments", []):
-                                st.write(f"• {treatment}")
+                                st.write(f"-  {treatment}")
 
                             chemical_treatments = result.get("chemical_treatments", [])
                             total_chemical_cost = 0
@@ -1415,7 +1437,7 @@ if page == "AI Plant Doctor":
                             <div class="info-title">Prevention</div>
                         """, unsafe_allow_html=True)
                         for tip in result.get("prevention_long_term", []):
-                            st.write(f"• {tip}")
+                            st.write(f"-  {tip}")
                         st.markdown("</div>", unsafe_allow_html=True)
 
                         if result.get("plant_specific_notes"):
@@ -1476,6 +1498,7 @@ elif page == "KisanAI Assistant":
         st.markdown("""
         <div class="info-section">
             <div class="info-title">Current Diagnosis Context</div>
+        </div>
         """, unsafe_allow_html=True)
         col_ctx1, col_ctx2, col_ctx3 = st.columns(3)
         with col_ctx1:
@@ -1484,7 +1507,6 @@ elif page == "KisanAI Assistant":
             st.write(f"**🦠 Disease:** {diag.get('disease_name', 'Unknown')}")
         with col_ctx3:
             st.write(f"**⚠️ Severity:** {diag.get('severity', 'Unknown').title()}")
-        st.markdown("</div>", unsafe_allow_html=True)
     else:
         st.markdown("""
         <div class="warning-box">
@@ -1494,7 +1516,7 @@ elif page == "KisanAI Assistant":
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    col_chat_control1, col_chat_control2, col_chat_control3 = st.columns([2, 1, 1])
+    col_chat_control1, col_chat_control2, col_chat_control3 = st.columns()[3][2]
     with col_chat_control1:
         st.write("")
     with col_chat_control2:
@@ -1522,7 +1544,11 @@ elif page == "KisanAI Assistant":
     st.markdown("<br>", unsafe_allow_html=True)
 
     with st.form("farmer_bot_form", clear_on_submit=True):
-        user_question = st.text_area("Type your question here...", height=100, placeholder="Ask about treatments, prevention, costs, or any farming topic...")
+        user_question = st.text_area(
+            "Type your question here...",
+            height=100,
+            placeholder="Ask about treatments, prevention, costs, or any farming topic..."
+        )
         submitted = st.form_submit_button("Send Message", width="stretch")
 
     if submitted and user_question.strip():
@@ -1649,8 +1675,8 @@ elif page == "Crop Rotation Advisor":
             st.markdown(f"""
             <div class="rotation-card">
                 <div class="rotation-year">🔄 Year 2</div>
-                <div class="crop-name">{rotations[0] if len(rotations) > 0 else 'Crop 2'}</div>
-                <div class="crop-description">{info.get(rotations[0], 'Rotation crop to break disease cycle.') if len(rotations) > 0 else 'Rotation crop'}</div>
+                <div class="crop-name">{rotations if len(rotations) > 0 else 'Crop 2'}</div>
+                <div class="crop-description">{info.get(rotations, 'Rotation crop to break disease cycle.') if len(rotations) > 0 else 'Rotation crop'}</div>
             </div>
             """, unsafe_allow_html=True)
         
@@ -1658,8 +1684,8 @@ elif page == "Crop Rotation Advisor":
             st.markdown(f"""
             <div class="rotation-card">
                 <div class="rotation-year">🌿 Year 3</div>
-                <div class="crop-name">{rotations[1] if len(rotations) > 1 else 'Crop 3'}</div>
-                <div class="crop-description">{info.get(rotations[1], 'Alternative crop for diversification.') if len(rotations) > 1 else 'Alternative crop'}</div>
+                <div class="crop-name">{rotations if len(rotations) > 1 else 'Crop 3'}</div>[2]
+                <div class="crop-description">{info.get(rotations, 'Alternative crop for diversification.') if len(rotations) > 1 else 'Alternative crop'}</div>[2]
             </div>
             """, unsafe_allow_html=True)
         
@@ -1669,11 +1695,11 @@ elif page == "Crop Rotation Advisor":
         <div class="stat-box">
             <div style="font-size: 1.2rem; color: #667eea; font-weight: 600;">✅ Benefits of Rotation</div>
             <div style="margin-top: 15px; color: #b0c4ff; font-size: 1rem;">
-            • 60-80% reduction in pathogen buildup<br>
-            • Improved soil health and structure<br>
-            • Lower chemical input costs<br>
-            • More resilient farming system<br>
-            • Enhanced biodiversity
+            -  60-80% reduction in pathogen buildup<br>
+            -  Improved soil health and structure<br>
+            -  Lower chemical input costs<br>
+            -  More resilient farming system<br>
+            -  Enhanced biodiversity
             </div>
         </div>
         """, unsafe_allow_html=True)
