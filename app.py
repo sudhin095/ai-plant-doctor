@@ -1023,7 +1023,7 @@ def get_farmer_bot_response(user_question, diagnosis_context=None):
 # ============ HEADER ============
 st.markdown("""
 <div class="header-container">
-    <div class="header-title">🌿 AI Plant Doctor - Smart Edition</div>
+    <div class="header-title"> AI Plant Doctor - Smart Edition</div>
     <div class="header-subtitle">Hybrid YOLOv8+ViT Detection - 100% FREE & Offline Capable</div>
 </div>
 """, unsafe_allow_html=True)
@@ -1913,3 +1913,4 @@ elif page == "Cost Calculator & ROI":
                 ✅ Chemical treatment offers higher immediate ROI, but consider organic for long-term sustainability.
                 </div>
                 """, unsafe_allow_html=True)
+
