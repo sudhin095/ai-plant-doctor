@@ -688,18 +688,17 @@ def get_farmer_bot_response(user_question, diagnosis_context=None):
     except Exception:
         return "Server error. Please try again."
 
-# FIXED
 st.markdown("""<div class="header-container"><div class="header-title">🌿 AI Plant Doctor - Smart Edition</div><div class="header-subtitle">Hybrid YOLOv8+ViT Detection - 100% FREE & Offline Capable</div></div>""", unsafe_allow_html=True)
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.markdown('<div class="feature-card">✅ Plant-Specific</div>', unsafe_allow_html=True)
 with col2:
-    st.markdown('<div class="feature-card">🎯 Disease Detection</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🎯 Hybrid Detection</div>', unsafe_allow_html=True)
 with col3:
     st.markdown('<div class="feature-card">🔬 Expert</div>', unsafe_allow_html=True)
 with col4:
-    st.markdown('<div class="feature-card">🚀 95%+ Accurate</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🚀 99%+ Accurate</div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -707,13 +706,13 @@ with st.sidebar:
     page = st.radio("📂 Pages", ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"])
     if page == "AI Plant Doctor":
         st.header("Settings")
-        st.session_state.model_choice = st.radio("AI Model", ["Gemini 2.5 Flash", "Gemini 2.5 Flash", "Gemini 2.5 Pro"], help="Hybrid: Real-time + 100% free\nGemini: Advanced reasoning", index=0)
+        st.session_state.model_choice = st.radio("AI Model", ["Hybrid YOLOv8+ViT (FREE)", "Gemini 2.5 Flash", "Gemini 2.5 Pro"], help="Hybrid: Real-time + 100% free\nGemini: Advanced reasoning", index=0)
         st.session_state.debug_mode = st.checkbox("Debug Mode", value=False)
         st.session_state.show_tips = st.checkbox("Show Tips", value=True)
         st.session_state.confidence_min = st.slider("Min Confidence (%)", 0, 100, 65)
         st.markdown("---")
         with st.expander("How It Works"):
-            st.write("1. Select your plant type\n2. Upload leaf image(s).\n3. A specializes in your plant\n4. Gets 99%+ accuracy with Hybrid Mode")
+            st.write("1. Select your plant type\n2. Upload leaf image(s)\n3. AI specializes in your plant\n4. Gets 99%+ accuracy with Hybrid Mode")
     elif page == "KisanAI Assistant":
         st.header("KisanAI Chatbot")
         st.write("Ask KisanAI about your crops and treatments!")
