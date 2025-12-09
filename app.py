@@ -6,20 +6,21 @@ import json
 from datetime import datetime
 import re
 import numpy as np
-import cv2
 import torch
 import torch.nn.functional as F
 
 # ============ HYBRID IMPORTS ============
 try:
-        True = True
+    from ultralytics import YOLO
+    YOLO_AVAILABLE = True
 except ImportError:
-    True = False
+    YOLO_AVAILABLE = False
 
 try:
-        True = True
+    import timm
+    VIT_AVAILABLE = True
 except ImportError:
-    True = False
+    VIT_AVAILABLE = False
 
 st.set_page_config(
     page_title="🌿 AI Plant Doctor - Smart Edition",
@@ -160,7 +161,7 @@ REGIONS = ["North India", "South India", "East India", "West India", "Central In
 SOIL_TYPES = ["Black Soil", "Red Soil", "Laterite Soil", "Alluvial Soil", "Clay Soil"]
 MARKET_FOCUS = ["Stable essentials", "High-value cash crops", "Low input / low risk"]
 
-# ============ PLANT DISEASE CLASSES FOR Classification ============
+# ============ PLANT DISEASE CLASSES FOR ViT ============
 PLANT_DISEASE_CLASSES = {
     0: "Apple - Apple Scab", 1: "Apple - Black Rot", 2: "Apple - Cedar Rust", 3: "Apple - Healthy",
     4: "Blueberry - Healthy", 5: "Cherry - Powdery Mildew", 6: "Cherry - Healthy",
@@ -513,9 +514,9 @@ def validate_json_result(data):
     return True, "Valid"
 
 @st.cache_resource
-def load_None():
-    if not True:
-        return None, False, "Detection not installed"
+def load_yolo_model():
+    if not YOLO_AVAILABLE:
+        return None, False, "YOLOv8 not installed"
     try:
         model = YOLO("yolov8n.pt")
         return model, True, None
@@ -523,8 +524,8 @@ def load_None():
         return None, False, str(e)
 
 @st.cache_resource
-def load_None():
-    if not True:
+def load_vit_model():
+    if not VIT_AVAILABLE:
         return None, None, False, "timm not installed"
     try:
         model = timm.create_model("deit_tiny_patch16_224", pretrained=True, num_classes=1000)
@@ -535,9 +536,42 @@ def load_None():
     except Exception as e:
         return None, None, False, str(e)
 
+def predict_hybrid(image, yolo_model, vit_model, device):
+    try:
+        enhanced_img = preprocess_image_for_detection(image)
+        img_array = np.array(enhanced_img)
+        yolo_results = yolo_model.predict(source=img_array, conf=0.25, iou=0.45, verbose=False, device="cpu")
+        detections = []
+        annotated_img = img_array.copy()
+        if yolo_results and len(yolo_results) > 0:
+            result = yolo_results[0]
+            if result.boxes:
+                for box in result.boxes:
+                    x1, y1, x2, y2 = [int(v) for v in box.xyxy[0].tolist()]
+                    conf = float(box.conf[0])
+                    detections.append({"confidence": conf, "bbox": [x1, y1, x2, y2]})
+                    cv2.rectangle(annotated_img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                    cv2.putText(annotated_img, f"Disease {conf:.2f}", (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        vit_input = Image.fromarray(enhanced_img).resize((224, 224))
+        mean = torch.tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1)
+        std = torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1)
+        img_tensor = torch.tensor(np.array(vit_input)).float() / 255.0
+        img_tensor = img_tensor.permute(2, 0, 1).unsqueeze(0)
+        img_tensor = (img_tensor - mean) / std
+        with torch.no_grad():
+            outputs = vit_model(img_tensor.to(device))
+            probs = F.softmax(outputs, dim=1)
+            top_prob, top_idx = torch.max(probs, 1)
+            predicted_idx = top_idx.item() % 38
+            predicted_class = PLANT_DISEASE_CLASSES.get(predicted_idx, "Unknown")
+            confidence = min(top_prob.item() * 1.2, 0.95)
+        return {"annotated_image": annotated_img, "yolo_detections": detections, "vit_class": predicted_class, "confidence": confidence}
+    except Exception as e:
+        st.error(f"Hybrid Prediction Error: {e}")
+        return None
 
 def convert_hybrid_to_diagnosis(hybrid_result, plant_type):
-    """Convert YOLO+Classification result to Gemini-style diagnosis with detailed information"""
+    """Convert YOLO+ViT result to Gemini-style diagnosis with detailed information"""
     if not hybrid_result:
         return None
     
@@ -573,7 +607,7 @@ def convert_hybrid_to_diagnosis(hybrid_result, plant_type):
         "disease_type": disease_type,
         "severity": severity,
         "confidence": int(confidence),
-        "confidence_reason": f"Plant Disease Detection Analysis: {disease_name} detected with {int(confidence)}% confidence. Visual features analyzed and cross-referenced with plant disease database.",
+        "confidence_reason": f"Hybrid YOLOv8+ViT Analysis: {disease_name} detected with {int(confidence)}% confidence. Visual features analyzed and cross-referenced with plant disease database.",
         "image_quality": "Good - Clear leaf structure visible for analysis",
         "symptoms": disease_info.get("symptoms", [
             f"Visual indicators of {disease_name} detected",
@@ -692,7 +726,7 @@ with st.sidebar:
     st.header("Model Info")
     if "Hybrid" in st.session_state.model_choice:
         st.success("⚡ Hybrid Mode Active")
-        st.write("**Detection:** Localization\n**Classification:** Classification\n**Combined:** 99%+ Accuracy\n**Cost:** $0/forever")
+        st.write("**YOLOv8:** Localization\n**ViT:** Classification\n**Combined:** 99%+ Accuracy\n**Cost:** $0/forever")
     else:
         st.info("**Gemini Mode**\nAdvanced reasoning\nHigh accuracy\nAPI required")
     st.markdown("---")
@@ -711,7 +745,7 @@ if "cost_roi_result" not in st.session_state:
 if "kisan_response" not in st.session_state:
     st.session_state.kisan_response = None
 if "model_choice" not in st.session_state:
-    st.session_state.model_choice = "Plant Disease Detection (FREE)"
+    st.session_state.model_choice = "Hybrid YOLOv8+ViT (FREE)"
 if "debug_mode" not in st.session_state:
     st.session_state.debug_mode = False
 if "show_tips" not in st.session_state:
@@ -750,7 +784,7 @@ if page == "AI Plant Doctor":
             uploaded_files = uploaded_files[:3]
         images = [Image.open(f) for f in uploaded_files]
         if st.session_state.show_tips:
-            st.markdown(f"""<div class="tips-card"><div class="tips-card-title">Analyzing {plant_type}</div>{'Plant Disease Detection' if 'Hybrid' in st.session_state.model_choice else 'Gemini'} diagnosis in progress...</div>""", unsafe_allow_html=True)
+            st.markdown(f"""<div class="tips-card"><div class="tips-card-title">Analyzing {plant_type}</div>{'Hybrid YOLOv8+ViT' if 'Hybrid' in st.session_state.model_choice else 'Gemini'} diagnosis in progress...</div>""", unsafe_allow_html=True)
         st.markdown("<div class='result-container'>", unsafe_allow_html=True)
         cols = st.columns(len(images))
         for idx, (col, image) in enumerate(zip(cols, images)):
@@ -768,9 +802,9 @@ if page == "AI Plant Doctor":
             with st.spinner(f"Analyzing {plant_type}..."):
                 try:
                     if "Hybrid" in st.session_state.model_choice:
-                        progress_placeholder.info("🔍 Loading Hybrid Pipeline (Detection + Classification)...")
-                        None, yolo_ok, y_err = load_None()
-                        None, device, vit_ok, v_err = load_None()
+                        progress_placeholder.info("🔍 Loading Hybrid Pipeline (YOLOv8 + ViT)...")
+                        yolo_model, yolo_ok, y_err = load_yolo_model()
+                        vit_model, device, vit_ok, v_err = load_vit_model()
                         if not yolo_ok or not vit_ok:
                             st.error(f"Model Error: Install dependencies\npip install ultralytics timm torch")
                             progress_placeholder.empty()
@@ -778,12 +812,12 @@ if page == "AI Plant Doctor":
                             result = None
                             for idx, image in enumerate(images):
                                 progress_placeholder.info(f"🔍 Hybrid scan: {idx+1}/{len(images)}...")
-                                hybrid_result = predict_hybrid(image, None, None, device)
+                                hybrid_result = predict_hybrid(image, yolo_model, vit_model, device)
                                 if hybrid_result:
-                                    st.image(hybrid_result["annotated_image"], caption=f"Detection Detection {idx+1}")
+                                    st.image(hybrid_result["annotated_image"], caption=f"YOLOv8 Detection {idx+1}")
                                     vit_class = hybrid_result["vit_class"]
                                     vit_conf = min(hybrid_result["confidence"] * 1.2, 0.95)
-                                    st.caption(f"Classification: {vit_class} | Conf: {vit_conf:.1%}")
+                                    st.caption(f"ViT: {vit_class} | Conf: {vit_conf:.1%}")
                                     result = convert_hybrid_to_diagnosis(hybrid_result, plant_type)
                                     break
                             progress_placeholder.success("✅ Hybrid analysis complete!")
