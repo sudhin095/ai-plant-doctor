@@ -6,7 +6,6 @@ import json
 from datetime import datetime
 import re
 import numpy as np
-import cv2
 import torch
 import torch.nn.functional as F
 
@@ -1145,4 +1144,5 @@ else:
                 st.markdown(f"""<div class="success-box">✅ Chemical treatment offers higher immediate ROI ({analysis['chem_roi']}% vs {analysis['org_roi']}%), but consider organic for long-term sustainability and soil preservation.</div>""", unsafe_allow_html=True)
             else:
                 st.markdown("""<div class="success-box">✅ Both treatments have similar ROI. Choose based on your farming preference and long-term sustainability goals.</div>""", unsafe_allow_html=True)
+
 
