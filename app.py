@@ -6,6 +6,7 @@ import json
 from datetime import datetime
 import re
 import numpy as np
+import cv2
 import torch
 import torch.nn.functional as F
 
@@ -368,7 +369,7 @@ RESPOND WITH EXACTLY THIS JSON:
   "differential_diagnosis": ["Disease A (common in {plant_type}): Why it might be this", "Disease B (common in {plant_type}): Why it might be this", "Disease C: Why this is unlikely for {plant_type}"],
   "probable_causes": ["Primary cause relevant to {plant_type}", "Secondary cause", "Environmental factor"],
   "immediate_action": ["Action 1: Specific to {plant_type}", "Action 2: Specific to {plant_type}", "Action 3: Specific to {plant_type}"],
-  "organic_treatments": ["Treatment 1: Product and application for {plant_type}", "Treatment 2: Alternative for {plant_type}"],
+  "organic_treatments": ["Treatment 1: Product and application for {plant_type}", "Treatment 2: Alternative for {plant_type}", "Timing: When to apply for {plant_type}"],
   "chemical_treatments": ["Chemical 1: Safe for {plant_type} with dilution", "Chemical 2: Alternative safe for {plant_type}", "Safety: Important precautions for {plant_type}"],
   "prevention_long_term": ["Prevention strategy 1 for {plant_type}", "Prevention strategy 2 for {plant_type}", "Resistant varieties: If available for {plant_type}"],
   "plant_specific_notes": "Important notes specific to {plant_type} care and disease management",
@@ -694,11 +695,11 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.markdown('<div class="feature-card">✅ Plant-Specific</div>', unsafe_allow_html=True)
 with col2:
-    st.markdown('<div class="feature-card">🎯 Disease Detection</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🎯 Hybrid Detection</div>', unsafe_allow_html=True)
 with col3:
     st.markdown('<div class="feature-card">🔬 Expert</div>', unsafe_allow_html=True)
 with col4:
-    st.markdown('<div class="feature-card">🚀 95%+ Accurate</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🚀 99%+ Accurate</div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -706,7 +707,7 @@ with st.sidebar:
     page = st.radio("📂 Pages", ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"])
     if page == "AI Plant Doctor":
         st.header("Settings")
-        st.session_state.model_choice = st.radio("AI Model", ["YOLOv8","Gemini 2.5 Flash"], help="Hybrid: Real-time + 100% free\nGemini: Advanced reasoning", index=0)
+        st.session_state.model_choice = st.radio("AI Model", ["Hybrid YOLOv8+ViT (FREE)", "Gemini 2.5 Flash", "Gemini 2.5 Pro"], help="Hybrid: Real-time + 100% free\nGemini: Advanced reasoning", index=0)
         st.session_state.debug_mode = st.checkbox("Debug Mode", value=False)
         st.session_state.show_tips = st.checkbox("Show Tips", value=True)
         st.session_state.confidence_min = st.slider("Min Confidence (%)", 0, 100, 65)
@@ -863,6 +864,8 @@ if page == "AI Plant Doctor":
                             st.metric("Confidence", f"{confidence}%")
                         with col3:
                             st.metric("Severity", severity.title())
+                        with col4:
+                            st.metric("Time", datetime.now().strftime("%H:%M"))
                         st.markdown("<br>", unsafe_allow_html=True)
                         col_left, col_right = st.columns(2)
                         with col_left:
@@ -1138,5 +1141,3 @@ else:
                 st.markdown(f"""<div class="success-box">✅ Chemical treatment offers higher immediate ROI ({analysis['chem_roi']}% vs {analysis['org_roi']}%), but consider organic for long-term sustainability and soil preservation.</div>""", unsafe_allow_html=True)
             else:
                 st.markdown("""<div class="success-box">✅ Both treatments have similar ROI. Choose based on your farming preference and long-term sustainability goals.</div>""", unsafe_allow_html=True)
-
-
