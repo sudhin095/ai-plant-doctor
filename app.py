@@ -863,8 +863,6 @@ if page == "AI Plant Doctor":
                             st.metric("Confidence", f"{confidence}%")
                         with col3:
                             st.metric("Severity", severity.title())
-                        with col4:
-                            st.metric("Time", datetime.now().strftime("%H:%M"))
                         st.markdown("<br>", unsafe_allow_html=True)
                         col_left, col_right = st.columns(2)
                         with col_left:
@@ -1140,3 +1138,4 @@ else:
                 st.markdown(f"""<div class="success-box">✅ Chemical treatment offers higher immediate ROI ({analysis['chem_roi']}% vs {analysis['org_roi']}%), but consider organic for long-term sustainability and soil preservation.</div>""", unsafe_allow_html=True)
             else:
                 st.markdown("""<div class="success-box">✅ Both treatments have similar ROI. Choose based on your farming preference and long-term sustainability goals.</div>""", unsafe_allow_html=True)
+
