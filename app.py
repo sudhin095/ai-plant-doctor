@@ -706,7 +706,7 @@ with st.sidebar:
     page = st.radio("📂 Pages", ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"])
     if page == "AI Plant Doctor":
         st.header("Settings")
-        st.session_state.model_choice = st.radio("AI Model", ["Gemini 2.5 Flash"], help="Hybrid: Real-time + 100% free\nGemini: Advanced reasoning", index=0)
+        st.session_state.model_choice = st.radio("AI Model", ["YOLOv8","Gemini 2.5 Flash"], help="Hybrid: Real-time + 100% free\nGemini: Advanced reasoning", index=0)
         st.session_state.debug_mode = st.checkbox("Debug Mode", value=False)
         st.session_state.show_tips = st.checkbox("Show Tips", value=True)
         st.session_state.confidence_min = st.slider("Min Confidence (%)", 0, 100, 65)
@@ -1138,4 +1138,5 @@ else:
                 st.markdown(f"""<div class="success-box">✅ Chemical treatment offers higher immediate ROI ({analysis['chem_roi']}% vs {analysis['org_roi']}%), but consider organic for long-term sustainability and soil preservation.</div>""", unsafe_allow_html=True)
             else:
                 st.markdown("""<div class="success-box">✅ Both treatments have similar ROI. Choose based on your farming preference and long-term sustainability goals.</div>""", unsafe_allow_html=True)
+
 
