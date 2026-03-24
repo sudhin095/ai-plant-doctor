@@ -919,7 +919,7 @@ if page == "AI Plant Doctor":
                                     st.markdown(f"""<div class="treatment-item"><div class="treatment-name">⚗️ {treatment_name}</div><div class="treatment-quantity">Quantity: {quantity}</div><div class="treatment-dilution">Dilution: {dilution}</div><div class="cost-info" style="margin-top: 8px; border-left: 5px solid #64b5f6;">Cost: Rs {cost}</div></div>""", unsafe_allow_html=True)
                             st.markdown(f'<div class="cost-info" style="margin-top: 15px; border-left: 5px solid #64b5f6;">
                             total_chemical_cost_all = total_chemical_cost * infected_count
-                            st.markdown(f'<div class="cost-info" style="border-left: 5px solid #64b5f6;">
+                            st.markdown('f'<div class="cost-info" style="border-left: 5px solid #64b5f6;">
                             st.markdown("</div>", unsafe_allow_html=True)
                         st.markdown("""<div class="info-section"><div class="info-title">Prevention</div>""", unsafe_allow_html=True)
                         for tip in result.get("prevention_long_term", []):
