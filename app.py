@@ -772,6 +772,8 @@ if page == "AI Plant Doctor":
         if plant_type and plant_type in PLANT_COMMON_DISEASES:
             st.markdown(f"""<div class="success-box">Common diseases in {plant_type}:\n\n{PLANT_COMMON_DISEASES[plant_type]}</div>""", unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("""<div class="info-section"><div class="info-title">Infected Crops Count</div></div>""", unsafe_allow_html=True)
+        infected_count = st.number_input("Number of infected plants/trees in your field", value=1, min_value=1, step=1, label_visibility="collapsed")
         st.markdown("</div>", unsafe_allow_html=True)
     with col_upload:
         st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
@@ -917,9 +919,9 @@ if page == "AI Plant Doctor":
                                     dilution = info.get("dilution", "Follow label instructions")
                                     total_chemical_cost += cost
                                     st.markdown(f"""<div class="treatment-item"><div class="treatment-name">⚗️ {treatment_name}</div><div class="treatment-quantity">Quantity: {quantity}</div><div class="treatment-dilution">Dilution: {dilution}</div><div class="cost-info" style="margin-top: 8px; border-left: 5px solid #64b5f6;">Cost: Rs {cost}</div></div>""", unsafe_allow_html=True)
-                            st.markdown(f'<div class="cost-info" style="margin-top: 15px; border-left: 5px solid #64b5f6;">
+                            st.markdown(f'<div class="cost-info" style="margin-top: 15px; border-left: 5px solid #64b5f6;">💰 Total Cost per plant: Rs{total_chemical_cost}</div>', unsafe_allow_html=True)
                             total_chemical_cost_all = total_chemical_cost * infected_count
-                            st.markdown('f'<div class="cost-info" style="border-left: 5px solid #64b5f6;">
+                            st.markdown(f'<div class="cost-info" style="border-left: 5px solid #64b5f6;">💰 Total Cost for {infected_count} infected plants: Rs{total_chemical_cost_all}</div>', unsafe_allow_html=True)
                             st.markdown("</div>", unsafe_allow_html=True)
                         st.markdown("""<div class="info-section"><div class="info-title">Prevention</div>""", unsafe_allow_html=True)
                         for tip in result.get("prevention_long_term", []):
@@ -1140,5 +1142,4 @@ else:
                 st.markdown(f"""<div class="success-box">✅ Chemical treatment offers higher immediate ROI ({analysis['chem_roi']}% vs {analysis['org_roi']}%), but consider organic for long-term sustainability and soil preservation.</div>""", unsafe_allow_html=True)
             else:
                 st.markdown("""<div class="success-box">✅ Both treatments have similar ROI. Choose based on your farming preference and long-term sustainability goals.</div>""", unsafe_allow_html=True)
-
 
