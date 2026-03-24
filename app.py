@@ -691,6 +691,134 @@ def get_farmer_bot_response(user_question, diagnosis_context=None):
     except Exception:
         return "Server error. Please try again."
 
+# ============ DIAGNOSIS RENDER FUNCTION ============
+def render_diagnosis_output(result, plant_type, infected_count, key_suffix="main"):
+    """Renders the full diagnosis output. Called on fresh analysis and on page return."""
+    confidence = result.get("confidence", 0)
+    if confidence < st.session_state.get("confidence_min", 65):
+        st.markdown(f"""<div class="warning-box">⚠️ Low confidence result ({confidence}%). Consider re-uploading a clearer image.</div>""", unsafe_allow_html=True)
+    st.markdown("<div class='result-container'>", unsafe_allow_html=True)
+    disease_name = result.get("disease_name", "Unknown")
+    disease_type = result.get("disease_type", "unknown")
+    severity = result.get("severity", "unknown")
+    severity_class = get_severity_badge_class(severity)
+    type_class = get_type_badge_class(disease_type)
+    st.markdown(f"""<div class="disease-header"><div class="disease-name">{disease_name}</div><div class="disease-meta"><span class="severity-badge {severity_class}">{severity.title()}</span><span class="type-badge {type_class}">{disease_type.title()}</span></div></div>""", unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Plant", plant_type)
+    with col2:
+        st.metric("Confidence", f"{confidence}%")
+    with col3:
+        st.metric("Severity", severity.title())
+    st.markdown("<br>", unsafe_allow_html=True)
+    col_left, col_right = st.columns(2)
+    with col_left:
+        st.markdown("""<div class="info-section"><div class="info-title">Symptoms</div>""", unsafe_allow_html=True)
+        for symptom in result.get("symptoms", []):
+            st.write(f"• {symptom}")
+        st.markdown("</div>", unsafe_allow_html=True)
+        if result.get("differential_diagnosis"):
+            st.markdown("""<div class="info-section"><div class="info-title">Other Possibilities</div>""", unsafe_allow_html=True)
+            for diagnosis in result.get("differential_diagnosis", []):
+                st.write(f"• {diagnosis}")
+            st.markdown("</div>", unsafe_allow_html=True)
+    with col_right:
+        st.markdown("""<div class="info-section"><div class="info-title">Causes</div>""", unsafe_allow_html=True)
+        for cause in result.get("probable_causes", []):
+            st.write(f"• {cause}")
+        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("""<div class="info-section"><div class="info-title">Actions</div>""", unsafe_allow_html=True)
+        for i, action in enumerate(result.get("immediate_action", []), 1):
+            st.write(f"**{i}.** {action}")
+        st.markdown("</div>", unsafe_allow_html=True)
+    col_treat1, col_treat2 = st.columns(2)
+    organic_treatments = result.get("organic_treatments", [])
+    chemical_treatments = result.get("chemical_treatments", [])
+    total_organic_cost = 0
+    total_chemical_cost = 0
+    with col_treat1:
+        st.markdown("""<div class="info-section"><div class="info-title">Organic Treatments</div>""", unsafe_allow_html=True)
+        for treatment in organic_treatments:
+            if isinstance(treatment, str):
+                treatment_name = treatment.split(" - ")[0] if " - " in treatment else treatment.split(":")[0]
+                info = get_treatment_info("organic", treatment_name)
+                cost = info.get("cost", 300)
+                quantity = info.get("quantity", "As per package")
+                dilution = info.get("dilution", "Follow label instructions")
+                total_organic_cost += cost
+                st.markdown(f"""<div class="treatment-item"><div class="treatment-name">💊 {treatment_name}</div><div class="treatment-quantity">Quantity: {quantity}</div><div class="treatment-dilution">Dilution: {dilution}</div><div class="cost-info" style="margin-top: 8px; border-left: 5px solid #81c784;">Cost: Rs {cost}</div></div>""", unsafe_allow_html=True)
+        st.markdown(f'<div class="cost-info" style="margin-top: 15px; border-left: 5px solid #81c784;">💰 Total Cost per plant: Rs{total_organic_cost}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="cost-info" style="border-left: 5px solid #4caf50;">💰 Total Cost for {infected_count} infected plants: Rs{total_organic_cost * infected_count}</div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    with col_treat2:
+        st.markdown("""<div class="info-section"><div class="info-title">Chemical Treatments</div>""", unsafe_allow_html=True)
+        for treatment in chemical_treatments:
+            if isinstance(treatment, str):
+                treatment_name = treatment.split(" - ")[0] if " - " in treatment else treatment.split(":")[0]
+                info = get_treatment_info("chemical", treatment_name)
+                cost = info.get("cost", 250)
+                quantity = info.get("quantity", "As per package")
+                dilution = info.get("dilution", "Follow label instructions")
+                total_chemical_cost += cost
+                st.markdown(f"""<div class="treatment-item"><div class="treatment-name">⚗️ {treatment_name}</div><div class="treatment-quantity">Quantity: {quantity}</div><div class="treatment-dilution">Dilution: {dilution}</div><div class="cost-info" style="margin-top: 8px; border-left: 5px solid #64b5f6;">Cost: Rs {cost}</div></div>""", unsafe_allow_html=True)
+        st.markdown(f'<div class="cost-info" style="margin-top: 15px; border-left: 5px solid #64b5f6;">💰 Total Cost per plant: Rs{total_chemical_cost}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="cost-info" style="border-left: 5px solid #64b5f6;">💰 Total Cost for {infected_count} infected plants: Rs{total_chemical_cost * infected_count}</div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("""<div class="info-section"><div class="info-title">Prevention</div>""", unsafe_allow_html=True)
+    for tip in result.get("prevention_long_term", []):
+        st.write(f"• {tip}")
+    st.markdown("</div>", unsafe_allow_html=True)
+    if result.get("plant_specific_notes"):
+        st.markdown(f"""<div class="info-section"><div class="info-title">{plant_type} Care Notes</div>{result.get("plant_specific_notes")}</div>""", unsafe_allow_html=True)
+    if result.get("similar_conditions"):
+        st.markdown(f"""<div class="info-section"><div class="info-title">Similar Conditions in {plant_type}</div>{result.get("similar_conditions")}</div>""", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # ── Treatment Selection & Cost Auto-Fill ──────────────────────────────────
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("""<div class="info-section" style="border-left: 5px solid #ffd700;"><div class="info-title">🧮 Select Treatment & Auto-Calculate Cost</div><div style="color:#b0c4ff; margin-top:6px; font-size:0.95rem;">Enter the number of infected plants and choose one treatment from the AI-suggested list below. The total cost will be automatically sent to the <b>Cost Calculator & ROI</b> page.</div></div>""", unsafe_allow_html=True)
+    all_treatment_options = {}
+    for t in organic_treatments:
+        tname = t.split(" - ")[0].split(":")[0].strip() if isinstance(t, str) else str(t)
+        tinfo = get_treatment_info("organic", tname)
+        lbl = f"🌱 {tname} (Organic) — {tinfo.get('quantity', 'As per package')}"
+        all_treatment_options[lbl] = ("organic", tname, tinfo.get("cost", 300), tinfo.get("quantity", "As per package"), tinfo.get("dilution", "Follow label instructions"))
+    for t in chemical_treatments:
+        tname = t.split(" - ")[0].split(":")[0].strip() if isinstance(t, str) else str(t)
+        tinfo = get_treatment_info("chemical", tname)
+        lbl = f"⚗️ {tname} (Chemical) — {tinfo.get('quantity', 'As per package')}"
+        all_treatment_options[lbl] = ("chemical", tname, tinfo.get("cost", 250), tinfo.get("quantity", "As per package"), tinfo.get("dilution", "Follow label instructions"))
+
+    col_tsel1, col_tsel2 = st.columns(2)
+    with col_tsel1:
+        treat_plant_count = st.number_input("Number of Infected Plants", value=infected_count, min_value=1, step=1, key=f"treat_plant_count_{key_suffix}", help="Enter the total number of infected plants you want to treat")
+    with col_tsel2:
+        selected_treat = st.selectbox("Select Treatment to Apply", ["-- Select a treatment --"] + list(all_treatment_options.keys()), key=f"selected_treat_{key_suffix}", help="Select one treatment from the AI-suggested organic or chemical options")
+
+    if selected_treat and selected_treat != "-- Select a treatment --":
+        s_type, s_name, s_cost_100, s_qty, s_dil = all_treatment_options[selected_treat]
+        total_selected_cost = int(round((s_cost_100 / 100) * treat_plant_count))
+        col_tinfo1, col_tinfo2, col_tinfo3 = st.columns(3)
+        with col_tinfo1:
+            st.markdown(f"""<div class="stat-box"><div class="stat-label">Selected Treatment</div><div class="stat-value" style="font-size:1.1rem;">{s_name}</div></div>""", unsafe_allow_html=True)
+        with col_tinfo2:
+            st.markdown(f"""<div class="stat-box"><div class="stat-label">Quantity for {treat_plant_count} Plants</div><div class="stat-value" style="font-size:0.95rem; color:#81c784;">{s_qty}</div></div>""", unsafe_allow_html=True)
+        with col_tinfo3:
+            st.markdown(f"""<div class="stat-box"><div class="stat-label">Total Treatment Cost</div><div class="stat-value" style="color:#ffd700;">Rs {total_selected_cost:,}</div></div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class="cost-info" style="border-left: 5px solid #ffd700;">💧 Dilution: {s_dil}</div>""", unsafe_allow_html=True)
+        if s_type == "organic":
+            st.session_state.roi_organic_cost = total_selected_cost
+            st.session_state.roi_chemical_cost = 0
+            st.markdown(f"""<div class="success-box">✅ <b>Organic treatment selected.</b> Cost Calculator & ROI page auto-updated →<br>🌱 Organic: <b>Rs {total_selected_cost:,}</b> &nbsp;|&nbsp; ⚗️ Chemical: <b>Rs 0</b> (automatically set to 0)</div>""", unsafe_allow_html=True)
+        else:
+            st.session_state.roi_organic_cost = 0
+            st.session_state.roi_chemical_cost = total_selected_cost
+            st.markdown(f"""<div class="success-box">✅ <b>Chemical treatment selected.</b> Cost Calculator & ROI page auto-updated →<br>⚗️ Chemical: <b>Rs {total_selected_cost:,}</b> &nbsp;|&nbsp; 🌱 Organic: <b>Rs 0</b> (automatically set to 0)</div>""", unsafe_allow_html=True)
+
+    return total_organic_cost, total_chemical_cost, organic_treatments, chemical_treatments
+# ============ END DIAGNOSIS RENDER FUNCTION ============
+
 # FIXED
 st.markdown("""<div class="header-container"><div class="header-title">🌿 AI Plant Doctor - Smart Edition</div></div>""", unsafe_allow_html=True)
 
@@ -854,145 +982,11 @@ if page == "AI Plant Doctor":
                     
                     if result:
                         is_valid, validation_msg = validate_json_result(result)
-                        confidence = result.get("confidence", 0)
-                        if confidence < st.session_state.confidence_min:
-                            st.warning(f"Low Confidence ({confidence}%)")
-                        st.markdown("<div class='result-container'>", unsafe_allow_html=True)
+                        total_organic_cost, total_chemical_cost, organic_treatments, chemical_treatments = render_diagnosis_output(result, plant_type, infected_count, key_suffix="main")
                         disease_name = result.get("disease_name", "Unknown")
                         disease_type = result.get("disease_type", "unknown")
                         severity = result.get("severity", "unknown")
-                        severity_class = get_severity_badge_class(severity)
-                        type_class = get_type_badge_class(disease_type)
-                        st.markdown(f"""<div class="disease-header"><div class="disease-name">{disease_name}</div><div class="disease-meta"><span class="severity-badge {severity_class}">{severity.title()}</span><span class="type-badge {type_class}">{disease_type.title()}</span></div></div>""", unsafe_allow_html=True)
-                        col1, col2, col3, col4 = st.columns(4)
-                        with col1:
-                            st.metric("Plant", plant_type)
-                        with col2:
-                            st.metric("Confidence", f"{confidence}%")
-                        with col3:
-                            st.metric("Severity", severity.title())
-                        st.markdown("<br>", unsafe_allow_html=True)
-                        col_left, col_right = st.columns(2)
-                        with col_left:
-                            st.markdown("""<div class="info-section"><div class="info-title">Symptoms</div>""", unsafe_allow_html=True)
-                            for symptom in result.get("symptoms", []):
-                                st.write(f"• {symptom}")
-                            st.markdown("</div>", unsafe_allow_html=True)
-                            if result.get("differential_diagnosis"):
-                                st.markdown("""<div class="info-section"><div class="info-title">Other Possibilities</div>""", unsafe_allow_html=True)
-                                for diagnosis in result.get("differential_diagnosis", []):
-                                    st.write(f"• {diagnosis}")
-                                st.markdown("</div>", unsafe_allow_html=True)
-                        with col_right:
-                            st.markdown("""<div class="info-section"><div class="info-title">Causes</div>""", unsafe_allow_html=True)
-                            for cause in result.get("probable_causes", []):
-                                st.write(f"• {cause}")
-                            st.markdown("</div>", unsafe_allow_html=True)
-                            st.markdown("""<div class="info-section"><div class="info-title">Actions</div>""", unsafe_allow_html=True)
-                            for i, action in enumerate(result.get("immediate_action", []), 1):
-                                st.write(f"**{i}.** {action}")
-                            st.markdown("</div>", unsafe_allow_html=True)
-                        col_treat1, col_treat2 = st.columns(2)
-                        with col_treat1:
-                            st.markdown("""<div class="info-section"><div class="info-title">Organic Treatments</div>""", unsafe_allow_html=True)
-                            organic_treatments = result.get("organic_treatments", [])
-                            total_organic_cost = 0
-                            for treatment in organic_treatments:
-                                if isinstance(treatment, str):
-                                    treatment_name = treatment.split(" - ")[0] if " - " in treatment else treatment.split(":")[0]
-                                    info = get_treatment_info("organic", treatment_name)
-                                    cost = info.get("cost", 300)
-                                    quantity = info.get("quantity", "As per package")
-                                    dilution = info.get("dilution", "Follow label instructions")
-                                    total_organic_cost += cost
-                                    st.markdown(f"""<div class="treatment-item"><div class="treatment-name">💊 {treatment_name}</div><div class="treatment-quantity">Quantity: {quantity}</div><div class="treatment-dilution">Dilution: {dilution}</div><div class="cost-info" style="margin-top: 8px; border-left: 5px solid #81c784;">Cost: Rs {cost}</div></div>""", unsafe_allow_html=True)
-                            st.markdown(f'<div class="cost-info" style="margin-top: 15px; border-left: 5px solid #81c784;">💰 Total Cost per plant: Rs{total_organic_cost}</div>', unsafe_allow_html=True)
-                            total_organic_cost_all = total_organic_cost * infected_count
-                            st.markdown(f'<div class="cost-info" style="border-left: 5px solid #4caf50;">💰 Total Cost for {infected_count} infected plants: Rs{total_organic_cost_all}</div>', unsafe_allow_html=True)
-                            st.markdown("</div>", unsafe_allow_html=True)
-                        with col_treat2:
-                            st.markdown("""<div class="info-section"><div class="info-title">Chemical Treatments</div>""", unsafe_allow_html=True)
-                            chemical_treatments = result.get("chemical_treatments", [])
-                            total_chemical_cost = 0
-                            for treatment in chemical_treatments:
-                                if isinstance(treatment, str):
-                                    treatment_name = treatment.split(" - ")[0] if " - " in treatment else treatment.split(":")[0]
-                                    info = get_treatment_info("chemical", treatment_name)
-                                    cost = info.get("cost", 250)
-                                    quantity = info.get("quantity", "As per package")
-                                    dilution = info.get("dilution", "Follow label instructions")
-                                    total_chemical_cost += cost
-                                    st.markdown(f"""<div class="treatment-item"><div class="treatment-name">⚗️ {treatment_name}</div><div class="treatment-quantity">Quantity: {quantity}</div><div class="treatment-dilution">Dilution: {dilution}</div><div class="cost-info" style="margin-top: 8px; border-left: 5px solid #64b5f6;">Cost: Rs {cost}</div></div>""", unsafe_allow_html=True)
-                            st.markdown(f'<div class="cost-info" style="margin-top: 15px; border-left: 5px solid #64b5f6;">💰 Total Cost per plant: Rs{total_chemical_cost}</div>', unsafe_allow_html=True)
-                            total_chemical_cost_all = total_chemical_cost * infected_count
-                            st.markdown(f'<div class="cost-info" style="border-left: 5px solid #64b5f6;">💰 Total Cost for {infected_count} infected plants: Rs{total_chemical_cost_all}</div>', unsafe_allow_html=True)
-                            st.markdown("</div>", unsafe_allow_html=True)
-                        st.markdown("""<div class="info-section"><div class="info-title">Prevention</div>""", unsafe_allow_html=True)
-                        for tip in result.get("prevention_long_term", []):
-                            st.write(f"• {tip}")
-                        st.markdown("</div>", unsafe_allow_html=True)
-                        if result.get("plant_specific_notes"):
-                            st.markdown(f"""<div class="info-section"><div class="info-title">{plant_type} Care Notes</div>{result.get("plant_specific_notes")}</div>""", unsafe_allow_html=True)
-                        if result.get("similar_conditions"):
-                            st.markdown(f"""<div class="info-section"><div class="info-title">Similar Conditions in {plant_type}</div>{result.get("similar_conditions")}</div>""", unsafe_allow_html=True)
-                        st.markdown("</div>", unsafe_allow_html=True)
-
-                        # =========================================================
-                        # TREATMENT SELECTION & COST AUTO-FILL SECTION
-                        # =========================================================
-                        st.markdown("<br>", unsafe_allow_html=True)
-                        st.markdown("""<div class="info-section" style="border-left: 5px solid #ffd700;"><div class="info-title">🧮 Select Treatment & Auto-Calculate Cost</div><div style="color:#b0c4ff; margin-top:6px; font-size:0.95rem;">Enter the number of infected plants and choose one treatment from the AI-suggested list below. The total cost will be calculated automatically and sent to the <b>Cost Calculator & ROI</b> page.</div></div>""", unsafe_allow_html=True)
-
-                        # Build treatment options from AI result
-                        all_treatment_options = {}
-                        for t in organic_treatments:
-                            tname = t.split(" - ")[0].split(":")[0].strip() if isinstance(t, str) else str(t)
-                            tinfo = get_treatment_info("organic", tname)
-                            t_qty = tinfo.get("quantity", "As per package")
-                            t_cost = tinfo.get("cost", 300)
-                            t_dil = tinfo.get("dilution", "Follow label instructions")
-                            lbl = f"🌱 {tname} (Organic) — {t_qty}"
-                            all_treatment_options[lbl] = ("organic", tname, t_cost, t_qty, t_dil)
-                        for t in chemical_treatments:
-                            tname = t.split(" - ")[0].split(":")[0].strip() if isinstance(t, str) else str(t)
-                            tinfo = get_treatment_info("chemical", tname)
-                            t_qty = tinfo.get("quantity", "As per package")
-                            t_cost = tinfo.get("cost", 250)
-                            t_dil = tinfo.get("dilution", "Follow label instructions")
-                            lbl = f"⚗️ {tname} (Chemical) — {t_qty}"
-                            all_treatment_options[lbl] = ("chemical", tname, t_cost, t_qty, t_dil)
-
-                        col_tsel1, col_tsel2 = st.columns(2)
-                        with col_tsel1:
-                            treat_plant_count = st.number_input("Number of Infected Plants", value=infected_count, min_value=1, step=1, key="treat_plant_count_main", help="Enter the total number of infected plants you want to treat")
-                        with col_tsel2:
-                            selected_treat = st.selectbox("Select Treatment to Apply", ["-- Select a treatment --"] + list(all_treatment_options.keys()), key="selected_treat_main", help="Select one treatment from the AI-suggested organic or chemical options")
-
-                        if selected_treat and selected_treat != "-- Select a treatment --":
-                            s_type, s_name, s_cost_100, s_qty, s_dil = all_treatment_options[selected_treat]
-                            # Cost scaled proportionally (database cost is per 100 plants)
-                            total_selected_cost = int(round((s_cost_100 / 100) * treat_plant_count))
-
-                            col_tinfo1, col_tinfo2, col_tinfo3 = st.columns(3)
-                            with col_tinfo1:
-                                st.markdown(f"""<div class="stat-box"><div class="stat-label">Selected Treatment</div><div class="stat-value" style="font-size:1.1rem;">{s_name}</div></div>""", unsafe_allow_html=True)
-                            with col_tinfo2:
-                                st.markdown(f"""<div class="stat-box"><div class="stat-label">Quantity for {treat_plant_count} Plants</div><div class="stat-value" style="font-size:0.95rem; color:#81c784;">{s_qty}</div></div>""", unsafe_allow_html=True)
-                            with col_tinfo3:
-                                st.markdown(f"""<div class="stat-box"><div class="stat-label">Total Treatment Cost</div><div class="stat-value" style="color:#ffd700;">Rs {total_selected_cost:,}</div></div>""", unsafe_allow_html=True)
-
-                            st.markdown(f"""<div class="cost-info" style="border-left: 5px solid #ffd700;">💧 Dilution: {s_dil}</div>""", unsafe_allow_html=True)
-
-                            if s_type == "organic":
-                                st.session_state.roi_organic_cost = total_selected_cost
-                                st.session_state.roi_chemical_cost = 0
-                                st.markdown(f"""<div class="success-box">✅ <b>Organic treatment selected.</b> Cost Calculator & ROI page auto-updated →<br>🌱 Organic Treatment Cost: <b>Rs {total_selected_cost:,}</b> &nbsp;|&nbsp; ⚗️ Chemical Treatment Cost: <b>Rs 0</b> (automatically set to 0)</div>""", unsafe_allow_html=True)
-                            else:
-                                st.session_state.roi_organic_cost = 0
-                                st.session_state.roi_chemical_cost = total_selected_cost
-                                st.markdown(f"""<div class="success-box">✅ <b>Chemical treatment selected.</b> Cost Calculator & ROI page auto-updated →<br>⚗️ Chemical Treatment Cost: <b>Rs {total_selected_cost:,}</b> &nbsp;|&nbsp; 🌱 Organic Treatment Cost: <b>Rs 0</b> (automatically set to 0)</div>""", unsafe_allow_html=True)
-                        # =========================================================
-
+                        confidence = result.get("confidence", 0)
                         st.session_state.last_diagnosis = {"plant_type": plant_type, "disease_name": disease_name, "disease_type": disease_type, "severity": severity, "confidence": confidence, "organic_cost": total_organic_cost, "chemical_cost": total_chemical_cost, "infected_count": infected_count, "timestamp": datetime.now().isoformat(), "result": result, "organic_treatments_list": organic_treatments, "chemical_treatments_list": chemical_treatments}
                         progress_placeholder.empty()
                 except Exception as e:
@@ -1000,66 +994,17 @@ if page == "AI Plant Doctor":
                     progress_placeholder.empty()
     elif st.session_state.last_diagnosis:
         diag_prev = st.session_state.last_diagnosis
-        st.markdown("""<div class="success-box">Showing results from your last diagnosis. You can visit other pages while keeping these results.</div>""", unsafe_allow_html=True)
-
-        # =========================================================
-        # PERSISTENT TREATMENT SELECTION (shown after page reruns)
-        # =========================================================
-        prev_organic = diag_prev.get("organic_treatments_list", [])
-        prev_chemical = diag_prev.get("chemical_treatments_list", [])
-        prev_infected = diag_prev.get("infected_count", 1)
-
-        if prev_organic or prev_chemical:
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("""<div class="info-section" style="border-left: 5px solid #ffd700;"><div class="info-title">🧮 Select Treatment & Auto-Calculate Cost</div><div style="color:#b0c4ff; margin-top:6px; font-size:0.95rem;">Enter the number of infected plants and choose one treatment from the AI-suggested list below. The total cost will be calculated automatically and sent to the <b>Cost Calculator & ROI</b> page.</div></div>""", unsafe_allow_html=True)
-
-            prev_treatment_options = {}
-            for t in prev_organic:
-                tname = t.split(" - ")[0].split(":")[0].strip() if isinstance(t, str) else str(t)
-                tinfo = get_treatment_info("organic", tname)
-                t_qty = tinfo.get("quantity", "As per package")
-                t_cost = tinfo.get("cost", 300)
-                t_dil = tinfo.get("dilution", "Follow label instructions")
-                lbl = f"🌱 {tname} (Organic) — {t_qty}"
-                prev_treatment_options[lbl] = ("organic", tname, t_cost, t_qty, t_dil)
-            for t in prev_chemical:
-                tname = t.split(" - ")[0].split(":")[0].strip() if isinstance(t, str) else str(t)
-                tinfo = get_treatment_info("chemical", tname)
-                t_qty = tinfo.get("quantity", "As per package")
-                t_cost = tinfo.get("cost", 250)
-                t_dil = tinfo.get("dilution", "Follow label instructions")
-                lbl = f"⚗️ {tname} (Chemical) — {t_qty}"
-                prev_treatment_options[lbl] = ("chemical", tname, t_cost, t_qty, t_dil)
-
-            col_ptsel1, col_ptsel2 = st.columns(2)
-            with col_ptsel1:
-                prev_treat_count = st.number_input("Number of Infected Plants", value=prev_infected, min_value=1, step=1, key="treat_plant_count_prev", help="Enter the total number of infected plants you want to treat")
-            with col_ptsel2:
-                prev_selected_treat = st.selectbox("Select Treatment to Apply", ["-- Select a treatment --"] + list(prev_treatment_options.keys()), key="selected_treat_prev", help="Select one treatment from the AI-suggested organic or chemical options")
-
-            if prev_selected_treat and prev_selected_treat != "-- Select a treatment --":
-                ps_type, ps_name, ps_cost_100, ps_qty, ps_dil = prev_treatment_options[prev_selected_treat]
-                prev_total_cost = int(round((ps_cost_100 / 100) * prev_treat_count))
-
-                col_ptinfo1, col_ptinfo2, col_ptinfo3 = st.columns(3)
-                with col_ptinfo1:
-                    st.markdown(f"""<div class="stat-box"><div class="stat-label">Selected Treatment</div><div class="stat-value" style="font-size:1.1rem;">{ps_name}</div></div>""", unsafe_allow_html=True)
-                with col_ptinfo2:
-                    st.markdown(f"""<div class="stat-box"><div class="stat-label">Quantity for {prev_treat_count} Plants</div><div class="stat-value" style="font-size:0.95rem; color:#81c784;">{ps_qty}</div></div>""", unsafe_allow_html=True)
-                with col_ptinfo3:
-                    st.markdown(f"""<div class="stat-box"><div class="stat-label">Total Treatment Cost</div><div class="stat-value" style="color:#ffd700;">Rs {prev_total_cost:,}</div></div>""", unsafe_allow_html=True)
-
-                st.markdown(f"""<div class="cost-info" style="border-left: 5px solid #ffd700;">💧 Dilution: {ps_dil}</div>""", unsafe_allow_html=True)
-
-                if ps_type == "organic":
-                    st.session_state.roi_organic_cost = prev_total_cost
-                    st.session_state.roi_chemical_cost = 0
-                    st.markdown(f"""<div class="success-box">✅ <b>Organic treatment selected.</b> Cost Calculator & ROI page auto-updated →<br>🌱 Organic Treatment Cost: <b>Rs {prev_total_cost:,}</b> &nbsp;|&nbsp; ⚗️ Chemical Treatment Cost: <b>Rs 0</b> (automatically set to 0)</div>""", unsafe_allow_html=True)
-                else:
-                    st.session_state.roi_organic_cost = 0
-                    st.session_state.roi_chemical_cost = prev_total_cost
-                    st.markdown(f"""<div class="success-box">✅ <b>Chemical treatment selected.</b> Cost Calculator & ROI page auto-updated →<br>⚗️ Chemical Treatment Cost: <b>Rs {prev_total_cost:,}</b> &nbsp;|&nbsp; 🌱 Organic Treatment Cost: <b>Rs 0</b> (automatically set to 0)</div>""", unsafe_allow_html=True)
-        # =========================================================
+        stored_result = diag_prev.get("result")
+        if stored_result:
+            ts = diag_prev.get("timestamp", "")
+            ts_display = ts[:19].replace("T", " ") if ts else "previous session"
+            st.markdown(f"""<div class="info-section" style="border-left:5px solid #667eea;"><div class="info-title">📋 Diagnosis from {ts_display}</div><div style="color:#b0c4ff;font-size:0.9rem;">Results retained from your last analysis. Upload a new image and click Analyse to run a fresh diagnosis.</div></div>""", unsafe_allow_html=True)
+            render_diagnosis_output(
+                stored_result,
+                diag_prev.get("plant_type", "Unknown"),
+                diag_prev.get("infected_count", 1),
+                key_suffix="cached"
+            )
 
 elif page == "KisanAI Assistant":
     st.markdown("""<div class="page-header"><div class="page-title">🤖 KisanAI Assistant</div><div class="page-subtitle">Your Personal Agricultural Advisor</div></div>""", unsafe_allow_html=True)
