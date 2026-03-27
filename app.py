@@ -831,21 +831,12 @@ def enhance_image_for_analysis(image):
 
 def extract_json_robust(response_text):
     """
-    Safely extract a JSON object from the model response without raising.
+    Safely extract a JSON object from the model response.
     Returns a dict on success, or None on failure.
     """
-
-    # 0) Normalize type
+    # Normalize to string
     if isinstance(response_text, list):
-        parts = []
-        for item in response_text:
-            if isinstance(item, str):
-                parts.append(item)
-            elif hasattr(item, "text"):
-                parts.append(str(getattr(item, "text")))
-            else:
-                parts.append(str(item))
-        response_text = "\n".join(parts)
+        response_text = "\n".join(str(x) for x in response_text)
     elif not isinstance(response_text, str):
         response_text = str(response_text)
 
@@ -876,23 +867,16 @@ def extract_json_robust(response_text):
 
     cleaned = cleaned.strip()
 
-    # 3) Handle responses that start with keys but no braces
-    if cleaned.startswith('"plant_species"') or cleaned.startswith("'plant_species'"):
-        cleaned = "{\n" + cleaned
-        if not cleaned.rstrip().endswith("}"):
-            cleaned = cleaned.rstrip().rstrip(",") + "\n}"
-
+    # 3) Fallback: first {...} block
     try:
         return json.loads(cleaned)
     except Exception:
         pass
 
-    # 4) Fallback: first {...} block anywhere in text
     match = re.search(r"\{[\s\S]*\}", response_text)
     if match:
-        candidate = match.group(0)
         try:
-            return json.loads(candidate)
+            return json.loads(match.group(0))
         except Exception:
             pass
 
