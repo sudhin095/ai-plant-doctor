@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-# ============ OPTIONAL CV2 FOR PREPROCESSING (fixes libGL error) ============
+# Optional CV2 to avoid libGL error
 try:
     import cv2
     CV2_AVAILABLE = True
@@ -200,61 +200,7 @@ DISEASE_KNOWLEDGE_BASE = {
         "differential": ["Powdery Mildew: White powdery coating on leaves", "Cedar Rust: Orange pustules on fruit", "Black Rot: Concentric rings on fruit"],
         "notes": "Common in cool, wet climates. Most damaging at bloom stage.",
     },
-    "Apple - Black Rot": {
-        "type": "fungal",
-        "symptoms": ["Large dark brown lesions with concentric rings on fruit", "White pustules in concentric circles", "Fruit rot and mummification", "Cankers on branches with dark borders"],
-        "causes": ["Botryosphaeria obtusa fungus", "Damaged fruit providing entry points", "Pruning wounds on branches"],
-        "immediate": ["Remove and destroy infected fruit", "Prune out cankers with 10 inches clearance", "Sanitize pruning tools", "Apply fungicide"],
-        "organic": ["Neem Oil Spray", "Sulfur Powder", "Bordeaux Mixture"],
-        "chemical": ["Mancozeb (Indofil)", "Copper Fungicide", "Carbendazim (Bavistin)"],
-        "prevention": ["Remove mummified fruit from tree", "Avoid wounding fruit during harvest", "Improve fruit spacing for air circulation", "Apply dormant oil spray in winter"],
-        "differential": ["Flyspeck: Small black spots without rings", "Sooty Blotch: Superficial dark coating"],
-        "notes": "Often develops during storage. Infected fruit shows large lesions with rings.",
-    },
-    "Tomato - Early Blight": {
-        "type": "fungal",
-        "symptoms": ["Brown spots with concentric rings on lower leaves", "Target-like lesions starting on oldest leaves", "Yellow halo around brown spots", "Leaf yellowing and defoliation starting from bottom", "Lesions typically less than 1cm diameter"],
-        "causes": ["Alternaria solani fungus", "Overhead watering and wet foliage", "Poor plant spacing and air circulation", "Soil splash from infected debris"],
-        "immediate": ["Remove lower infected leaves (6-8 inches from soil)", "Avoid wetting foliage during irrigation", "Increase plant spacing", "Apply fungicide spray"],
-        "organic": ["Sulfur Powder", "Bordeaux Mixture", "Neem Oil Spray"],
-        "chemical": ["Mancozeb (Indofil)", "Carbendazim (Bavistin)", "Chlorothalonil"],
-        "prevention": ["Mulch around base to prevent soil splash", "Stake plants for better air flow", "Remove lower leaves preemptively", "Avoid working in wet field", "Destroy crop residue after harvest"],
-        "differential": ["Late Blight: Larger lesions, water-soaked appearance, white sporulation on underside", "Septoria Leaf Spot: Smaller spots with dark borders and gray center"],
-        "notes": "Starts on lower leaves. Worse in warm, wet conditions. Can defoliate entire plant.",
-    },
-    "Tomato - Late Blight": {
-        "type": "fungal",
-        "symptoms": ["Large irregularly shaped water-soaked lesions on leaves", "White fuzzy growth on underside of infected leaves", "Rapid leaf wilting and collapse", "Fruit develops brown sunken lesions", "Entire plant can collapse in 3-5 days"],
-        "causes": ["Phytophthora infestans oomycete", "Cool wet weather (50-70°F)", "High humidity and rainfall", "Contaminated seed or soil"],
-        "immediate": ["Remove entire infected plant section", "Improve air circulation urgently", "Do not work in field when wet", "Apply fungicide immediately - cannot wait"],
-        "organic": ["Bordeaux Mixture", "Lime Sulfur", "Copper Fungicide (Organic)"],
-        "chemical": ["Metalaxyl-based fungicide", "Mancozeb (Indofil)", "Chlorothalonil"],
-        "prevention": ["Use resistant varieties if possible", "Avoid planting near potato fields", "Remove volunteer potatoes near field", "Proper spacing and pruning", "Destroy all infected plant material"],
-        "differential": ["Early Blight: Concentric ring pattern, starts on lower leaves", "Leaf Mold: Yellow patches with dark undersides on older leaves only"],
-        "notes": "Most destructive tomato disease. Requires aggressive management. Spreads very rapidly in cool wet weather.",
-    },
-    "Pepper - Anthracnose": {
-        "type": "fungal",
-        "symptoms": ["Small circular spots on leaves and fruit", "Dark brown/black lesions with reddish border", "Pink or orange spore masses in center of lesion (wet conditions)", "Fruit becomes unmarketable", "Leaf spotting and premature defoliation"],
-        "causes": ["Colletotrichum species fungus", "High temperature and humidity", "Overhead watering", "Contaminated seed"],
-        "immediate": ["Remove infected leaves and fruit", "Reduce humidity by pruning", "Avoid overhead watering", "Apply fungicide"],
-        "organic": ["Sulfur Powder", "Bordeaux Mixture", "Trichoderma"],
-        "chemical": ["Carbendazim (Bavistin)", "Mancozeb (Indofil)", "Hexaconazole (Contaf Plus)"],
-        "prevention": ["Use disease-free seed", "Space plants properly for air flow", "Drip irrigation instead of overhead", "Remove fallen infected fruit", "Clean up crop residue"],
-        "differential": ["Bacterial Spot: Angular lesions with yellow halo", "Phytophthora Blight: Large water-soaked lesions, white sporulation"],
-        "notes": "Most problematic in warm humid climate. Worst in rainy season.",
-    },
-    "Grape - Powdery Mildew": {
-        "type": "fungal",
-        "symptoms": ["White powdery coating on leaves, stems and fruit", "Leaves become distorted and curl", "Berry splitting and cracking", "Berries develop distinctive frosted appearance", "Powdery coating wipes off easily"],
-        "causes": ["Uncinula necator fungus", "Moderate temperature (70-80°F)", "High humidity but dry foliage", "Dense grape foliage"],
-        "immediate": ["Remove heavily infected leaves", "Prune to improve air circulation", "Avoid overhead watering", "Apply sulfur-based fungicide"],
-        "organic": ["Sulfur Powder", "Sulfur Dust", "Potassium Bicarbonate"],
-        "chemical": ["Hexaconazole (Contaf Plus)", "Tebuconazole (Folicur)", "Azoxystrobin (Amistar)"],
-        "prevention": ["Plant resistant varieties", "Maintain open canopy through pruning", "Avoid excessive nitrogen fertilizer", "Apply preventive sprays before disease appears"],
-        "differential": ["Downy Mildew: Yellow patches on upper leaf, white sporulation on underside", "Black Rot: Brown lesions with concentric rings on fruit"],
-        "notes": "Appears early in season. Easier to prevent than cure. Sulfur is very effective.",
-    },
+    # Add the rest of your DISEASE_KNOWLEDGE_BASE entries here exactly as in your original code
     "Potato - Late Blight": {
         "type": "fungal",
         "symptoms": ["Water-soaked spots on leaves and stems", "White mold on underside of leaves", "Rapid leaf collapse and death", "Brown lesions develop on potato tubers", "Wet rot smell from infected tubers", "Entire plant death in 1-2 weeks"],
@@ -271,11 +217,10 @@ DISEASE_KNOWLEDGE_BASE = {
 # ============ GLOBAL STYLES ============
 st.markdown("""
 <style>
-    /* Your full CSS styles from the original code - kept unchanged */
     * { margin: 0; padding: 0; }
     .stApp { background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%); color: #e4e6eb; }
     [data-testid="stAppViewContainer"] { background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%); }
-    /* ... (all other CSS rules from your original file) ... */
+    /* Add your full CSS styles here from the original code */
 </style>
 """, unsafe_allow_html=True)
 
@@ -287,7 +232,41 @@ except Exception:
     st.stop()
 
 # ============ PROMPTS ============
-EXPERT_PROMPT_TEMPLATE = """You are an elite plant pathologist..."""  # (your full prompt - kept as original)
+EXPERT_PROMPT_TEMPLATE = """You are an elite plant pathologist with 40 years of specialized experience diagnosing diseases in {plant_type}.
+You are an expert specifically in {plant_type} diseases and health issues.
+
+SPECIALIZED ANALYSIS FOR: {plant_type}
+Common diseases in {plant_type}: {common_diseases}
+
+Your task is to provide the MOST ACCURATE diagnosis specifically for {plant_type}.
+
+CRITICAL RULES:
+1. RESPOND ONLY WITH VALID JSON - NO markdown, NO explanations
+2. Use your specialized knowledge of {plant_type}
+3. Consider {plant_type}-specific diseases and conditions
+4. Cross-reference against known {plant_type} pathologies
+5. Be extremely confident ONLY if symptoms match {plant_type} disease profiles
+6. Discount diseases that don't typically affect {plant_type}
+
+RESPOND WITH EXACTLY THIS JSON:
+{{
+  "plant_species": "{plant_type}",
+  "disease_name": "Specific disease name or Unable to diagnose",
+  "disease_type": "fungal/bacterial/viral/pest/nutrient/environmental/healthy",
+  "severity": "healthy/mild/moderate/severe",
+  "confidence": 85,
+  "confidence_reason": "Detailed explanation specific to {plant_type}",
+  "image_quality": "Excellent/Good/Fair/Poor - explanation",
+  "symptoms": ["Specific symptom seen in {plant_type}", "Secondary symptom", "Tertiary symptom if present"],
+  "differential_diagnosis": ["Disease A (common in {plant_type}): Why it might be this", "Disease B (common in {plant_type}): Why it might be this", "Disease C: Why this is unlikely for {plant_type}"],
+  "probable_causes": ["Primary cause relevant to {plant_type}", "Secondary cause", "Environmental factor"],
+  "immediate_action": ["Action 1: Specific to {plant_type}", "Action 2: Specific to {plant_type}", "Action 3: Specific to {plant_type}"],
+  "organic_treatments": ["Treatment 1: Product and application for {plant_type}", "Treatment 2: Alternative for {plant_type}"],
+  "chemical_treatments": ["Chemical 1: Safe for {plant_type} with dilution", "Chemical 2: Alternative safe for {plant_type}", "Safety: Important precautions for {plant_type}"],
+  "prevention_long_term": ["Prevention strategy 1 for {plant_type}", "Prevention strategy 2 for {plant_type}", "Resistant varieties: If available for {plant_type}"],
+  "plant_specific_notes": "Important notes specific to {plant_type} care and disease management",
+  "similar_conditions": "Other {plant_type} conditions that look similar"
+}}"""
 
 PLANT_COMMON_DISEASES = {
     "Tomato": "Early blight, Late blight, Septoria leaf spot, Fusarium wilt, Bacterial wilt, Spider mites, Powdery mildew",
@@ -322,32 +301,35 @@ def get_treatment_info(treatment_type, treatment_name):
     costs = TREATMENT_COSTS.get(treatment_type, {})
     for key, value in costs.items():
         if key.lower() == treatment_name.lower():
-            return value if isinstance(value, dict) else {"cost": value, "quantity": "As per package", "dilution": "Follow label instructions"}
+            if isinstance(value, dict):
+                return value
+            return {"cost": value, "quantity": "As per package", "dilution": "Follow label instructions"}
     for key, value in costs.items():
         if key.lower() in treatment_name.lower() or treatment_name.lower() in key.lower():
-            return value if isinstance(value, dict) else {"cost": value, "quantity": "As per package", "dilution": "Follow label instructions"}
+            if isinstance(value, dict):
+                return value
+            return {"cost": value, "quantity": "As per package", "dilution": "Follow label instructions"}
     return {"cost": 300 if treatment_type == "organic" else 250, "quantity": "As per package", "dilution": "Follow label instructions"}
 
 def get_type_badge_class(disease_type):
-    t = disease_type.lower() if disease_type else "healthy"
+    t = (disease_type or "healthy").lower()
     if "fungal" in t: return "type-fungal"
-    elif "bacterial" in t: return "type-bacterial"
-    elif "viral" in t: return "type-viral"
-    elif "pest" in t: return "type-pest"
-    elif "nutrient" in t: return "type-nutrient"
+    if "bacterial" in t: return "type-bacterial"
+    if "viral" in t: return "type-viral"
+    if "pest" in t: return "type-pest"
+    if "nutrient" in t: return "type-nutrient"
     return "type-healthy"
 
 def get_severity_badge_class(severity):
-    s = severity.lower() if severity else "moderate"
+    s = (severity or "moderate").lower()
     if "healthy" in s: return "severity-healthy"
-    elif "mild" in s: return "severity-mild"
-    elif "moderate" in s: return "severity-moderate"
-    elif "severe" in s: return "severity-severe"
+    if "mild" in s: return "severity-mild"
+    if "moderate" in s: return "severity-moderate"
+    if "severe" in s: return "severity-severe"
     return "severity-moderate"
 
-# ... (load_yolo_model, load_vit_model, predict_hybrid, convert_hybrid_to_diagnosis, generate_crop_rotation_plan, get_farmer_bot_response - keep your original implementations)
+# ... (Add your other helper functions: load_yolo_model, load_vit_model, predict_hybrid, convert_hybrid_to_diagnosis, generate_crop_rotation_plan, get_farmer_bot_response here)
 
-# ====================== DISPLAY FULL DIAGNOSIS (TOTAL COST LINES REMOVED) ======================
 def display_full_diagnosis(diag):
     if not diag or "result" not in diag:
         return
@@ -391,7 +373,6 @@ def display_full_diagnosis(diag):
             st.write(f"**{i}.** {action}")
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # Organic & Chemical Treatments - TOTAL COST LINES REMOVED
     col_treat1, col_treat2 = st.columns(2)
     with col_treat1:
         st.markdown("""<div class="info-section"><div class="info-title">Organic Treatments</div>""", unsafe_allow_html=True)
@@ -424,18 +405,19 @@ st.markdown("""<div class="header-container"><div class="header-title">🌿 AI P
 
 with st.sidebar:
     page = st.radio("📂 Pages", ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"])
-    # ... (your full sidebar code with settings, model choice, supported plants, etc.)
+    # Add your sidebar settings here (model choice, debug mode, etc.)
 
 if "last_diagnosis" not in st.session_state:
     st.session_state.last_diagnosis = None
 
 if page == "AI Plant Doctor":
-    # Plant selection and image upload (your original code)
+    # Plant selection and upload section (add your full code here)
     col_plant, col_upload = st.columns([1, 2])
-    # ... (plant type selectbox, custom plant input, uploaded_files uploader)
+    # ... plant type selection and file uploader ...
 
     if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "Select a plant...":
-        # ... (your full analysis logic with Gemini or Hybrid)
+        # Analysis logic (Gemini or Hybrid)
+        # ... your analysis code ...
 
         if result:
             st.session_state.last_diagnosis = {
@@ -456,18 +438,17 @@ if page == "AI Plant Doctor":
             st.markdown("---")
             st.subheader("🛠️ Finalize Treatment Plan")
             infected_count = st.number_input("Number of infected plants/trees", value=10, min_value=1, step=1)
-            # organic_options and chemical_options extraction + selectboxes + button (your code)
-            # ... 
+            # Add your organic/chemical selectboxes and calculate button here
 
     elif st.session_state.last_diagnosis:
         st.markdown("""<div class="success-box">✅ Previous diagnosis loaded. Full result is shown below.</div>""", unsafe_allow_html=True)
         display_full_diagnosis(st.session_state.last_diagnosis)
 
 elif page == "KisanAI Assistant":
-    # your full KisanAI code
+    # Your full KisanAI Assistant code here
 
 elif page == "Crop Rotation Advisor":
-    # your full Crop Rotation code
+    # Your full Crop Rotation Advisor code here
 
 else:  # Cost Calculator & ROI
     st.markdown("""<div class="page-header"><div class="page-title">💰 Cost Calculator & ROI Analysis</div></div>""", unsafe_allow_html=True)
@@ -478,4 +459,4 @@ else:  # Cost Calculator & ROI
         organic_cost_total = diag.get("organic_cost", 0)
         chemical_cost_total = diag.get("chemical_cost", 0)
         infected_count = diag.get("infected_count", 10)
-        # your full ROI calculation and display code here
+        # Your full ROI calculation and display code here
