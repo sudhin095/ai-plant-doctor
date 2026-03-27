@@ -14,11 +14,12 @@ st.set_page_config(
 )
 
 # ============ TREATMENT COSTS & QUANTITIES DATABASE ============
+# ============ TREATMENT COSTS & QUANTITIES DATABASE ============
 
 TREATMENT_COSTS = {
     "organic": {
         "Cow Urine Extract": {
-            "cost": 80,
+            "cost": 80,   # locally prepared / very low-cost input
             "quantity": "2-3 liters per 100 plants",
             "dilution": "1:5 with water",
         },
@@ -38,6 +39,7 @@ TREATMENT_COSTS = {
             "dilution": "1:10 with water",
         },
         "Neem Oil Spray": {
+            # ~₹340–550 per liter retail; 500 ml ≈ ₹170–275
             "cost": 250,
             "quantity": "500ml per 100 plants",
             "dilution": "3% solution - 5ml per liter",
@@ -77,23 +79,28 @@ TREATMENT_COSTS = {
             "quantity": "500g per 100 plants",
             "dilution": "0.5% solution - 5g per liter",
         },
+        # Spinosad is a bio‑insecticide; market price for 100 ml is ~₹1,900–2,000
         "Spinosad": {
             "cost": 2000,
             "quantity": "100ml per 100 plants",
             "dilution": "0.02% solution - 0.2ml per liter",
         },
+        # Added: seaweed extract as a common organic biostimulant
         "Seaweed Extract": {
+            # 500 ml pack ≈ ₹500–530; assuming ~250 ml per 100 plants
             "cost": 260,
             "quantity": "250ml per 100 plants",
             "dilution": "0.3% solution - 3ml per liter",
         },
     },
     "chemical": {
+        # Bavistin / Carbendazim 50% WP: 100 g ≈ ₹90–140
         "Carbendazim (Bavistin)": {
             "cost": 120,
             "quantity": "100g per 100 plants",
             "dilution": "0.1% solution - 1g per liter",
         },
+        # Indofil M-45 (Mancozeb 75% WP): 100 g ≈ ₹75; 500 g ≈ ₹279
         "Mancozeb (Indofil)": {
             "cost": 120,
             "quantity": "150g per 100 plants",
@@ -119,6 +126,7 @@ TREATMENT_COSTS = {
             "quantity": "50ml per 100 plants",
             "dilution": "0.005% solution - 0.05ml per liter",
         },
+        # Confidor (Imidacloprid 17.8% SL): 100 ml ≈ ₹300–380
         "Imidacloprid (Confidor)": {
             "cost": 350,
             "quantity": "80ml per 100 plants",
@@ -139,6 +147,7 @@ TREATMENT_COSTS = {
             "quantity": "100g per 100 plants",
             "dilution": "0.04% solution - 0.4g per liter",
         },
+        # Amistar / Amistar Top: 100 ml ≈ ₹560–700
         "Azoxystrobin (Amistar)": {
             "cost": 650,
             "quantity": "80ml per 100 plants",
@@ -154,12 +163,16 @@ TREATMENT_COSTS = {
             "quantity": "200ml per 100 plants",
             "dilution": "0.3% solution - 3ml per liter",
         },
+        # Added: Ridomil Gold (Metalaxyl + Mancozeb)
         "Metalaxyl + Mancozeb (Ridomil Gold)": {
+            # 100 g pack ≈ ₹180–190
             "cost": 190,
             "quantity": "100g per 100 plants",
             "dilution": "0.25% solution - 2.5g per liter",
         },
+        # Added: Tilt (Propiconazole 25% EC)
         "Propiconazole (Tilt)": {
+            # 100 ml ≈ ₹190; 250 ml ≈ ₹390
             "cost": 190,
             "quantity": "100ml per 100 plants",
             "dilution": "0.1% solution - 1ml per liter",
@@ -168,7 +181,6 @@ TREATMENT_COSTS = {
 }
 
 # ============ CROP ROTATION DATABASE ============
-
 CROP_ROTATION_DATA = {
     "Tomato": {
         "rotations": ["Beans", "Cabbage", "Cucumber"],
@@ -267,7 +279,6 @@ SOIL_TYPES = ["Black Soil", "Red Soil", "Laterite Soil", "Alluvial Soil", "Clay 
 MARKET_FOCUS = ["Stable essentials", "High-value cash crops", "Low input / low risk"]
 
 # ============ GLOBAL STYLES ============
-
 st.markdown(
     """
 <style>
@@ -342,7 +353,6 @@ st.markdown(
 )
 
 # ============ GEMINI CONFIG ============
-
 try:
     genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 except Exception:
@@ -366,7 +376,7 @@ CRITICAL RULES:
 6. Discount diseases that don't typically affect {plant_type}
 
 RESPOND WITH EXACTLY THIS JSON:
-{
+{{
   "plant_species": "{plant_type}",
   "disease_name": "Specific disease name or Unable to diagnose",
   "disease_type": "fungal/bacterial/viral/pest/nutrient/environmental/healthy",
@@ -379,15 +389,10 @@ RESPOND WITH EXACTLY THIS JSON:
   "probable_causes": ["Primary cause relevant to {plant_type}", "Secondary cause", "Environmental factor"],
   "immediate_action": ["Action 1: Specific to {plant_type}", "Action 2: Specific to {plant_type}", "Action 3: Specific to {plant_type}"],
   "organic_treatments": ["Treatment 1: Product and application for {plant_type}", "Treatment 2: Alternative for {plant_type}"],
-  "chemical_treatments": [
-    "Chemical 1: Safe for {plant_type} with dilution",
-    "Chemical 2: Alternative safe for {plant_type}"
-  ],
   "prevention_long_term": ["Prevention strategy 1 for {plant_type}", "Prevention strategy 2 for {plant_type}", "Resistant varieties: If available for {plant_type}"],
   "plant_specific_notes": "Important notes specific to {plant_type} care and disease management",
   "similar_conditions": "Other {plant_type} conditions that look similar"
-}
-"""
+}}"""
 
 PLANT_COMMON_DISEASES = {
     "Tomato": "Early blight, Late blight, Septoria leaf spot, Fusarium wilt, Bacterial wilt, Spider mites, Powdery mildew",
@@ -556,7 +561,7 @@ def render_treatment_selection_ui(
             key="cost_calc_selected_chemical_treatment",
         )
 
-    info = get_treatment_info(selected_type_key, selected_name)
+       info = get_treatment_info(selected_type_key, selected_name)
     unit_cost = info.get("cost", 0)
     quantity = info.get("quantity", "As per package")
 
@@ -569,7 +574,7 @@ def render_treatment_selection_ui(
     st.session_state.treatment_selection = {
         "plant_type": plant_type,
         "disease_name": disease_name,
-        "treatment_type": selected_type_key,
+        "treatment_type": selected_type_key,  # 'organic' or 'chemical'
         "treatment_name": selected_name,
         "infected_plants": infected_plants,
         "unit_cost": unit_cost,
@@ -592,7 +597,6 @@ def render_treatment_selection_ui(
         """,
         unsafe_allow_html=True,
     )
-
 
 def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_count: int):
     disease_name = result.get("disease_name", "Unknown")
@@ -772,17 +776,23 @@ def calculate_loss_percentage(disease_severity, infected_count, total_plants=100
     Estimate yield loss (%) based on:
     1) Severity band (healthy/mild/moderate/severe) -> typical loss range
     2) Fraction of plants that are infected
+
+    Method:
+    - Map severity to a loss band (literature-style ranges)
+    - Take the midpoint of that band as base_loss
+    - Scale by infected_ratio = infected_count / total_plants
+    - Clamp to [0, 80] to avoid unrealistic extremes
     """
     severity_bands = {
-        "healthy": (0, 2),
-        "mild": (5, 15),
-        "moderate": (20, 40),
-        "severe": (50, 70),
+        "healthy": (0, 2),      # 0–2% loss
+        "mild": (5, 15),        # 5–15% loss
+        "moderate": (20, 40),   # 20–40% loss
+        "severe": (50, 70),     # 50–70% loss
     }
 
     sev = (disease_severity or "moderate").lower()
     low, high = severity_bands.get(sev, severity_bands["moderate"])
-    base_loss = (low + high) / 2.0
+    base_loss = (low + high) / 2.0  # midpoint of the band
 
     if total_plants <= 0:
         infected_ratio = 1.0
@@ -790,6 +800,8 @@ def calculate_loss_percentage(disease_severity, infected_count, total_plants=100
         infected_ratio = max(0.0, min(infected_count / total_plants, 1.0))
 
     loss_percent = base_loss * infected_ratio
+
+    # Clamp to a reasonable range
     loss_percent = max(0.0, min(loss_percent, 80.0))
 
     return int(round(loss_percent))
@@ -812,30 +824,25 @@ def enhance_image_for_analysis(image):
     return image
 
 
-def extract_json_robust(response_text: str):
+def extract_json_robust(response_text):
     if not response_text:
         return None
-    # First try direct
     try:
         return json.loads(response_text)
     except Exception:
         pass
 
     cleaned = response_text
-    # Strip markdown code fences if present
     if "```json" in cleaned:
-        cleaned = cleaned.split("```json", 1)[1]
-        cleaned = cleaned.split("```", 1)
+        cleaned = cleaned.split("```json").split("```")[1]
     elif "```" in cleaned:
-        parts = cleaned.split("```")
-        if len(parts) >= 3:
-            cleaned = parts[13]
+        cleaned = cleaned.split("```")[2].split("```")[0]
+
     try:
         return json.loads(cleaned.strip())
     except Exception:
         pass
 
-    # Fallback: take first {...} block
     match = re.search(r"\{[\s\S]*\}", response_text)
     if match:
         try:
@@ -854,18 +861,124 @@ def validate_json_result(data):
         "symptoms",
         "probable_causes",
     ]
+    if not isinstance(data, dict):
+        return False, "Response is not a dictionary"
     missing = [f for f in required_fields if f not in data]
     if missing:
         return False, f"Missing fields: {', '.join(missing)}"
-    return True, "OK"
+    return True, "Valid"
 
 
-# ============ SESSION STATE INIT ============
+def generate_crop_rotation_plan(plant_type, region, soil_type, market_focus):
+    if plant_type in CROP_ROTATION_DATA:
+        return CROP_ROTATION_DATA[plant_type]
+    else:
+        return get_manual_rotation_plan(plant_type)
 
+
+def get_manual_rotation_plan(plant_name):
+    try:
+        model = genai.GenerativeModel("gemini-2.5-flash")
+    except Exception:
+        return None
+    prompt = f"""You are an agricultural expert with deep knowledge of crop rotation and soil health. For the plant: {plant_name}
+Provide ONLY a valid JSON response in this exact format (no markdown, no explanations, no code blocks):
+{{"rotations": ["Crop1", "Crop2", "Crop3"], "info": {{"{plant_name}": "Detailed info about {plant_name}", "Crop1": "Why good after {plant_name}", "Crop2": "Why follows Crop1", "Crop3": "Why completes cycle"}}}}"""
+    try:
+        response = model.generate_content(prompt)
+        result = extract_json_robust(response.text)
+        if result and "rotations" in result and "info" in result:
+            return result
+    except Exception:
+        pass
+    return {
+        "rotations": ["Legumes or Pulses", "Cereals (Wheat/Maize)", "Oilseeds or Vegetables"],
+        "info": {
+            plant_name: "Primary crop. Requires disease break and soil replenishment.",
+            "Legumes or Pulses": "Nitrogen-fixing crops. Soil improvement and disease cycle break.",
+            "Cereals (Wheat/Maize)": "Different nutrient profile. Continues income generation.",
+            "Oilseeds or Vegetables": "Diverse crop selection. Completes rotation cycle.",
+        },
+    }
+
+
+def get_farmer_bot_response(user_question, diagnosis_context=None):
+    try:
+        model = genai.GenerativeModel("gemini-2.5-flash")
+    except Exception:
+        return "Model not available. Please try again later."
+    context_text = ""
+    if diagnosis_context:
+        context_text = (
+            "Current Diagnosis:\n"
+            f"- Plant: {diagnosis_context.get('plant_type', 'Unknown')}\n"
+            f"- Disease: {diagnosis_context.get('disease_name', 'Unknown')}\n"
+            f"- Severity: {diagnosis_context.get('severity', 'Unknown')}\n"
+            f"- Confidence: {diagnosis_context.get('confidence', 'Unknown')}%\n"
+        )
+    prompt = (
+        "You are an expert agricultural advisor for farmers with deep expertise in crop management, "
+        "disease control, and sustainable farming practices.\n\n"
+        f"{context_text}\n"
+        f"Farmer question: {user_question}\n\n"
+        "IMPORTANT: Provide a comprehensive, detailed response (5-8 sentences) that includes: "
+        "1. Direct answer to the question 2. Practical, cost-effective solutions suitable for farming conditions "
+        "3. Seasonal timing and weather considerations if applicable 4. Resource availability and sourcing information "
+        "5. Long-term sustainability and soil health recommendations\n\n"
+        "Use clear, professional English. Focus on actionable, readily available solutions with proven effectiveness."
+    )
+    try:
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception:
+        return "Server error. Please try again."
+
+
+# ============ MAIN UI HEADER ============
+st.markdown(
+    """<div class="header-container"><div class="header-title">🌿 AI Plant Doctor - Smart Edition</div></div>""",
+    unsafe_allow_html=True,
+)
+
+col1, col2, col3, col4 = st.columns(4)
+with col1:
+    st.markdown('<div class="feature-card">✅ Plant-Specific</div>', unsafe_allow_html=True)
+with col2:
+    st.markdown('<div class="feature-card">🎯 Disease Detection</div>', unsafe_allow_html=True)
+with col3:
+    st.markdown('<div class="feature-card">🔬 Expert</div>', unsafe_allow_html=True)
+with col4:
+    st.markdown('<div class="feature-card">🚀 95%+ Accurate</div>', unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# ============ SIDEBAR ============
+with st.sidebar:
+    page = st.radio(
+        "📂 Pages",
+        ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"],
+    )
+
+    st.header("Model Info")
+    st.info("**Gemini Mode**\nAdvanced reasoning\nHigh accuracy\nAPI required")
+    st.markdown("---")
+    st.header("Supported Plants")
+    for plant in sorted(PLANT_COMMON_DISEASES.keys()):
+        st.write(f"✓ {plant}")
+
+# ============ SESSION STATE DEFAULTS ============
 if "last_diagnosis" not in st.session_state:
     st.session_state.last_diagnosis = None
+if "treatment_selection" not in st.session_state:
+    st.session_state.treatment_selection = None
 if "farmer_bot_messages" not in st.session_state:
     st.session_state.farmer_bot_messages = []
+if "crop_rotation_result" not in st.session_state:
+    st.session_state.crop_rotation_result = None
+if "cost_roi_result" not in st.session_state:
+    st.session_state.cost_roi_result = None
+if "kisan_response" not in st.session_state:
+    st.session_state.kisan_response = None
 if "model_choice" not in st.session_state:
     st.session_state.model_choice = "Gemini 2.5 Flash"
 if "debug_mode" not in st.session_state:
@@ -874,212 +987,369 @@ if "show_tips" not in st.session_state:
     st.session_state.show_tips = True
 if "confidence_min" not in st.session_state:
     st.session_state.confidence_min = 65
-if "treatment_selection" not in st.session_state:
-    st.session_state.treatment_selection = None
-
-# ============ SIDEBAR ============
-
-with st.sidebar:
-    st.title("🌿 Smart Farmer Hub")
-    page = st.radio(
-        "Go to",
-        [
-            "AI Plant Doctor",
-            "Cost Calculator & ROI",
-            "KisanAI Assistant",
-            "Crop Rotation Advisor",
-        ],
-    )
-    if page == "AI Plant Doctor":
-        st.header("Settings")
-        st.session_state.model_choice = "Gemini 2.5 Flash"
-        st.session_state.debug_mode = st.checkbox("Debug Mode", value=False)
-        st.session_state.show_tips = st.checkbox("Show Tips", value=True)
-        st.session_state.confidence_min = st.slider("Min Confidence (%)", 0, 100, 65)
-        st.markdown("---")
-        with st.expander("How It Works"):
-            st.write(
-                "1. Select your plant type\n"
-                "2. Upload leaf image(s)\n"
-                "3. AI analyses the leaf image\n"
-                "4. High-accuracy diagnosis using Gemini"
-            )
-    st.header("Model Info")
-    st.info("**Gemini Mode**\nAdvanced reasoning\nHigh accuracy\nAPI required")
 
 # ============ MAIN PAGES ============
 
-# Header
+# --- AI Plant Doctor ---
 if page == "AI Plant Doctor":
-    st.markdown(
-        """
-        <div class="header-container">
-            <div class="header-title">🌿 AI Plant Doctor - Smart Edition</div>
-            <div class="header-subtitle">
-                Upload your plant leaf images and get instant disease diagnosis,
-                treatments, and ROI guidance.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    col_f1, col_f2, col_f3 = st.columns(3)
-    with col_f1:
-        st.markdown(
-            '<div class="feature-card">📸 Image-based Diagnosis</div>',
-            unsafe_allow_html=True,
+    col_plant, col_upload = st.columns([1, 2])
+    with col_plant:
+        st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
+        st.subheader("Select Plant Type")
+        plant_options = ["Select a plant..."] + sorted(list(PLANT_COMMON_DISEASES.keys())) + [
+            "Other (Manual Entry)"
+        ]
+        selected_plant = st.selectbox(
+            "What plant do you have?", plant_options, label_visibility="collapsed"
         )
-    with col_f2:
-        st.markdown(
-            '<div class="feature-card">💊 Organic & Chemical Treatments</div>',
-            unsafe_allow_html=True,
-        )
-    with col_f3:
-        st.markdown(
-            '<div class="feature-card">📈 Cost & ROI Ready</div>',
-            unsafe_allow_html=True,
-        )
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    plant_type = st.selectbox(
-        "Select Plant Type", list(PLANT_COMMON_DISEASES.keys()), index=0
-    )
-
-    st.markdown(
-        '<div class="upload-container"><h3>📤 Upload Leaf Images</h3>',
-        unsafe_allow_html=True,
-    )
-    uploaded_files = st.file_uploader(
-        "Upload clear images of affected leaves (you can upload multiple)",
-        type=["jpg", "jpeg", "png"],
-        accept_multiple_files=True,
-    )
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    images = []
-    if uploaded_files:
-        st.markdown("#### Preview")
-        img_cols = st.columns(len(uploaded_files))
-        for i, file in enumerate(uploaded_files):
-            img = Image.open(file)
-            img = resize_image(img)
-            images.append(img)
-            with img_cols[i]:
-                st.image(img, use_column_width=True)
-
-    infected_count = st.number_input(
-        "Estimated number of infected plants",
-        min_value=1,
-        value=50,
-        step=1,
-    )
-
-    analyze_btn = st.button("🔍 Analyze Plant Health")
-
-    result = None
-
-    if analyze_btn:
-        if not images:
-            st.error("Please upload at least one leaf image to analyze.")
+        if selected_plant == "Other (Manual Entry)":
+            custom_plant = st.text_input("Enter plant name", placeholder="e.g., Banana, Orange")
+            plant_type = custom_plant if custom_plant else "Unknown Plant"
         else:
-            progress_placeholder = st.empty()
-            with st.spinner(f"Analyzing {plant_type}..."):
-                try:
-                    progress_placeholder.info(f"Processing {plant_type} leaf...")
-                    model = genai.GenerativeModel("gemini-2.5-flash")
-                    if st.session_state.debug_mode:
-                        st.info("Using: Gemini 2.5 Flash")
-                    common_diseases = PLANT_COMMON_DISEASES.get(
-                        plant_type, "various plant diseases"
-                    )
-                    prompt = EXPERT_PROMPT_TEMPLATE.format(
-                        plant_type=plant_type,
-                        common_diseases=common_diseases,
-                    )
-                    enhanced_images = [
-                        enhance_image_for_analysis(img.copy()) for img in images
-                    ]
-                    response = model.generate_content([prompt] + enhanced_images)
-                    raw_response = response.text or ""
-                    if st.session_state.debug_mode:
-                        with st.expander("Raw Response"):
-                            st.markdown(
-                                '<div class="debug-box">', unsafe_allow_html=True
-                            )
-                            displayed = (
-                                raw_response[:3000] + "..."
-                                if len(raw_response) > 3000
-                                else raw_response
-                            )
-                            st.text(displayed)
-                            st.markdown("</div>", unsafe_allow_html=True)
+            plant_type = selected_plant if selected_plant != "Select a plant..." else None
 
-                    result = extract_json_robust(raw_response)
-                    if result is None:
-                        st.error("Could not parse AI response as valid JSON.")
-                    progress_placeholder.empty()
-                except Exception as e:
-                    st.error(f"Analysis Failed: {str(e)}")
-                    progress_placeholder.empty()
+        if plant_type and plant_type in PLANT_COMMON_DISEASES:
+            st.markdown(
+                f"""<div class="success-box">Common diseases in {plant_type}:\n\n{PLANT_COMMON_DISEASES[plant_type]}</div>""",
+                unsafe_allow_html=True,
+            )
+        st.markdown("</div>", unsafe_allow_html=True)
 
-            if result:
-                is_valid, validation_msg = validate_json_result(result)
-                confidence = result.get("confidence", 0)
-                if confidence < st.session_state.confidence_min:
-                    st.warning(f"Low Confidence ({confidence}%)")
+    with col_upload:
+        st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
+        st.subheader("Upload Leaf Images")
+        st.caption("Up to 3 images for best results")
+        uploaded_files = st.file_uploader(
+            "Select images",
+            type=["jpg", "jpeg", "png"],
+            accept_multiple_files=True,
+            label_visibility="collapsed",
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
 
-                st.markdown("<div class='result-container'>", unsafe_allow_html=True)
+    images = None
+    analyze_btn = False
+    if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "Select a plant...":
+        if len(uploaded_files) > 3:
+            st.warning("Maximum 3 images. Only first 3 will be analyzed.")
+            uploaded_files = uploaded_files[:3]
+        images = [Image.open(f) for f in uploaded_files]
 
-                organic_sum, chemical_sum = render_diagnosis_and_treatments(
-                    result=result, plant_type=plant_type, infected_count=infected_count
+        if st.session_state.show_tips:
+            st.markdown(
+                f"""<div class="tips-card"><div class="tips-card-title">Analyzing {plant_type}</div>Gemini diagnosis in progress...</div>""",
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("<div class='result-container'>", unsafe_allow_html=True)
+        cols = st.columns(len(images))
+        for idx, (col, image) in enumerate(zip(cols, images)):
+            with col:
+                st.caption(f"Image {idx + 1}")
+                display_image = resize_image(image.copy())
+                st.image(display_image, use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        col_b1, col_b2, col_b3 = st.columns(3)
+        with col_b2:
+            analyze_btn = st.button(
+                f"Analyze {plant_type}", use_container_width=True, type="primary"
+            )
+
+    if analyze_btn and images is not None and plant_type:
+        progress_placeholder = st.empty()
+        with st.spinner(f"Analyzing {plant_type}..."):
+            try:
+                progress_placeholder.info(f"Processing {plant_type} leaf...")
+
+                model_name = (
+                    "Gemini 2.5 Pro"
+                    if "Pro" in st.session_state.model_choice
+                    else "Gemini 2.5 Flash"
+                )
+                model_id = (
+                    "gemini-2.5-pro"
+                    if "Pro" in st.session_state.model_choice
+                    else "gemini-2.5-flash"
+                )
+                model = genai.GenerativeModel(model_id)
+                if st.session_state.debug_mode:
+                    st.info(f"Using: {model_name}")
+
+                common_diseases = PLANT_COMMON_DISEASES.get(
+                    plant_type, "various plant diseases"
+                )
+                prompt = EXPERT_PROMPT_TEMPLATE.format(
+                    plant_type=plant_type, common_diseases=common_diseases
                 )
 
-                st.markdown("</div>", unsafe_allow_html=True)
+                enhanced_images = [
+                    enhance_image_for_analysis(img.copy()) for img in images
+                ]
+                response = model.generate_content([prompt] + enhanced_images)
+                raw_response = response.text
 
-                st.session_state.last_diagnosis = {
-                    "plant_type": plant_type,
-                    "disease_name": result.get("disease_name", "Unknown"),
-                    "disease_type": result.get("disease_type", "unknown"),
-                    "severity": result.get("severity", "unknown"),
-                    "confidence": confidence,
-                    "organic_cost": organic_sum,
-                    "chemical_cost": chemical_sum,
-                    "infected_count": infected_count,
-                    "timestamp": datetime.now().isoformat(),
-                    "result": result,
-                }
+                if st.session_state.debug_mode:
+                    with st.expander("Raw Response"):
+                        st.markdown('<div class="debug-box">', unsafe_allow_html=True)
+                        displayed = (
+                            raw_response[:3000] + "..."
+                            if len(raw_response) > 3000
+                            else raw_response
+                        )
+                        st.text(displayed)
+                        st.markdown("</div>", unsafe_allow_html=True)
 
-    elif st.session_state.last_diagnosis:
+                result = extract_json_robust(raw_response)
+                if result is None:
+                    st.error("Could not parse AI response")
+
+                progress_placeholder.empty()
+
+                if result:
+                    is_valid, validation_msg = validate_json_result(result)
+                    confidence = result.get("confidence", 0)
+                    if confidence < st.session_state.confidence_min:
+                        st.warning(f"Low Confidence ({confidence}%)")
+
+                    st.session_state.last_diagnosis = {
+                        "plant_type": plant_type,
+                        "disease_name": result.get("disease_name", "Unknown"),
+                        "disease_type": result.get("disease_type", "unknown"),
+                        "severity": result.get("severity", "unknown"),
+                        "confidence": confidence,
+                        "organic_cost": 0,
+                        "chemical_cost": 0,
+                        "infected_count": 50,
+                        "timestamp": datetime.now().isoformat(),
+                        "result": result,
+                    }
+
+            except Exception as e:
+                st.error(f"Analysis Failed: {str(e)}")
+                progress_placeholder.empty()
+
+    diag = st.session_state.last_diagnosis
+    if diag:
         st.markdown(
             """<div class="success-box">
                 Showing results from your last diagnosis. You can visit other pages while keeping these results.
             </div>""",
             unsafe_allow_html=True,
         )
-        last = st.session_state.last_diagnosis
+
         st.markdown("<div class='result-container'>", unsafe_allow_html=True)
-        organic_sum, chemical_sum = render_diagnosis_and_treatments(
-            result=last.get("result", {}),
-            plant_type=last.get("plant_type", "Unknown"),
-            infected_count=last.get("infected_count", 1),
+
+        organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
+            result=diag.get("result", {}),
+            plant_type=diag.get("plant_type", "Unknown"),
+            infected_count=diag.get("infected_count", 50),
         )
-        last["organic_cost"] = organic_sum
-        last["chemical_cost"] = chemical_sum
-        st.session_state.last_diagnosis = last
+
+        diag["organic_cost"] = organic_total_cost
+        diag["chemical_cost"] = chemical_total_cost
+        st.session_state.last_diagnosis = diag
+
         st.markdown("</div>", unsafe_allow_html=True)
 
-elif page == "Cost Calculator & ROI":
+# --- KisanAI Assistant ---
+elif page == "KisanAI Assistant":
     st.markdown(
-        """
-        <div class="page-header">
-            <div class="page-title">📈 Treatment Cost Calculator & ROI</div>
-            <div class="page-subtitle">
-                Estimate treatment costs, yield impact, and return on investment based on your AI diagnosis.
-            </div>
-        </div>
-        """,
+        """<div class="page-header"><div class="page-title">🤖 KisanAI Assistant</div><div class="page-subtitle">Your Personal Agricultural Advisor</div></div>""",
+        unsafe_allow_html=True,
+    )
+    diag = st.session_state.last_diagnosis
+    if diag:
+        st.markdown(
+            """<div class="info-section"><div class="info-title">Current Diagnosis Context</div></div>""",
+            unsafe_allow_html=True,
+        )
+        col_ctx1, col_ctx2, col_ctx3 = st.columns(3)
+        with col_ctx1:
+            st.write(f"**🌱 Plant:** {diag.get('plant_type', 'Unknown')}")
+        with col_ctx2:
+            st.write(f"**🦠 Disease:** {diag.get('disease_name', 'Unknown')}")
+        with col_ctx3:
+            st.write(f"**⚠️ Severity:** {diag.get('severity', 'Unknown').title()}")
+    else:
+        st.markdown(
+            """<div class="warning-box">No recent diagnosis found. Run AI Plant Doctor first for better context-aware responses.</div>""",
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    col_chat_control1, col_chat_control2, col_chat_control3 = st.columns([2, 1, 1])
+    with col_chat_control1:
+        st.write("")
+    with col_chat_control2:
+        if st.button("🗑️ Clear Chat", use_container_width=True):
+            st.session_state.farmer_bot_messages = []
+            st.session_state.kisan_response = None
+            st.rerun()
+    with col_chat_control3:
+        if st.button("↻ Refresh", use_container_width=True):
+            st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown('<div class="chatbot-container">', unsafe_allow_html=True)
+    if len(st.session_state.farmer_bot_messages) == 0:
+        st.markdown(
+            '<div class="chat-message" style="text-align: center;"><b>👋 Welcome to KisanAI!</b><br>Ask me anything about your crops, diseases, treatments, or farming practices.</div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        for msg in st.session_state.farmer_bot_messages[-20:]:
+            if msg["role"] == "farmer":
+                st.markdown(
+                    f'<div class="chat-message"><b>👨 You:</b> {msg["content"]}</div>',
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    f'<div class="chat-message"><b>🤖 KisanAI:</b> {msg["content"]}</div>',
+                    unsafe_allow_html=True,
+                )
+    # FIXED: markmarkdown -> markdown
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    with st.form("farmer_bot_form", clear_on_submit=True):
+        user_question = st.text_area(
+            "Type your question here...",
+            height=100,
+            placeholder="Ask about treatments, prevention, costs, or any farming topic...",
+        )
+        submitted = st.form_submit_button("Send Message", use_container_width=True)
+
+    if submitted and user_question.strip():
+        st.session_state.farmer_bot_messages.append(
+            {"role": "farmer", "content": user_question.strip()}
+        )
+        answer = get_farmer_bot_response(user_question.strip(), diagnosis_context=diag)
+        st.session_state.farmer_bot_messages.append(
+            {"role": "assistant", "content": answer}
+        )
+        st.session_state.kisan_response = answer
+        st.rerun()
+
+    if st.session_state.kisan_response:
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown(
+            f"""<div class="kisan-response-box"><b>🤖 KisanAI's Response:</b><br><br>{st.session_state.kisan_response}</div>""",
+            unsafe_allow_html=True,
+        )
+
+# --- Crop Rotation Advisor ---
+elif page == "Crop Rotation Advisor":
+    st.markdown(
+        """<div class="page-header"><div class="page-title">🌱 Crop Rotation Advisor</div><div class="page-subtitle">Sustainable 3-Year Crop Rotation Planning</div></div>""",
+        unsafe_allow_html=True,
+    )
+    diag = st.session_state.last_diagnosis
+    default_plant = diag["plant_type"] if diag and diag.get("plant_type") else None
+
+    col_inputs1, col_inputs2 = st.columns(2)
+    with col_inputs1:
+        st.markdown(
+            """<div class="info-section"><div class="info-title">Current Crop Selection</div></div>""",
+            unsafe_allow_html=True,
+        )
+        use_last = False
+        if default_plant:
+            use_last = st.checkbox(
+                f"Use diagnosed plant: **{default_plant}**", value=True
+            )
+        if use_last and default_plant:
+            plant_type = default_plant
+            st.success(f"Selected: {plant_type}")
+        else:
+            plant_options = sorted(list(PLANT_COMMON_DISEASES.keys()))
+            selected_option = st.selectbox(
+                "Select plant or choose 'Other Manual Type'",
+                plant_options + ["Other Manual Type"],
+                label_visibility="collapsed",
+            )
+            if selected_option == "Other Manual Type":
+                plant_type = st.text_input(
+                    "Enter plant name",
+                    placeholder="e.g., Banana, Mango, Carrot, Ginger",
+                    label_visibility="collapsed",
+                )
+                if plant_type:
+                    st.info(
+                        f"📝 Will generate rotation plan for: **{plant_type}**"
+                    )
+            else:
+                plant_type = selected_option
+
+    with col_inputs2:
+        st.markdown(
+            """<div class="info-section"><div class="info-title">Regional & Soil Details</div></div>""",
+            unsafe_allow_html=True,
+        )
+        region = st.selectbox("Region", REGIONS)
+        soil_type = st.selectbox("Soil Type", SOIL_TYPES)
+
+    market_focus = st.selectbox(
+        "Market Focus", MARKET_FOCUS, label_visibility="visible"
+    )
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    if st.button("📋 Generate Rotation Plan", use_container_width=True, type="primary"):
+        if plant_type:
+            with st.spinner(f"Generating accurate rotation plan for {plant_type}..."):
+                rotations = generate_crop_rotation_plan(
+                    plant_type, region, soil_type, market_focus
+                )
+                st.session_state.crop_rotation_result = {
+                    "plant_type": plant_type,
+                    "rotations": rotations.get("rotations", []),
+                    "info": rotations.get("info", {}),
+                    "region": region,
+                    "soil_type": soil_type,
+                }
+        else:
+            st.warning("Please select or enter a plant type first!")
+
+    if st.session_state.crop_rotation_result:
+        result = st.session_state.crop_rotation_result
+        rotations = result["rotations"]
+        info = result["info"]
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown(
+            """<div class="info-section"><div class="info-title">Your 3-Year Rotation Strategy</div></div>""",
+            unsafe_allow_html=True,
+        )
+        col_year1, col_year2, col_year3 = st.columns(3)
+        with col_year1:
+            st.markdown(
+                f"""<div class="rotation-card"><div class="rotation-year">📌 Year 1</div><div class="crop-name">{result['plant_type']}</div><div class="crop-description">{info.get(result['plant_type'], 'Primary crop for cultivation.')}</div></div>""",
+                unsafe_allow_html=True,
+            )
+        with col_year2:
+            st.markdown(
+                f"""<div class="rotation-card"><div class="rotation-year">🔄 Year 2</div><div class="crop-name">{rotations[0] if len(rotations) > 0 else 'Crop 2'}</div><div class="crop-description">{info.get(rotations[0], 'Rotation crop to break disease cycle.') if len(rotations) > 0 else 'Rotation crop'}</div></div>""",
+                unsafe_allow_html=True,
+            )
+        with col_year3:
+            st.markdown(
+                f"""<div class="rotation-card"><div class="rotation-year">🌿 Year 3</div><div class="crop-name">{rotations[1] if len(rotations) > 1 else 'Crop 3'}</div><div class="crop-description">{info.get(rotations[1], 'Alternative crop for diversification.') if len(rotations) > 1 else 'Alternative crop'}</div></div>""",
+                unsafe_allow_html=True,
+            )
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown(
+            """<div class="stat-box"><div style="font-size: 1.2rem; color: #667eea; font-weight: 600;">✅ Benefits of Rotation</div><div style="margin-top: 15px; color: #b0c4ff; font-size: 1rem;">• 60-80% reduction in pathogen buildup<br>• Improved soil health and structure<br>• Lower chemical input costs<br>• More resilient farming system<br>• Enhanced biodiversity</div></div>""",
+            unsafe_allow_html=True,
+        )
+
+# --- Cost Calculator & ROI ---
+else:
+    st.markdown(
+        """<div class="page-header">
+            <div class="page-title">Cost Calculator & ROI Analysis</div>
+            <div class="page-subtitle">Investment Analysis for Treatment Options</div>
+        </div>""",
         unsafe_allow_html=True,
     )
 
@@ -1087,7 +1357,7 @@ elif page == "Cost Calculator & ROI":
     if not diag:
         st.markdown(
             """<div class="warning-box">
-                First run a diagnosis in the AI Plant Doctor page to auto-fill disease and treatment details.
+                No diagnosis data found. Run AI Plant Doctor first to get disease and treatment information.
             </div>""",
             unsafe_allow_html=True,
         )
@@ -1155,6 +1425,9 @@ elif page == "Cost Calculator & ROI":
         else:
             organic_default = int(diag.get("organic_cost", 300) * infected_count)
             chemical_default = int(diag.get("chemical_cost", 200) * infected_count)
+        else:
+            organic_default = int(diag.get("organic_cost", 300) * infected_count)
+            chemical_default = int(diag.get("chemical_cost", 200) * infected_count)
 
         col_input1, col_input2, col_input3, col_input4 = st.columns(4)
         with col_input1:
@@ -1174,188 +1447,153 @@ elif page == "Cost Calculator & ROI":
                 help=f"Total cost for treating {infected_count} plants",
             )
         with col_input3:
-            yield_per_plant = st.number_input(
-                "Average Yield per Healthy Plant (kg)",
-                value=2.0,
-                min_value=0.0,
-                step=0.1,
+            yield_kg = st.number_input(
+                "Expected Yield (kg)", value=1000, min_value=100, step=100
             )
         with col_input4:
-            price_per_kg = st.number_input(
-                "Market Price (Rs per kg)", value=30.0, min_value=0.0, step=1.0
+            market_price = st.number_input(
+                "Market Price per kg (Rs)", value=40, min_value=1, step=5
             )
 
-        total_plants = st.number_input(
-            "Total Plants in Field", value=max(infected_count * 2, 100), min_value=1
-        )
-
-        disease_severity = diag.get("severity", "moderate")
-        loss_percent = calculate_loss_percentage(
-            disease_severity, infected_count, total_plants
-        )
-
+        st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
-            """<div class="info-section"><div class="info-title">Estimated Yield Loss & ROI</div></div>""",
+            """<div class="info-section"><div class="info-title">Loss Analysis (Auto-Calculated)</div></div>""",
             unsafe_allow_html=True,
         )
 
-        potential_yield = total_plants * yield_per_plant
-        potential_revenue = potential_yield * price_per_kg
-        expected_loss_kg = potential_yield * (loss_percent / 100)
-        expected_loss_rs = expected_loss_kg * price_per_kg
+        auto_loss_percentage = calculate_loss_percentage(
+            diag.get("severity", "moderate"), infected_count, total_plants=100
+        )
 
         col_loss1, col_loss2, col_loss3 = st.columns(3)
         with col_loss1:
             st.markdown(
-                f"""<div class="stat-box"><div class="stat-label">Potential Yield (No Disease)</div>
-                <div class="stat-value">{potential_yield:.0f} kg</div></div>""",
+                f"""<div class="stat-box"><div class="stat-label">Loss Percentage (%)</div><div class="stat-value" style="color: #ff6b6b;">{auto_loss_percentage}%</div></div>""",
                 unsafe_allow_html=True,
             )
         with col_loss2:
+            total_revenue = int(yield_kg * market_price)
+            potential_loss_value = int(total_revenue * (auto_loss_percentage / 100))
             st.markdown(
-                f"""<div class="stat-box"><div class="stat-label">Expected Loss Due to Disease</div>
-                <div class="stat-value">{expected_loss_kg:.0f} kg</div></div>""",
+                f"""<div class="stat-box"><div class="stat-label">Total Yield Value</div><div class="stat-value">Rs {total_revenue:,}</div></div>""",
                 unsafe_allow_html=True,
             )
         with col_loss3:
             st.markdown(
-                f"""<div class="stat-box"><div class="stat-label">Expected Loss (Rs)</div>
-                <div class="stat-value">Rs {expected_loss_rs:.0f}</div></div>""",
+                f"""<div class="stat-box"><div class="stat-label">Potential Loss</div><div class="stat-value" style="color: #ff6b6b;">Rs {potential_loss_value:,}</div></div>""",
                 unsafe_allow_html=True,
             )
 
         st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("📊 Calculate ROI Analysis", use_container_width=True, type="primary"):
+            org_benefit = potential_loss_value - organic_cost_total
+            chem_benefit = potential_loss_value - chemical_cost_total
+            analysis = {
+                "total_value": total_revenue,
+                "loss_prevented": potential_loss_value,
+                "loss_percentage": auto_loss_percentage,
+                "org_roi": int((org_benefit / organic_cost_total * 100))
+                if organic_cost_total > 0
+                else 0,
+                "chem_roi": int((chem_benefit / chemical_cost_total * 100))
+                if chemical_cost_total > 0
+                else 0,
+                "organic_net": org_benefit,
+                "chemical_net": chem_benefit,
+                "total_organic_cost": organic_cost_total,
+                "total_chemical_cost": chemical_cost_total,
+                "infected_count": infected_count,
+            }
+            st.session_state.cost_roi_result = {
+                "plant_name": plant_name,
+                "disease_name": disease_name,
+                "analysis": analysis,
+                "organic_cost_input": organic_cost_total,
+                "chemical_cost_input": chemical_cost_total,
+            }
 
-        col_roi1, col_roi2 = st.columns(2)
-        with col_roi1:
-            if organic_cost_total > 0:
-                net_saving_org = expected_loss_rs - organic_cost_total
-                roi_org = (
-                    (net_saving_org / organic_cost_total) * 100
-                    if organic_cost_total > 0
-                    else 0
-                )
-            else:
-                net_saving_org = 0
+        if st.session_state.cost_roi_result:
+            result = st.session_state.cost_roi_result
+            analysis = result["analysis"]
+            st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(
-                """<div class="info-section"><div class="info-title">Organic Treatment ROI</div>""",
+                """<div class="info-section"><div class="info-title">Investment Analysis Results (For All Infected Plants)</div></div>""",
                 unsafe_allow_html=True,
             )
-            st.write(f"Total Organic Cost: Rs {organic_cost_total}")
-            st.write(f"Estimated Loss Prevented: Rs {expected_loss_rs:.0f}")
-            st.write(f"Net Saving: Rs {net_saving_org:.0f}")
-            if organic_cost_total > 0:
-                st.write(f"ROI: {roi_org:.1f}%")
-            st.markdown("</div>", unsafe_allow_html=True)
-
-        with col_roi2:
-            if chemical_cost_total > 0:
-                net_saving_chem = expected_loss_rs - chemical_cost_total
-                roi_chem = (
-                    (net_saving_chem / chemical_cost_total) * 100
-                    if chemical_cost_total > 0
-                    else 0
-                )
-            else:
-                net_saving_chem = 0
-            st.markdown(
-                """<div class="info-section"><div class="info-title">Chemical Treatment ROI</div>""",
-                unsafe_allow_html=True,
-            )
-            st.write(f"Total Chemical Cost: Rs {chemical_cost_total}")
-            st.write(f"Estimated Loss Prevented: Rs {expected_loss_rs:.0f}")
-            st.write(f"Net Saving: Rs {net_saving_chem:.0f}")
-            if chemical_cost_total > 0:
-                st.write(f"ROI: {roi_chem:.1f}%")
-            st.markdown("</div>", unsafe_allow_html=True)
-
-elif page == "KisanAI Assistant":
-    st.markdown(
-        """
-        <div class="page-header">
-            <div class="page-title">🤖 KisanAI - Farming Assistant</div>
-            <div class="page-subtitle">
-                Ask any question about crops, pests, fertilizers, irrigation, or government schemes in simple language.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    user_query = st.text_area(
-        "Ask your question (Hindi, Punjabi, English all supported):",
-        height=120,
-        placeholder="Example: मेरी टमाटर की फसल में पत्तों पर सफेद धब्बे आ रहे हैं, क्या करूँ?",
-    )
-    ask_btn = st.button("Ask KisanAI")
-
-    if ask_btn and user_query.strip():
-        try:
-            model = genai.GenerativeModel("gemini-2.5-flash")
-            prompt = (
-                "You are KisanAI, an Indian agriculture expert. "
-                "Explain in simple farmer-friendly language. Use bullet points where helpful. "
-                "Keep answers practical and specific to Indian conditions.\n\n"
-                f"Farmer's question:\n{user_query}"
-            )
-            resp = model.generate_content(prompt)
-            answer = resp.text or "No answer generated."
-            st.markdown(
-                f"""<div class="kisan-response-box">{answer}</div>""",
-                unsafe_allow_html=True,
-            )
-        except Exception as e:
-            st.error(f"Error from KisanAI: {e}")
-
-elif page == "Crop Rotation Advisor":
-    st.markdown(
-        """
-        <div class="page-header">
-            <div class="page-title">🔄 Smart Crop Rotation Advisor</div>
-            <div class="page-subtitle">
-                Design 3-4 year crop rotations that improve soil health, break disease cycles, and increase farm income.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    base_crop = st.selectbox("Current Main Crop", list(CROP_ROTATION_DATA.keys()))
-    region = st.selectbox("Region", REGIONS)
-    soil_type = st.selectbox("Soil Type", SOIL_TYPES)
-    market_focus = st.selectbox("Market Focus", MARKET_FOCUS)
-
-    if st.button("Generate Rotation Plan"):
-        data = CROP_ROTATION_DATA[base_crop]
-        rotations = data["rotations"]
-        info = data["info"]
-
-        st.markdown(
-            f"""<div class="info-section"><div class="info-title">Recommended 3-Year Rotation for {base_crop}</div></div>""",
-            unsafe_allow_html=True,
-        )
-
-        year_cols = st.columns(3)
-        all_crops = [base_crop] + rotations
-        for year, (col, crop) in enumerate(zip(year_cols, all_crops), start=1):
-            with col:
+            result_col1, result_col2, result_col3 = st.columns(3)
+            with result_col1:
                 st.markdown(
-                    f"""<div class="rotation-card">
-                        <div class="rotation-year">Year {year}</div>
-                        <div class="crop-name">{crop}</div>
-                        <div class="crop-description">{info.get(crop, '')}</div>
-                    </div>""",
+                    f"""<div class="stat-box"><div class="stat-label">Total Yield Value</div><div class="stat-value">Rs {analysis['total_value']:,}</div></div>""",
+                    unsafe_allow_html=True,
+                )
+            with result_col2:
+                st.markdown(
+                    f"""<div class="stat-box"><div class="stat-label">Loss Prevention ({analysis['loss_percentage']}%)</div><div class="stat-value" style="color: #4caf50;">Rs {analysis['loss_prevented']:,}</div></div>""",
+                    unsafe_allow_html=True,
+                )
+            with result_col3:
+                st.markdown(
+                    f"""<div class="stat-box"><div class="stat-label">Infected Plants</div><div class="stat-value">{analysis['infected_count']}</div></div>""",
                     unsafe_allow_html=True,
                 )
 
-        st.markdown(
-            """<div class="info-section"><div class="info-title">Why This Rotation Works</div>""",
-            unsafe_allow_html=True,
-        )
-        st.write(
-            "- Breaks disease and pest cycles specific to your main crop.\n"
-            "- Balances nutrient use and replenishment across years.\n"
-            "- Matches Indian market demand and typical price patterns.\n"
-            "- Adapts to your region and soil type for better resilience."
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown(
+                f"""<div class="info-section"><div class="info-title">ROI Comparison (For {analysis['infected_count']} Plants)</div></div>""",
+                unsafe_allow_html=True,
+            )
+            comp_col1, comp_col2 = st.columns(2)
+            with comp_col1:
+                st.markdown(
+                    f"""<div class="stat-box"><div class="stat-label">Organic ROI</div><div class="stat-value" style="color: #81c784;">{analysis['org_roi']}%</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Total Cost: Rs {analysis['total_organic_cost']:,}<br>Net Benefit: Rs {analysis['organic_net']:,}</div></div>""",
+                    unsafe_allow_html=True,
+                )
+            with comp_col2:
+                st.markdown(
+                    f"""<div class="stat-box"><div class="stat-label">Chemical ROI</div><div class="stat-value" style="color: #64b5f6;">{analysis['chem_roi']}%</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Total Cost: Rs {analysis['total_chemical_cost']:,}<br>Net Benefit: Rs {analysis['chemical_net']:,}</div></div>""",
+                    unsafe_allow_html=True,
+                )
+
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown(
+                """<div class="info-section"><div class="info-title">Net Profit Comparison (For All Infected Plants)</div></div>""",
+                unsafe_allow_html=True,
+            )
+
+            # If cost is 0, net profit is 0; otherwise total_value - treatment_cost
+            net_profit_org = 0
+            if analysis["total_organic_cost"] > 0:
+                net_profit_org = analysis["total_value"] - analysis["total_organic_cost"]
+
+            net_profit_chem = 0
+            if analysis["total_chemical_cost"] > 0:
+                net_profit_chem = analysis["total_value"] - analysis["total_chemical_cost"]
+
+            profit_col1, profit_col2 = st.columns(2)
+            with profit_col1:
+                st.markdown(
+                    f"""<div class="stat-box"><div class="stat-label">🌱 Organic Net Profit</div><div class="stat-value" style="color: #81c784;">Rs {net_profit_org:,}</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Loss Prevented: Rs {analysis['loss_prevented']:,}<br>Total Treatment: Rs {analysis['total_organic_cost']:,}</div></div>""",
+                    unsafe_allow_html=True,
+                )
+            with profit_col2:
+                st.markdown(
+                    f"""<div class="stat-box"><div class="stat-label">💊 Chemical Net Profit</div><div class="stat-value" style="color: #64b5f6;">Rs {net_profit_chem:,}</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Loss Prevented: Rs {analysis['loss_prevented']:,}<br>Total Treatment: Rs {analysis['total_chemical_cost']:,}</div></div>""",
+                    unsafe_allow_html=True,
+                )
+
+            st.markdown("<br>", unsafe_allow_html=True)
+            if analysis["org_roi"] > analysis["chem_roi"]:
+                st.markdown(
+                    f"""<div class="success-box">✅ Organic treatment provides better ROI ({analysis['org_roi']}% vs {analysis['chem_roi']}%)! Invest in organic methods for sustainable farming and long-term soil health.</div>""",
+                    unsafe_allow_html=True,
+                )
+            elif analysis["chem_roi"] > analysis["org_roi"]:
+                st.markdown(
+                    f"""<div class="success-box">✅ Chemical treatment offers higher immediate ROI ({analysis['chem_roi']}% vs {analysis['org_roi']}%), but consider organic for long-term sustainability and soil preservation.</div>""",
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    """<div class="success-box">✅ Both treatments have similar ROI. Choose based on your farming preference and long-term sustainability goals.</div>""",
+                    unsafe_allow_html=True,
+                )
