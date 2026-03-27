@@ -14,8 +14,6 @@ st.set_page_config(
 )
 
 # ============ TREATMENT COSTS & QUANTITIES DATABASE ============
-# ============ TREATMENT COSTS & QUANTITIES DATABASE ============
-
 TREATMENT_COSTS = {
     "organic": {
         "Cow Urine Extract": {
@@ -278,470 +276,230 @@ REGIONS = ["North India", "South India", "East India", "West India", "Central In
 SOIL_TYPES = ["Black Soil", "Red Soil", "Laterite Soil", "Alluvial Soil", "Clay Soil"]
 MARKET_FOCUS = ["Stable essentials", "High-value cash crops", "Low input / low risk"]
 
-# ============ GLOBAL STYLES ============
+# ============ GLOBAL STYLES (CLEAN ECO-DASHBOARD THEME) ============
 st.markdown(
     """
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-    /* ── Base Reset ── */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html, body, .stApp, [data-testid="stAppViewContainer"] {
-        background: #080d14 !important;
-        font-family: 'DM Sans', sans-serif;
-        color: #d4ddf7;
+    * { margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    
+    .stApp { 
+        background-color: #f1f5f9; /* Very light cool gray */
+        color: #334155; 
     }
-
-    p, span, div, label { color: #d4ddf7; font-size: 1.05rem; font-family: 'DM Sans', sans-serif; }
-
-    /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #080d14; }
-    ::-webkit-scrollbar-thumb { background: #2a4fff55; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: #4c6fff; }
-
-    /* ── Sidebar ── */
-    [data-testid="stSidebar"] {
-        background: #0b1120 !important;
-        border-right: 1px solid #1a2a4a;
-    }
-
-    /* ── Header ── */
-    .header-container {
+    
+    [data-testid="stAppViewContainer"] { background: transparent; }
+    p, span, div, label { color: #475569; font-size: 1.05rem; }
+    
+    /* Sleek Main Header */
+    .header-container { 
+        background: linear-gradient(135deg, #16a34a 0%, #065f46 100%);
+        padding: 45px 20px; 
+        border-radius: 24px; 
+        margin-bottom: 35px; 
+        box-shadow: 0 10px 30px rgba(22, 163, 74, 0.2); 
+        text-align: center;
         position: relative;
         overflow: hidden;
-        background: linear-gradient(135deg, #0b1733 0%, #0f2347 50%, #0b1733 100%);
-        padding: 48px 32px 40px;
-        border-radius: 20px;
-        margin-bottom: 28px;
-        border: 1px solid #1e3a6e;
-        box-shadow: 0 0 60px rgba(44, 110, 255, 0.15), 0 20px 60px rgba(0,0,0,0.6);
     }
-    .header-container::before {
-        content: '';
-        position: absolute;
-        top: -60px; right: -60px;
-        width: 280px; height: 280px;
-        background: radial-gradient(circle, rgba(60, 120, 255, 0.18) 0%, transparent 70%);
-        border-radius: 50%;
-        pointer-events: none;
+    .header-title { 
+        font-size: 3rem; 
+        font-weight: 800; 
+        color: #ffffff !important; 
+        margin-bottom: 10px; 
+        letter-spacing: -0.5px; 
     }
-    .header-container::after {
-        content: '';
-        position: absolute;
-        bottom: -40px; left: -40px;
-        width: 200px; height: 200px;
-        background: radial-gradient(circle, rgba(34, 197, 130, 0.12) 0%, transparent 70%);
-        border-radius: 50%;
-        pointer-events: none;
-    }
-    .header-badge {
-        display: inline-block;
-        background: rgba(44, 110, 255, 0.15);
-        border: 1px solid rgba(44, 110, 255, 0.4);
-        color: #7da6ff;
-        font-size: 0.72rem;
-        font-weight: 600;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        padding: 5px 14px;
-        border-radius: 100px;
-        margin-bottom: 18px;
-        font-family: 'DM Sans', sans-serif;
-    }
-    .header-title {
-        font-family: 'Syne', sans-serif;
-        font-size: 3rem;
-        font-weight: 800;
-        color: #ffffff;
-        text-align: center;
-        letter-spacing: -0.02em;
-        line-height: 1.1;
-        margin-bottom: 12px;
-        text-shadow: 0 0 40px rgba(100, 160, 255, 0.35);
-    }
-    .header-title span { color: #4c9f70; }
-    .header-subtitle {
-        font-size: 1.1rem;
-        color: #7a9bc7;
-        text-align: center;
-        font-weight: 400;
-        letter-spacing: 0.01em;
-    }
-
-    /* ── Feature Pills ── */
-    .feature-card {
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.09);
-        color: #c2d4f8;
-        padding: 13px 18px;
-        border-radius: 12px;
-        text-align: center;
+    .header-subtitle { 
+        font-size: 1.25rem; 
+        color: #d1fae5; 
         font-weight: 500;
-        font-size: 0.92rem;
-        font-family: 'DM Sans', sans-serif;
-        letter-spacing: 0.01em;
-        transition: all 0.25s ease;
-        backdrop-filter: blur(6px);
+        margin-bottom: 25px;
     }
-    .feature-card:hover {
-        background: rgba(44, 110, 255, 0.12);
-        border-color: rgba(44, 110, 255, 0.35);
-        color: #ffffff;
-        transform: translateY(-3px);
-        box-shadow: 0 8px 24px rgba(44, 110, 255, 0.2);
-    }
-
-    /* ── Upload Container ── */
-    .upload-container {
-        background: rgba(255,255,255,0.025);
-        padding: 32px;
-        border-radius: 16px;
-        border: 1.5px dashed rgba(44, 110, 255, 0.35);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
-        margin: 20px 0;
-        transition: border-color 0.3s ease;
-    }
-    .upload-container:hover { border-color: rgba(44, 110, 255, 0.7); }
-
-    /* ── Result Container ── */
-    .result-container {
-        background: rgba(255,255,255,0.025);
-        border-radius: 16px;
-        padding: 28px;
-        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-        margin: 20px 0;
-        border: 1px solid rgba(44, 110, 255, 0.15);
-    }
-
-    /* ── Disease Header ── */
-    .disease-header {
-        background: linear-gradient(135deg, #1a0a2e 0%, #2d0a20 100%);
-        border: 1px solid rgba(240, 80, 120, 0.35);
-        color: white;
-        padding: 28px 30px;
-        border-radius: 16px;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 30px rgba(240, 80, 120, 0.2);
-        position: relative;
-        overflow: hidden;
-    }
-    .disease-header::before {
-        content: '';
-        position: absolute;
-        top: -30px; right: -30px;
-        width: 150px; height: 150px;
-        background: radial-gradient(circle, rgba(240, 80, 120, 0.15) 0%, transparent 70%);
-        border-radius: 50%;
-    }
-    .disease-name {
-        font-family: 'Syne', sans-serif;
-        font-size: 2.4rem;
-        font-weight: 800;
-        margin-bottom: 14px;
-        letter-spacing: -0.02em;
-    }
-    .disease-meta { font-size: 1rem; opacity: 0.95; display: flex; gap: 12px; flex-wrap: wrap; }
-
-    /* ── Info Sections ── */
-    .info-section {
-        background: rgba(255,255,255,0.03);
-        border-left: 3px solid #2a5cff;
-        padding: 18px 20px;
-        border-radius: 10px;
-        margin: 14px 0;
-        border: 1px solid rgba(42, 92, 255, 0.18);
-        border-left-width: 3px;
-    }
-    .info-title {
-        font-family: 'Syne', sans-serif;
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #90b4f7;
-        margin-bottom: 10px;
-        letter-spacing: 0.01em;
-        display: flex;
+    
+    /* Built by Badge */
+    .creator-badge {
+        display: inline-flex;
         align-items: center;
         gap: 8px;
-    }
-
-    /* ── Cost Info ── */
-    .cost-info {
-        background: rgba(42, 92, 255, 0.08);
-        border-left: 3px solid #2a5cff;
-        padding: 10px 15px;
-        border-radius: 8px;
-        margin: 10px 0;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 8px 22px;
+        border-radius: 30px;
         font-size: 0.95rem;
-        color: #90b4f7;
-        font-weight: 500;
-    }
-
-    /* ── Treatment Items ── */
-    .treatment-item {
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(42, 92, 255, 0.2);
-        border-left: 3px solid #2a5cff;
-        padding: 14px 16px;
-        border-radius: 10px;
-        margin: 10px 0;
-        font-size: 0.93rem;
-        color: #a0b8e8;
-        transition: background 0.2s ease;
-    }
-    .treatment-item:hover { background: rgba(42, 92, 255, 0.07); }
-    .treatment-name { font-weight: 700; color: #e8eeff; margin-bottom: 6px; font-size: 0.98rem; font-family: 'Syne', sans-serif; }
-    .treatment-quantity { color: #5dcb8a; font-weight: 500; margin: 4px 0; font-size: 0.88rem; }
-    .treatment-dilution { color: #e8b96a; font-size: 0.85rem; margin: 4px 0; }
-
-    /* ── Severity Badges ── */
-    .severity-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 16px;
-        border-radius: 100px;
-        font-weight: 600;
-        font-size: 0.88rem;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-    }
-    .severity-healthy { background: rgba(76, 175, 80, 0.15); color: #5dcb8a; border: 1px solid rgba(76,175,80,0.3); }
-    .severity-mild    { background: rgba(0, 188, 212, 0.12); color: #4dd0e1; border: 1px solid rgba(0,188,212,0.3); }
-    .severity-moderate{ background: rgba(255, 193, 7, 0.12); color: #ffd54f; border: 1px solid rgba(255,193,7,0.3); }
-    .severity-severe  { background: rgba(244, 67, 54, 0.12); color: #ff7070; border: 1px solid rgba(244,67,54,0.3); }
-
-    /* ── Type Badges ── */
-    .type-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 5px 13px;
-        border-radius: 100px;
-        font-weight: 600;
-        font-size: 0.82rem;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        margin: 3px 4px 3px 0;
-    }
-    .type-fungal   { background: rgba(156, 39, 176, 0.15); color: #ce93d8; border: 1px solid rgba(156,39,176,0.3); }
-    .type-bacterial{ background: rgba(13, 71, 161, 0.2);   color: #64b5f6; border: 1px solid rgba(13,71,161,0.35); }
-    .type-viral    { background: rgba(183, 28, 28, 0.15);  color: #ef9a9a; border: 1px solid rgba(183,28,28,0.3); }
-    .type-pest     { background: rgba(230, 81, 0, 0.15);   color: #ffcc80; border: 1px solid rgba(230,81,0,0.3); }
-    .type-nutrient { background: rgba(27, 94, 32, 0.15);   color: #81c784; border: 1px solid rgba(27,94,32,0.3); }
-    .type-healthy  { background: rgba(27, 94, 32, 0.15);   color: #81c784; border: 1px solid rgba(27,94,32,0.3); }
-
-    /* ── Debug ── */
-    .debug-box {
-        background: #050a12;
-        border: 1px solid #1a2a4a;
-        border-radius: 10px;
-        padding: 15px;
-        margin: 10px 0;
-        font-family: 'JetBrains Mono', 'Courier New', monospace;
-        font-size: 0.88rem;
-        max-height: 400px;
-        overflow-y: auto;
-        color: #7a9bc7;
-        white-space: pre-wrap;
-    }
-
-    /* ── Alert Boxes ── */
-    .warning-box {
-        background: rgba(255, 193, 7, 0.07);
-        border: 1px solid rgba(255, 193, 7, 0.35);
-        border-left: 4px solid #ffc107;
-        border-radius: 10px;
-        padding: 16px 20px;
-        margin: 12px 0;
-        color: #ffe082;
-        font-size: 1rem;
-    }
-    .success-box {
-        background: rgba(76, 175, 80, 0.07);
-        border: 1px solid rgba(76, 175, 80, 0.35);
-        border-left: 4px solid #4caf50;
-        border-radius: 10px;
-        padding: 16px 20px;
-        margin: 12px 0;
-        color: #a5d6a7;
-        font-size: 1rem;
-    }
-    .error-box {
-        background: rgba(244, 67, 54, 0.07);
-        border: 1px solid rgba(244, 67, 54, 0.35);
-        border-left: 4px solid #f44336;
-        border-radius: 10px;
-        padding: 16px 20px;
-        margin: 12px 0;
-        color: #ef9a9a;
-        font-size: 1rem;
-    }
-
-    /* ── Buttons ── */
-    .stButton > button {
-        background: linear-gradient(135deg, #1e4fff 0%, #1a38cc 100%) !important;
-        color: white !important;
-        border: none !important;
-        padding: 12px 30px !important;
-        font-weight: 600 !important;
-        font-size: 1rem !important;
-        border-radius: 10px !important;
-        box-shadow: 0 4px 20px rgba(30, 79, 255, 0.35) !important;
-        transition: all 0.25s ease !important;
-        font-family: 'DM Sans', sans-serif !important;
-        letter-spacing: 0.02em !important;
-    }
-    .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 28px rgba(30, 79, 255, 0.5) !important;
-        background: linear-gradient(135deg, #2a5cff 0%, #1e4fff 100%) !important;
-    }
-
-    /* ── Image Container ── */
-    .image-container {
-        border-radius: 14px;
-        overflow: hidden;
-        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
-        border: 1px solid rgba(42, 92, 255, 0.2);
-    }
-
-    /* ── Tips Card ── */
-    .tips-card {
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(42, 92, 255, 0.2);
-        border-radius: 12px;
-        padding: 16px 20px;
-        margin: 10px 0;
-    }
-    .tips-card-title {
-        font-family: 'Syne', sans-serif;
         font-weight: 700;
-        color: #90b4f7;
-        margin-bottom: 10px;
-        font-size: 1.05rem;
-    }
-
-    /* ── Metric Containers ── */
-    [data-testid="metric-container"] {
-        background: rgba(255,255,255,0.03) !important;
-        border: 1px solid rgba(42, 92, 255, 0.18) !important;
-        border-radius: 12px !important;
-        padding: 16px !important;
-    }
-    [data-testid="stExpander"] {
-        background: rgba(255,255,255,0.03) !important;
-        border: 1px solid rgba(42, 92, 255, 0.18) !important;
-        border-radius: 12px !important;
-    }
-    .streamlit-expanderHeader { color: #90b4f7 !important; font-size: 1rem !important; font-family: 'DM Sans', sans-serif !important; }
-
-    /* ── Inputs ── */
-    input, textarea, select {
-        background: rgba(255,255,255,0.04) !important;
-        border: 1px solid rgba(42, 92, 255, 0.25) !important;
-        color: #d4ddf7 !important;
-        font-size: 1rem !important;
-        border-radius: 8px !important;
-        font-family: 'DM Sans', sans-serif !important;
-    }
-
-    h2, h3, h4 { font-size: 1.3rem !important; color: #90b4f7 !important; font-family: 'Syne', sans-serif !important; }
-
-    /* ── Chatbot ── */
-    .chatbot-container {
-        background: rgba(255,255,255,0.025);
-        border: 1px solid rgba(42, 92, 255, 0.25);
-        border-radius: 14px;
-        padding: 16px;
-        margin: 16px 0;
-        max-height: 500px;
-        overflow-y: auto;
-    }
-    .chat-message {
-        background: rgba(255,255,255,0.035);
-        border-left: 3px solid #2a5cff;
-        padding: 12px 16px;
-        margin: 8px 0;
-        border-radius: 10px;
-        font-size: 0.93rem;
-        color: #c2d4f8;
-    }
-
-    /* ── Page Headers ── */
-    .page-header {
-        background: linear-gradient(135deg, #0b1733 0%, #0f2347 100%);
-        padding: 28px 24px;
-        border-radius: 16px;
-        margin-bottom: 24px;
-        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-        border: 1px solid #1e3a6e;
-    }
-    .page-title {
-        font-family: 'Syne', sans-serif;
-        font-size: 2.2rem;
-        font-weight: 800;
         color: #ffffff;
-        text-align: center;
-        letter-spacing: -0.02em;
+        letter-spacing: 0.5px;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
     }
-    .page-subtitle {
-        font-size: 1.05rem;
-        color: #7a9bc7;
-        text-align: center;
-        margin-top: 8px;
-        font-weight: 400;
+    .creator-badge:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.25);
     }
 
-    /* ── Stat Boxes ── */
-    .stat-box {
-        background: rgba(30, 79, 255, 0.06);
-        border: 1px solid rgba(30, 79, 255, 0.22);
-        border-radius: 14px;
-        padding: 22px 20px;
-        margin: 10px 0;
-        text-align: center;
-        transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    /* Minimalist Cards */
+    .feature-card { 
+        background: #ffffff; 
+        color: #065f46; 
+        padding: 18px 20px; 
+        border-radius: 16px; 
+        text-align: center; 
+        font-weight: 700; 
+        font-size: 1.05rem; 
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        transition: all 0.3s ease; 
+        border: 1px solid #e2e8f0; 
     }
-    .stat-box:hover {
-        border-color: rgba(30, 79, 255, 0.45);
-        box-shadow: 0 4px 24px rgba(30, 79, 255, 0.15);
+    .feature-card:hover { 
+        transform: translateY(-4px); 
+        border-color: #10b981;
+        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1); 
     }
-    .stat-value {
-        font-family: 'Syne', sans-serif;
-        font-size: 2rem;
-        font-weight: 800;
-        color: #4c7fff;
-        margin: 10px 0;
-        letter-spacing: -0.02em;
+    
+    /* Containers */
+    .upload-container, .result-container { 
+        background: #ffffff; 
+        padding: 30px; 
+        border-radius: 20px; 
+        border: 1px solid #e2e8f0; 
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+        margin: 20px 0; 
     }
-    .stat-label { font-size: 0.88rem; color: #7a9bc7; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+    .upload-container { border: 2px dashed #cbd5e1; }
+    .upload-container:hover { border-color: #22c55e; }
 
-    /* ── Rotation Cards ── */
-    .rotation-card {
-        background: rgba(255,255,255,0.025);
-        border: 1px solid rgba(42, 92, 255, 0.2);
-        border-radius: 14px;
-        padding: 22px;
-        margin: 14px 0;
-        transition: border-color 0.25s ease;
+    /* Disease Alerts */
+    .disease-header { 
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); 
+        padding: 30px; 
+        border-radius: 16px; 
+        margin-bottom: 25px; 
+        border: 1px solid #fca5a5; 
     }
-    .rotation-card:hover { border-color: rgba(42, 92, 255, 0.45); }
-    .rotation-year { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 700; color: #4c7fff; margin-bottom: 8px; }
-    .crop-name { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; color: #90b4f7; margin: 10px 0; }
-    .crop-description { font-size: 0.92rem; color: #7a9bc7; margin-top: 8px; line-height: 1.65; }
+    .disease-name { font-size: 2.5rem; font-weight: 800; margin-bottom: 15px; color: #991b1b !important;}
+    .disease-meta { display: flex; gap: 15px; flex-wrap: wrap; }
+    
+    /* Info Blocks */
+    .info-section { 
+        background: #f8fafc; 
+        border-left: 5px solid #10b981; 
+        padding: 24px; 
+        border-radius: 0 16px 16px 0; 
+        margin: 15px 0; 
+        border-top: 1px solid #f1f5f9;
+        border-right: 1px solid #f1f5f9;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .info-title { font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 15px; }
+    
+    .cost-info, .treatment-item { 
+        background: #ffffff; 
+        border-radius: 12px; 
+        padding: 16px; 
+        margin: 12px 0; 
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .treatment-name { font-weight: 800; color: #1e293b; font-size: 1.1rem; margin-bottom: 6px; }
+    .treatment-quantity { color: #059669; font-weight: 600; margin: 4px 0; font-size: 0.95rem; }
+    .treatment-dilution { color: #d97706; font-size: 0.9rem; margin: 4px 0; font-weight: 500;}
+    
+    /* Badges */
+    .severity-badge, .type-badge { 
+        padding: 8px 18px; 
+        border-radius: 30px; 
+        font-weight: 700; 
+        font-size: 0.85rem; 
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .severity-healthy { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .severity-mild { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .severity-moderate { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .severity-severe { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    
+    .type-fungal { background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+    .type-bacterial { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .type-viral { background: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; }
+    .type-pest { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+    .type-nutrient { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .type-healthy { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    
+    /* Alert Boxes */
+    .warning-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px; margin: 12px 0; color: #b45309; font-weight: 500;}
+    .success-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin: 12px 0; color: #15803d; font-weight: 500;}
+    .error-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 16px; margin: 12px 0; color: #b91c1c; font-weight: 500;}
+    .debug-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; color: #475569; font-family: monospace; font-size: 0.9rem; }
 
-    /* ── Kisan Response ── */
-    .kisan-response-box {
-        background: rgba(30, 79, 255, 0.06);
-        border: 1px solid rgba(30, 79, 255, 0.28);
-        border-radius: 16px;
-        padding: 26px;
-        margin: 20px 0;
-        font-size: 1.1rem;
-        line-height: 1.85;
-        color: #c2d4f8;
-        font-weight: 400;
+    /* Primary Buttons */
+    .stButton > button { 
+        background: #10b981 !important; 
+        color: white !important;
+        border: none !important; 
+        padding: 12px 30px !important; 
+        font-weight: 700 !important; 
+        font-size: 1.1rem !important;
+        border-radius: 12px !important; 
+        box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2), 0 2px 4px -1px rgba(16, 185, 129, 0.1) !important; 
+        transition: all 0.3s ease !important;
     }
+    .stButton > button:hover { 
+        transform: translateY(-2px) !important; 
+        background: #059669 !important;
+        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3), 0 4px 6px -2px rgba(16, 185, 129, 0.15) !important; 
+    }
+    
+    /* Components */
+    .image-container { border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+    .tips-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin: 10px 0; }
+    .tips-card-title { font-weight: 800; color: #15803d; margin-bottom: 8px; font-size: 1.1rem; }
+    
+    /* Streamlit Overrides */
+    [data-testid="stSidebar"] { background: #ffffff !important; border-right: 1px solid #e2e8f0; }
+    [data-testid="metric-container"] { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    [data-testid="stExpander"] { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .streamlit-expanderHeader { color: #0f172a !important; font-size: 1.1rem !important; font-weight: 700 !important;}
+    
+    input, textarea, select { 
+        background: #ffffff !important; 
+        border: 1px solid #cbd5e1 !important; 
+        color: #0f172a !important; 
+        border-radius: 8px !important;
+        font-weight: 500 !important;
+    }
+    input:focus, textarea:focus, select:focus { border-color: #10b981 !important; box-shadow: 0 0 0 1px #10b981 !important;}
+    
+    h2, h3, h4 { color: #0f172a !important; font-weight: 800 !important; }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    
+    /* Chat & Others */
+    .chatbot-container { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; max-height: 500px; overflow-y: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);}
+    .chat-message { background: #f8fafc; border-left: 4px solid #10b981; padding: 16px; margin: 10px 0; border-radius: 0 12px 12px 0; font-size: 1.05rem; color: #334155; border-top: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9;}
+    
+    .page-header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 30px 20px; border-radius: 20px; margin-bottom: 30px; text-align: center; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+    .page-title { font-size: 2.5rem; font-weight: 800; color: #ffffff !important; letter-spacing: -0.5px; }
+    .page-subtitle { font-size: 1.1rem; color: #94a3b8; margin-top: 8px; font-weight: 500;}
+    
+    .stat-box { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin: 10px 0; text-align: center; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);}
+    .stat-box:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #cbd5e1;}
+    .stat-value { font-size: 2rem; font-weight: 800; color: #10b981; margin: 8px 0; }
+    .stat-label { font-size: 0.95rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    .rotation-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin: 15px 0; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);}
+    .rotation-card:hover { border-color: #10b981; transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1);}
+    .rotation-year { font-size: 1.1rem; font-weight: 800; color: #10b981; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+    .crop-name { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 8px 0; }
+    .crop-description { font-size: 1.05rem; color: #475569; margin-top: 12px; line-height: 1.6; }
+    
+    .kisan-response-box { background: #f0fdf4; border-left: 5px solid #10b981; border-radius: 0 16px 16px 0; padding: 25px; margin: 20px 0; font-size: 1.1rem; line-height: 1.8; color: #1e293b; border-top: 1px solid #dcfce7; border-right: 1px solid #dcfce7; border-bottom: 1px solid #dcfce7;}
 </style>
 """,
     unsafe_allow_html=True,
@@ -756,12 +514,10 @@ except Exception:
 
 EXPERT_PROMPT_TEMPLATE = """You are an elite plant pathologist with 40 years of specialized experience diagnosing diseases in {plant_type}.
 You are an expert specifically in {plant_type} diseases and health issues.
-
 SPECIALIZED ANALYSIS FOR: {plant_type}
 Common diseases in {plant_type}: {common_diseases}
 
 Your task is to provide the MOST ACCURATE diagnosis specifically for {plant_type}.
-
 CRITICAL RULES:
 1. RESPOND ONLY WITH VALID JSON - NO markdown, NO explanations
 2. Use your specialized knowledge of {plant_type}
@@ -842,6 +598,7 @@ def get_severity_badge_class(severity):
 def get_treatment_cost(treatment_type, treatment_name):
     costs = TREATMENT_COSTS.get(treatment_type, {})
     treatment_name_lower = treatment_name.lower()
+    
     for key, value in costs.items():
         if key.lower() == treatment_name_lower:
             return value["cost"] if isinstance(value, dict) else value
@@ -988,8 +745,8 @@ def render_treatment_selection_ui(
         <div class="cost-info" style="margin-top: 10px;">
             Selected: <b>{selected_name}</b> ({treatment_type_choice})<br>
             Quantity guideline: {quantity}<br>
-            Estimated total treatment cost for {infected_plants} plants: <b>Rs {total_cost}</b><br>
-            <span style="font-size:0.9rem; color:#b0c4ff;">
+            Estimated total treatment cost for {infected_plants} plants: <b style="color: #059669; font-size: 1.1rem;">Rs {total_cost}</b><br>
+            <span style="font-size:0.9rem; color:#64748b; font-weight: 500;">
                 This is based on typical Indian retail prices and standard doses
                 for about 100 plants.
             </span>
@@ -1091,7 +848,7 @@ def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_coun
                     <div class="treatment-name">💊 {t_name}</div>
                     <div class="treatment-quantity">Quantity: {quantity}</div>
                     <div class="treatment-dilution">Dilution: {dilution}</div>
-                    <div class="cost-info" style="margin-top: 8px; border-left: 5px solid #81c784;">
+                    <div class="cost-info" style="margin-top: 8px; border-left: 4px solid #10b981; background: #f8fafc;">
                         Cost: Rs {cost}
                     </div>
                 </div>
@@ -1121,7 +878,7 @@ def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_coun
                     <div class="treatment-name">⚗️ {t_name}</div>
                     <div class="treatment-quantity">Quantity: {quantity}</div>
                     <div class="treatment-dilution">Dilution: {dilution}</div>
-                    <div class="cost-info" style="margin-top: 8px; border-left: 5px solid #64b5f6;">
+                    <div class="cost-info" style="margin-top: 8px; border-left: 4px solid #3b82f6; background: #f8fafc;">
                         Cost: Rs {cost}
                     </div>
                 </div>
@@ -1306,7 +1063,8 @@ def get_manual_rotation_plan(plant_name):
         model = genai.GenerativeModel("gemini-2.5-flash")
     except Exception:
         return None
-    prompt = f"""You are an agricultural expert with deep knowledge of crop rotation and soil health. For the plant: {plant_name}
+    prompt = f"""You are an agricultural expert with deep knowledge of crop rotation and soil health.
+For the plant: {plant_name}
 Provide ONLY a valid JSON response in this exact format (no markdown, no explanations, no code blocks):
 {{"rotations": ["Crop1", "Crop2", "Crop3"], "info": {{"{plant_name}": "Detailed info about {plant_name}", "Crop1": "Why good after {plant_name}", "Crop2": "Why follows Crop1", "Crop3": "Why completes cycle"}}}}"""
     try:
@@ -1363,11 +1121,9 @@ def get_farmer_bot_response(user_question, diagnosis_context=None):
 st.markdown(
     """
     <div class="header-container">
-        <div style="text-align:center; margin-bottom: 6px;">
-            <span class="header-badge">✦ Built by Sudhin &nbsp;·&nbsp; Powered by Gemini ✦</span>
-        </div>
-        <div class="header-title">🌿 AI Plant <span>Doctor</span></div>
-        <div class="header-subtitle">Smart plant disease detection &amp; precision treatment advisory</div>
+        <div class="header-title">🌿 AI Plant Doctor <span style="color: #bbf7d0; font-weight: 400;">| Smart Edition</span></div>
+        <div class="header-subtitle">Advanced Crop Disease Diagnosis & Treatment Dashboard</div>
+        <div class="creator-badge">✨ Built by Sudhin • Powered by Gemini</div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -1375,20 +1131,20 @@ st.markdown(
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.markdown('<div class="feature-card">✅ Plant-Specific</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">✅ Plant-Specific Analysis</div>', unsafe_allow_html=True)
 with col2:
-    st.markdown('<div class="feature-card">🎯 Disease Detection</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🎯 Precise Detection</div>', unsafe_allow_html=True)
 with col3:
-    st.markdown('<div class="feature-card">🔬 Expert</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🔬 Expert Solutions</div>', unsafe_allow_html=True)
 with col4:
-    st.markdown('<div class="feature-card">🚀 95%+ Accurate</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🚀 95%+ Accuracy</div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ============ SIDEBAR ============
 with st.sidebar:
     page = st.radio(
-        "📂 Pages",
+        "📂 Dashboard Navigation",
         ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"],
     )
 
@@ -1628,22 +1384,21 @@ elif page == "KisanAI Assistant":
     st.markdown('<div class="chatbot-container">', unsafe_allow_html=True)
     if len(st.session_state.farmer_bot_messages) == 0:
         st.markdown(
-            '<div class="chat-message" style="text-align: center;"><b>👋 Welcome to KisanAI!</b><br>Ask me anything about your crops, diseases, treatments, or farming practices.</div>',
+            '<div class="chat-message" style="text-align: center; border-left: none;"><b>👋 Welcome to KisanAI!</b><br>Ask me anything about your crops, diseases, treatments, or farming practices.</div>',
             unsafe_allow_html=True,
         )
     else:
         for msg in st.session_state.farmer_bot_messages[-20:]:
             if msg["role"] == "farmer":
                 st.markdown(
-                    f'<div class="chat-message"><b>👨 You:</b> {msg["content"]}</div>',
-                    unsafe_allow_html=True,
+                    f'<div class="chat-message" style="border-left: 4px solid #3b82f6; background: #eff6ff;"><b>👨 You:</b> {msg["content"]}</div>',
+                unsafe_allow_html=True,
                 )
             else:
                 st.markdown(
                     f'<div class="chat-message"><b>🤖 KisanAI:</b> {msg["content"]}</div>',
                     unsafe_allow_html=True,
                 )
-    # FIXED: markmarkdown -> markdown
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1772,7 +1527,7 @@ elif page == "Crop Rotation Advisor":
             )
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
-            """<div class="stat-box"><div style="font-size: 1.2rem; color: #667eea; font-weight: 600;">✅ Benefits of Rotation</div><div style="margin-top: 15px; color: #b0c4ff; font-size: 1rem;">• 60-80% reduction in pathogen buildup<br>• Improved soil health and structure<br>• Lower chemical input costs<br>• More resilient farming system<br>• Enhanced biodiversity</div></div>""",
+            """<div class="stat-box" style="text-align: left; padding: 25px;"><div style="font-size: 1.25rem; color: #15803d; font-weight: 800; margin-bottom: 10px;">✅ Benefits of Rotation</div><div style="color: #475569; font-size: 1.05rem; line-height: 1.8; font-weight: 500;">• 60-80% reduction in pathogen buildup<br>• Improved soil health and structure<br>• Lower chemical input costs<br>• More resilient farming system<br>• Enhanced biodiversity</div></div>""",
             unsafe_allow_html=True,
         )
 
@@ -1813,31 +1568,31 @@ else:
         with col_diag1:
             st.markdown(
                 f"""<div class="stat-box"><div class="stat-label">Plant</div>
-                <div class="stat-value">{plant_name}</div></div>""",
+                <div class="stat-value" style="font-size: 1.6rem;">{plant_name}</div></div>""",
                 unsafe_allow_html=True,
             )
         with col_diag2:
             st.markdown(
                 f"""<div class="stat-box"><div class="stat-label">Disease</div>
-                <div class="stat-value">{disease_name[:12]}...</div></div>""",
+                <div class="stat-value" style="font-size: 1.6rem; color: #b91c1c;">{disease_name[:12]}...</div></div>""",
                 unsafe_allow_html=True,
             )
         with col_diag3:
             st.markdown(
                 f"""<div class="stat-box"><div class="stat-label">Severity</div>
-                <div class="stat-value">{diag.get('severity', 'Unknown').title()}</div></div>""",
+                <div class="stat-value" style="font-size: 1.6rem; color: #b45309;">{diag.get('severity', 'Unknown').title()}</div></div>""",
                 unsafe_allow_html=True,
             )
         with col_diag4:
             st.markdown(
                 f"""<div class="stat-box"><div class="stat-label">Confidence</div>
-                <div class="stat-value">{diag.get('confidence', 0)}%</div></div>""",
+                <div class="stat-value" style="font-size: 1.6rem; color: #0369a1;">{diag.get('confidence', 0)}%</div></div>""",
                 unsafe_allow_html=True,
             )
         with col_diag5:
             st.markdown(
                 f"""<div class="stat-box"><div class="stat-label">Infected Plants</div>
-                <div class="stat-value">{infected_count}</div></div>""",
+                <div class="stat-value" style="font-size: 1.6rem;">{infected_count}</div></div>""",
                 unsafe_allow_html=True,
             )
 
@@ -1902,19 +1657,19 @@ else:
         col_loss1, col_loss2, col_loss3 = st.columns(3)
         with col_loss1:
             st.markdown(
-                f"""<div class="stat-box"><div class="stat-label">Loss Percentage (%)</div><div class="stat-value" style="color: #ff6b6b;">{auto_loss_percentage}%</div></div>""",
+                f"""<div class="stat-box"><div class="stat-label">Loss Percentage (%)</div><div class="stat-value" style="color: #ef4444;">{auto_loss_percentage}%</div></div>""",
                 unsafe_allow_html=True,
             )
         with col_loss2:
             total_revenue = int(yield_kg * market_price)
             potential_loss_value = int(total_revenue * (auto_loss_percentage / 100))
             st.markdown(
-                f"""<div class="stat-box"><div class="stat-label">Total Yield Value</div><div class="stat-value">Rs {total_revenue:,}</div></div>""",
+                f"""<div class="stat-box"><div class="stat-label">Total Yield Value</div><div class="stat-value" style="color: #0f172a;">Rs {total_revenue:,}</div></div>""",
                 unsafe_allow_html=True,
             )
         with col_loss3:
             st.markdown(
-                f"""<div class="stat-box"><div class="stat-label">Potential Loss</div><div class="stat-value" style="color: #ff6b6b;">Rs {potential_loss_value:,}</div></div>""",
+                f"""<div class="stat-box"><div class="stat-label">Potential Loss</div><div class="stat-value" style="color: #ef4444;">Rs {potential_loss_value:,}</div></div>""",
                 unsafe_allow_html=True,
             )
 
@@ -1957,17 +1712,17 @@ else:
             result_col1, result_col2, result_col3 = st.columns(3)
             with result_col1:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">Total Yield Value</div><div class="stat-value">Rs {analysis['total_value']:,}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">Total Yield Value</div><div class="stat-value" style="color: #0f172a;">Rs {analysis['total_value']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
             with result_col2:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">Loss Prevention ({analysis['loss_percentage']}%)</div><div class="stat-value" style="color: #4caf50;">Rs {analysis['loss_prevented']:,}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">Loss Prevention ({analysis['loss_percentage']}%)</div><div class="stat-value" style="color: #10b981;">Rs {analysis['loss_prevented']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
             with result_col3:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">Infected Plants</div><div class="stat-value">{analysis['infected_count']}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">Infected Plants</div><div class="stat-value" style="color: #0f172a;">{analysis['infected_count']}</div></div>""",
                     unsafe_allow_html=True,
                 )
 
@@ -1979,12 +1734,12 @@ else:
             comp_col1, comp_col2 = st.columns(2)
             with comp_col1:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">Organic ROI</div><div class="stat-value" style="color: #81c784;">{analysis['org_roi']}%</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Total Cost: Rs {analysis['total_organic_cost']:,}<br>Net Benefit: Rs {analysis['organic_net']:,}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">Organic ROI</div><div class="stat-value" style="color: #10b981;">{analysis['org_roi']}%</div><div style="margin-top: 10px; color: #64748b; font-size: 0.95rem; font-weight: 500;">Total Cost: Rs {analysis['total_organic_cost']:,}<br>Net Benefit: Rs {analysis['organic_net']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
             with comp_col2:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">Chemical ROI</div><div class="stat-value" style="color: #64b5f6;">{analysis['chem_roi']}%</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Total Cost: Rs {analysis['total_chemical_cost']:,}<br>Net Benefit: Rs {analysis['chemical_net']:,}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">Chemical ROI</div><div class="stat-value" style="color: #3b82f6;">{analysis['chem_roi']}%</div><div style="margin-top: 10px; color: #64748b; font-size: 0.95rem; font-weight: 500;">Total Cost: Rs {analysis['total_chemical_cost']:,}<br>Net Benefit: Rs {analysis['chemical_net']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
 
@@ -2006,28 +1761,28 @@ else:
             profit_col1, profit_col2 = st.columns(2)
             with profit_col1:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">🌱 Organic Net Profit</div><div class="stat-value" style="color: #81c784;">Rs {net_profit_org:,}</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Loss Prevented: Rs {analysis['loss_prevented']:,}<br>Total Treatment: Rs {analysis['total_organic_cost']:,}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">🌱 Organic Net Profit</div><div class="stat-value" style="color: #10b981;">Rs {net_profit_org:,}</div><div style="margin-top: 10px; color: #64748b; font-size: 0.95rem; font-weight: 500;">Loss Prevented: Rs {analysis['loss_prevented']:,}<br>Total Treatment: Rs {analysis['total_organic_cost']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
             with profit_col2:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">💊 Chemical Net Profit</div><div class="stat-value" style="color: #64b5f6;">Rs {net_profit_chem:,}</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Loss Prevented: Rs {analysis['loss_prevented']:,}<br>Total Treatment: Rs {analysis['total_chemical_cost']:,}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">💊 Chemical Net Profit</div><div class="stat-value" style="color: #3b82f6;">Rs {net_profit_chem:,}</div><div style="margin-top: 10px; color: #64748b; font-size: 0.95rem; font-weight: 500;">Loss Prevented: Rs {analysis['loss_prevented']:,}<br>Total Treatment: Rs {analysis['total_chemical_cost']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
 
             st.markdown("<br>", unsafe_allow_html=True)
             if analysis["org_roi"] > analysis["chem_roi"]:
                 st.markdown(
-                    f"""<div class="success-box">✅ Organic treatment provides better ROI ({analysis['org_roi']}% vs {analysis['chem_roi']}%)! Invest in organic methods for sustainable farming and long-term soil health.</div>""",
+                    f"""<div class="success-box">✅ <b>Organic treatment provides better ROI ({analysis['org_roi']}% vs {analysis['chem_roi']}%)!</b> Invest in organic methods for sustainable farming and long-term soil health.</div>""",
                     unsafe_allow_html=True,
                 )
             elif analysis["chem_roi"] > analysis["org_roi"]:
                 st.markdown(
-                    f"""<div class="success-box">✅ Chemical treatment offers higher immediate ROI ({analysis['chem_roi']}% vs {analysis['org_roi']}%), but consider organic for long-term sustainability and soil preservation.</div>""",
+                    f"""<div class="success-box" style="color: #1d4ed8; border-color: #bfdbfe; background: #eff6ff;">✅ <b>Chemical treatment offers higher immediate ROI ({analysis['chem_roi']}% vs {analysis['org_roi']}%)</b>, but consider organic for long-term sustainability and soil preservation.</div>""",
                     unsafe_allow_html=True,
                 )
             else:
                 st.markdown(
-                    """<div class="success-box">✅ Both treatments have similar ROI. Choose based on your farming preference and long-term sustainability goals.</div>""",
+                    """<div class="success-box">✅ <b>Both treatments have similar ROI.</b> Choose based on your farming preference and long-term sustainability goals.</div>""",
                     unsafe_allow_html=True,
                 )
