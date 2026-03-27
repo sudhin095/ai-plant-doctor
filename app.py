@@ -911,21 +911,6 @@ with st.sidebar:
         ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"],
     )
 
-    if page == "AI Plant Doctor":
-        st.header("Settings")
-        st.session_state.model_choice = "Gemini 2.5 Flash"
-        st.session_state.debug_mode = st.checkbox("Debug Mode", value=False)
-        st.session_state.show_tips = st.checkbox("Show Tips", value=True)
-        st.session_state.confidence_min = st.slider("Min Confidence (%)", 0, 100, 65)
-        st.markdown("---")
-        with st.expander("How It Works"):
-            st.write(
-                "1. Select your plant type\n"
-                "2. Upload leaf image(s).\n"
-                "3. AI analyses the leaf image.\n"
-                "4. Gets high accuracy using Gemini."
-            )
-
     st.header("Model Info")
     st.info("**Gemini Mode**\nAdvanced reasoning\nHigh accuracy\nAPI required")
     st.markdown("---")
@@ -1177,7 +1162,8 @@ elif page == "KisanAI Assistant":
                     f'<div class="chat-message"><b>🤖 KisanAI:</b> {msg["content"]}</div>',
                     unsafe_allow_html=True,
                 )
-    st.markmarkdown("</div>", unsafe_allow_html=True)
+    # FIXED: markmarkdown -> markdown
+    st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
     with st.form("farmer_bot_form", clear_on_submit=True):
@@ -1527,7 +1513,7 @@ else:
                 unsafe_allow_html=True,
             )
 
-            # New net profit logic: if cost is 0, net profit is 0; otherwise total_value - treatment_cost
+            # If cost is 0, net profit is 0; otherwise total_value - treatment_cost
             net_profit_org = 0
             if analysis["total_organic_cost"] > 0:
                 net_profit_org = analysis["total_value"] - analysis["total_organic_cost"]
