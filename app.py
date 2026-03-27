@@ -571,26 +571,21 @@ def render_treatment_selection_ui(
     quantity = info.get("quantity", "As per package")
 
     base_plants = 100
-    total_cost = int(round(unit_cost * infected_plants / base_plants))
-    buying_total_cost = unit_cost + total_cost
-
-    is_buying = st.checkbox(
-        "I am buying this treatment product (pack/bottle/etc.)",
-        key="cost_calc_is_buying",
-    )
+    if infected_plants <= base_plants:
+        total_cost = int(round(unit_cost))
+    else:
+        total_cost = int(round(unit_cost * infected_plants / base_plants))
 
     st.session_state.treatment_selection = {
         "plant_type": plant_type,
         "disease_name": disease_name,
-        "treatment_type": selected_type_key,
+        "treatment_type": selected_type_key,  # 'organic' or 'chemical'
         "treatment_name": selected_name,
         "infected_plants": infected_plants,
         "unit_cost": unit_cost,
         "base_plants": base_plants,
         "total_cost": total_cost,
         "quantity": quantity,
-        "buying_total_cost": buying_total_cost,
-        "is_buying": is_buying,
     }
 
     st.markdown(
@@ -599,12 +594,14 @@ def render_treatment_selection_ui(
             Selected: <b>{selected_name}</b> ({treatment_type_choice})<br>
             Quantity guideline: {quantity}<br>
             Estimated total treatment cost for {infected_plants} plants: <b>Rs {total_cost}</b><br>
-            Total treatment cost if you are buying the product: <b>Rs {buying_total_cost}</b>
+            <span style="font-size:0.9rem; color:#b0c4ff;">
+                This is based on typical Indian retail prices and standard doses
+                for about 100 plants.
+            </span>
         </div>
         """,
         unsafe_allow_html=True,
     )
-
 
 def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_count: int):
     disease_name = result.get("disease_name", "Unknown")
