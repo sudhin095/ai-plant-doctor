@@ -856,7 +856,7 @@ def extract_json_robust(response_text: str):
     # 4) Fallback: grab the first {...} block anywhere in the text
     match = re.search(r"\{[\s\S]*\}", response_text)
     if match:
-        candidate = match.group()
+        candidate = match.group(0)
         try:
             return json.loads(candidate)
         except Exception:
@@ -864,7 +864,6 @@ def extract_json_robust(response_text: str):
 
     # If nothing worked, return None instead of raising
     return None
-
 
 def validate_json_result(data):
     required_fields = [
