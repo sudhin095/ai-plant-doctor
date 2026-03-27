@@ -561,7 +561,7 @@ def render_treatment_selection_ui(
             key="cost_calc_selected_chemical_treatment",
         )
 
-       info = get_treatment_info(selected_type_key, selected_name)
+    info = get_treatment_info(selected_type_key, selected_name)
     unit_cost = info.get("cost", 0)
     quantity = info.get("quantity", "As per package")
 
