@@ -995,6 +995,7 @@ if page == "AI Plant Doctor":
         st.markdown("</div>", unsafe_allow_html=True)
 
     images = None
+    analyze_btn = False
     if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "Select a plant...":
         if len(uploaded_files) > 3:
             st.warning("Maximum 3 images. Only first 3 will be analyzed.")
@@ -1022,8 +1023,6 @@ if page == "AI Plant Doctor":
             analyze_btn = st.button(
                 f"Analyze {plant_type}", use_container_width=True, type="primary"
             )
-    else:
-        analyze_btn = False
 
     if analyze_btn and images is not None and plant_type:
         progress_placeholder = st.empty()
@@ -1178,7 +1177,7 @@ elif page == "KisanAI Assistant":
                     f'<div class="chat-message"><b>🤖 KisanAI:</b> {msg["content"]}</div>',
                     unsafe_allow_html=True,
                 )
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markmarkdown("</div>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
     with st.form("farmer_bot_form", clear_on_submit=True):
@@ -1527,15 +1526,25 @@ else:
                 """<div class="info-section"><div class="info-title">Net Profit Comparison (For All Infected Plants)</div></div>""",
                 unsafe_allow_html=True,
             )
+
+            # New net profit logic: if cost is 0, net profit is 0; otherwise total_value - treatment_cost
+            net_profit_org = 0
+            if analysis["total_organic_cost"] > 0:
+                net_profit_org = analysis["total_value"] - analysis["total_organic_cost"]
+
+            net_profit_chem = 0
+            if analysis["total_chemical_cost"] > 0:
+                net_profit_chem = analysis["total_value"] - analysis["total_chemical_cost"]
+
             profit_col1, profit_col2 = st.columns(2)
             with profit_col1:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">🌱 Organic Net Profit</div><div class="stat-value" style="color: #81c784;">Rs {analysis['organic_net']:,}</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Loss Prevented: Rs {analysis['loss_prevented']:,}<br>Total Treatment: Rs {analysis['total_organic_cost']:,}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">🌱 Organic Net Profit</div><div class="stat-value" style="color: #81c784;">Rs {net_profit_org:,}</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Loss Prevented: Rs {analysis['loss_prevented']:,}<br>Total Treatment: Rs {analysis['total_organic_cost']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
             with profit_col2:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">💊 Chemical Net Profit</div><div class="stat-value" style="color: #64b5f6;">Rs {analysis['chemical_net']:,}</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Loss Prevented: Rs {analysis['loss_prevented']:,}<br>Total Treatment: Rs {analysis['total_chemical_cost']:,}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">💊 Chemical Net Profit</div><div class="stat-value" style="color: #64b5f6;">Rs {net_profit_chem:,}</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Loss Prevented: Rs {analysis['loss_prevented']:,}<br>Total Treatment: Rs {analysis['total_chemical_cost']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
 
