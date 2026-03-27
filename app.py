@@ -830,32 +830,73 @@ def enhance_image_for_analysis(image):
 
 
 def extract_json_robust(response_text):
-    if not response_text:
+    """
+    Safely extract a JSON object from the model response without raising.
+    Returns a dict on success, or None on failure.
+    """
+
+    # 0) Normalize type
+    if isinstance(response_text, list):
+        parts = []
+        for item in response_text:
+            if isinstance(item, str):
+                parts.append(item)
+            elif hasattr(item, "text"):
+                parts.append(str(getattr(item, "text")))
+            else:
+                parts.append(str(item))
+        response_text = "\n".join(parts)
+    elif not isinstance(response_text, str):
+        response_text = str(response_text)
+
+    if not response_text or not response_text.strip():
         return None
+
+    # 1) Try direct JSON
     try:
         return json.loads(response_text)
     except Exception:
         pass
 
     cleaned = response_text
+
+    # 2) Strip ```json ... ``` or ``` ... ``` fences
     if "```json" in cleaned:
-        cleaned = cleaned.split("```json").split("```")[1]
+        parts = cleaned.split("```json", 1)
+        if len(parts) > 1:
+            cleaned = parts[1]
+        if "```" in cleaned:
+            cleaned = cleaned.split("```", 1)[0]
     elif "```" in cleaned:
-        cleaned = cleaned.split("```")[2].split("```")[0]
+        parts = cleaned.split("```", 1)
+        if len(parts) > 1:
+            cleaned = parts[1]
+        if "```" in cleaned:
+            cleaned = cleaned.split("```", 1)[0]
+
+    cleaned = cleaned.strip()
+
+    # 3) Handle responses that start with keys but no braces
+    if cleaned.startswith('"plant_species"') or cleaned.startswith("'plant_species'"):
+        cleaned = "{\n" + cleaned
+        if not cleaned.rstrip().endswith("}"):
+            cleaned = cleaned.rstrip().rstrip(",") + "\n}"
 
     try:
-        return json.loads(cleaned.strip())
+        return json.loads(cleaned)
     except Exception:
         pass
 
+    # 4) Fallback: first {...} block anywhere in text
     match = re.search(r"\{[\s\S]*\}", response_text)
     if match:
+        candidate = match.group(0)
         try:
-            return json.loads(match.group())
+            return json.loads(candidate)
         except Exception:
             pass
-    return None
 
+    return None
 
 def validate_json_result(data):
     required_fields = [
@@ -1375,7 +1416,6 @@ else:
         plant_name = diag.get("plant_type", "Unknown")
         disease_name = diag.get("disease_name", "Unknown")
 
-        # Prefer infected plant count from AI Plant Doctor treatment selection, if available
         selection = st.session_state.treatment_selection
         if selection and isinstance(selection.get("infected_plants"), int):
             infected_count = selection["infected_plants"]
@@ -1420,9 +1460,7 @@ else:
             unsafe_allow_html=True,
         )
 
-        # Use treatment_selection from AI Plant Doctor to auto-fill costs
         if selection and isinstance(selection.get("total_cost"), int):
-            # support optional "buying_total_cost" / "is_buying" if present
             use_cost = (
                 selection.get("buying_total_cost", selection["total_cost"])
                 if selection.get("is_buying")
@@ -1435,7 +1473,6 @@ else:
                 organic_default = 0
                 chemical_default = use_cost
         else:
-            # fallback to diagnosis-level per-block costs
             organic_default = int(diag.get("organic_cost", 300) * infected_count)
             chemical_default = int(diag.get("chemical_cost", 200) * infected_count)
 
@@ -1456,7 +1493,6 @@ else:
                 step=100,
                 help=f"Total cost for treating {infected_count} plants",
             )
-        # Keep UI of file 2: take total expected yield & market price directly
         with col_input3:
             yield_kg = st.number_input(
                 "Expected Yield (kg)", value=1000, min_value=100, step=100
@@ -1472,35 +1508,26 @@ else:
             unsafe_allow_html=True,
         )
 
-        # Auto loss % uses helper from file 1 logic
         auto_loss_percentage = calculate_loss_percentage(
-            diag.get("severity", "moderate"),
-            infected_count,
-            total_plants=100,
+            diag.get("severity", "moderate"), infected_count, total_plants=100
         )
 
         col_loss1, col_loss2, col_loss3 = st.columns(3)
         with col_loss1:
             st.markdown(
-                f"""<div class="stat-box"><div class="stat-label">Loss Percentage (%)</div>
-                <div class="stat-value" style="color: #ff6b6b;">{auto_loss_percentage}%</div></div>""",
+                f"""<div class="stat-box"><div class="stat-label">Loss Percentage (%)</div><div class="stat-value" style="color: #ff6b6b;">{auto_loss_percentage}%</div></div>""",
                 unsafe_allow_html=True,
             )
-
-        # Base revenue and loss in Rs (file 1 logic but shown in file 2 style)
-        total_revenue = int(yield_kg * market_price)
-        potential_loss_value = int(total_revenue * (auto_loss_percentage / 100))
-
         with col_loss2:
+            total_revenue = int(yield_kg * market_price)
+            potential_loss_value = int(total_revenue * (auto_loss_percentage / 100))
             st.markdown(
-                f"""<div class="stat-box"><div class="stat-label">Total Yield Value</div>
-                <div class="stat-value">Rs {total_revenue:,}</div></div>""",
+                f"""<div class="stat-box"><div class="stat-label">Total Yield Value</div><div class="stat-value">Rs {total_revenue:,}</div></div>""",
                 unsafe_allow_html=True,
             )
         with col_loss3:
             st.markdown(
-                f"""<div class="stat-box"><div class="stat-label">Potential Loss</div>
-                <div class="stat-value" style="color: #ff6b6b;">Rs {potential_loss_value:,}</div></div>""",
+                f"""<div class="stat-box"><div class="stat-label">Potential Loss</div><div class="stat-value" style="color: #ff6b6b;">Rs {potential_loss_value:,}</div></div>""",
                 unsafe_allow_html=True,
             )
 
@@ -1508,7 +1535,6 @@ else:
         if st.button("📊 Calculate ROI Analysis", use_container_width=True, type="primary"):
             org_benefit = potential_loss_value - organic_cost_total
             chem_benefit = potential_loss_value - chemical_cost_total
-
             analysis = {
                 "total_value": total_revenue,
                 "loss_prevented": potential_loss_value,
@@ -1525,7 +1551,6 @@ else:
                 "total_chemical_cost": chemical_cost_total,
                 "infected_count": infected_count,
             }
-
             st.session_state.cost_roi_result = {
                 "plant_name": plant_name,
                 "disease_name": disease_name,
@@ -1537,30 +1562,25 @@ else:
         if st.session_state.cost_roi_result:
             result = st.session_state.cost_roi_result
             analysis = result["analysis"]
-
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(
                 """<div class="info-section"><div class="info-title">Investment Analysis Results (For All Infected Plants)</div></div>""",
                 unsafe_allow_html=True,
             )
-
             result_col1, result_col2, result_col3 = st.columns(3)
             with result_col1:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">Total Yield Value</div>
-                    <div class="stat-value">Rs {analysis['total_value']:,}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">Total Yield Value</div><div class="stat-value">Rs {analysis['total_value']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
             with result_col2:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">Loss Prevention ({analysis['loss_percentage']}%)</div>
-                    <div class="stat-value" style="color: #4caf50;">Rs {analysis['loss_prevented']:,}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">Loss Prevention ({analysis['loss_percentage']}%)</div><div class="stat-value" style="color: #4caf50;">Rs {analysis['loss_prevented']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
             with result_col3:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">Infected Plants</div>
-                    <div class="stat-value">{analysis['infected_count']}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">Infected Plants</div><div class="stat-value">{analysis['infected_count']}</div></div>""",
                     unsafe_allow_html=True,
                 )
 
@@ -1569,26 +1589,15 @@ else:
                 f"""<div class="info-section"><div class="info-title">ROI Comparison (For {analysis['infected_count']} Plants)</div></div>""",
                 unsafe_allow_html=True,
             )
-
             comp_col1, comp_col2 = st.columns(2)
             with comp_col1:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">Organic ROI</div>
-                    <div class="stat-value" style="color: #81c784;">{analysis['org_roi']}%</div>
-                    <div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">
-                        Total Cost: Rs {analysis['total_organic_cost']:,}<br>
-                        Net Benefit: Rs {analysis['organic_net']:,}
-                    </div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">Organic ROI</div><div class="stat-value" style="color: #81c784;">{analysis['org_roi']}%</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Total Cost: Rs {analysis['total_organic_cost']:,}<br>Net Benefit: Rs {analysis['organic_net']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
             with comp_col2:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">Chemical ROI</div>
-                    <div class="stat-value" style="color: #64b5f6;">{analysis['chem_roi']}%</div>
-                    <div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">
-                        Total Cost: Rs {analysis['total_chemical_cost']:,}<br>
-                        Net Benefit: Rs {analysis['chemical_net']:,}
-                    </div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">Chemical ROI</div><div class="stat-value" style="color: #64b5f6;">{analysis['chem_roi']}%</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Total Cost: Rs {analysis['total_chemical_cost']:,}<br>Net Benefit: Rs {analysis['chemical_net']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
 
@@ -1598,6 +1607,7 @@ else:
                 unsafe_allow_html=True,
             )
 
+            # If cost is 0, net profit is 0; otherwise total_value - treatment_cost
             net_profit_org = 0
             if analysis["total_organic_cost"] > 0:
                 net_profit_org = analysis["total_value"] - analysis["total_organic_cost"]
@@ -1609,46 +1619,28 @@ else:
             profit_col1, profit_col2 = st.columns(2)
             with profit_col1:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">🌱 Organic Net Profit</div>
-                    <div class="stat-value" style="color: #81c784;">Rs {net_profit_org:,}</div>
-                    <div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">
-                        Loss Prevented: Rs {analysis['loss_prevented']:,}<br>
-                        Total Treatment: Rs {analysis['total_organic_cost']:,}
-                    </div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">🌱 Organic Net Profit</div><div class="stat-value" style="color: #81c784;">Rs {net_profit_org:,}</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Loss Prevented: Rs {analysis['loss_prevented']:,}<br>Total Treatment: Rs {analysis['total_organic_cost']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
             with profit_col2:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">💊 Chemical Net Profit</div>
-                    <div class="stat-value" style="color: #64b5f6;">Rs {net_profit_chem:,}</div>
-                    <div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">
-                        Loss Prevented: Rs {analysis['loss_prevented']:,}<br>
-                        Total Treatment: Rs {analysis['total_chemical_cost']:,}
-                    </div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">💊 Chemical Net Profit</div><div class="stat-value" style="color: #64b5f6;">Rs {net_profit_chem:,}</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Loss Prevented: Rs {analysis['loss_prevented']:,}<br>Total Treatment: Rs {analysis['total_chemical_cost']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
 
             st.markdown("<br>", unsafe_allow_html=True)
             if analysis["org_roi"] > analysis["chem_roi"]:
                 st.markdown(
-                    f"""<div class="success-box">
-                        ✅ Organic treatment provides better ROI ({analysis['org_roi']}% vs {analysis['chem_roi']}%)!
-                        Invest in organic methods for sustainable farming and long-term soil health.
-                    </div>""",
+                    f"""<div class="success-box">✅ Organic treatment provides better ROI ({analysis['org_roi']}% vs {analysis['chem_roi']}%)! Invest in organic methods for sustainable farming and long-term soil health.</div>""",
                     unsafe_allow_html=True,
                 )
             elif analysis["chem_roi"] > analysis["org_roi"]:
                 st.markdown(
-                    f"""<div class="success-box">
-                        ✅ Chemical treatment offers higher immediate ROI ({analysis['chem_roi']}% vs {analysis['org_roi']}%),
-                        but consider organic for long-term sustainability and soil preservation.
-                    </div>""",
+                    f"""<div class="success-box">✅ Chemical treatment offers higher immediate ROI ({analysis['chem_roi']}% vs {analysis['org_roi']}%), but consider organic for long-term sustainability and soil preservation.</div>""",
                     unsafe_allow_html=True,
                 )
             else:
                 st.markdown(
-                    """<div class="success-box">
-                        ✅ Both treatments have similar ROI. Choose based on your farming preference and long-term sustainability goals.
-                    </div>""",
+                    """<div class="success-box">✅ Both treatments have similar ROI. Choose based on your farming preference and long-term sustainability goals.</div>""",
                     unsafe_allow_html=True,
                 )
