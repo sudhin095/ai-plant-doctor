@@ -808,15 +808,23 @@ def enhance_image_for_analysis(image):
     return image
 
 
-def extract_json_robust(response_text):
+def extract_json_robust(response_text: str):
+    """
+    Try multiple strategies to extract a JSON object from the model response
+    without ever raising an exception.
+    """
     if not response_text:
         return None
+
+    # 1) Best case: response is pure JSON
     try:
         return json.loads(response_text)
     except Exception:
         pass
 
     cleaned = response_text
+
+    # 2) Strip ```json ... ``` or ``` ... ``` code fences if present
     if "```json" in cleaned:
         parts = cleaned.split("```json", 1)
         if len(parts) > 1:
@@ -824,21 +832,37 @@ def extract_json_robust(response_text):
         if "```" in cleaned:
             cleaned = cleaned.split("```", 1)[0]
     elif "```" in cleaned:
-        parts = cleaned.split("```")
-        if len(parts) >= 2:
+        parts = cleaned.split("```", 1)
+        if len(parts) > 1:
             cleaned = parts[1]
+        if "```" in cleaned:
+            cleaned = cleaned.split("```", 1)[0]
+
+    cleaned = cleaned.strip()
+
+    # 3) Handle the case where the model starts directly with keys like:
+    #    "plant_species": "Tomato", ...
+    #    i.e., missing the outer { } braces
+    if cleaned.startswith('"plant_species"') or cleaned.startswith("'plant_species'"):
+        cleaned = "{\n" + cleaned
+        if not cleaned.rstrip().endswith("}"):
+            cleaned = cleaned.rstrip().rstrip(",") + "\n}"
 
     try:
-        return json.loads(cleaned.strip())
+        return json.loads(cleaned)
     except Exception:
         pass
 
+    # 4) Fallback: grab the first {...} block anywhere in the text
     match = re.search(r"\{[\s\S]*\}", response_text)
     if match:
+        candidate = match.group()
         try:
-            return json.loads(match.group())
+            return json.loads(candidate)
         except Exception:
             pass
+
+    # If nothing worked, return None instead of raising
     return None
 
 
