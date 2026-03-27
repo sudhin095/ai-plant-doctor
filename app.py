@@ -747,17 +747,39 @@ def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_coun
 
 
 def calculate_loss_percentage(disease_severity, infected_count, total_plants=100):
-    severity_loss_map = {
-        "healthy": 0,
-        "mild": 15,
-        "moderate": 40,
-        "severe": 70,
-    }
-    base_loss = severity_loss_map.get(disease_severity.lower(), 40)
-    infected_ratio = min(infected_count / total_plants, 1.0) if total_plants > 0 else 1.0
-    calculated_loss = int(base_loss * (infected_ratio ** 0.7))
-    return max(min(calculated_loss, 85), base_loss // 2)
+    """
+    Estimate yield loss (%) based on:
+    1) Severity band (healthy/mild/moderate/severe) -> typical loss range
+    2) Fraction of plants that are infected
 
+    Method:
+    - Map severity to a loss band (literature-style ranges)
+    - Take the midpoint of that band as base_loss
+    - Scale by infected_ratio = infected_count / total_plants
+    - Clamp to [0, 80] to avoid unrealistic extremes
+    """
+    severity_bands = {
+        "healthy": (0, 2),      # 0–2% loss
+        "mild": (5, 15),        # 5–15% loss
+        "moderate": (20, 40),   # 20–40% loss
+        "severe": (50, 70),     # 50–70% loss
+    }
+
+    sev = (disease_severity or "moderate").lower()
+    low, high = severity_bands.get(sev, severity_bands["moderate"])
+    base_loss = (low + high) / 2.0  # midpoint of the band
+
+    if total_plants <= 0:
+        infected_ratio = 1.0
+    else:
+        infected_ratio = max(0.0, min(infected_count / total_plants, 1.0))
+
+    loss_percent = base_loss * infected_ratio
+
+    # Clamp to a reasonable range
+    loss_percent = max(0.0, min(loss_percent, 80.0))
+
+    return int(round(loss_percent))
 
 def resize_image(image, max_width=600, max_height=500):
     image.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
