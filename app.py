@@ -1348,23 +1348,25 @@ def get_farmer_bot_response(user_question, diagnosis_context=None):
 # ============ MAIN UI HEADER ============
 st.markdown(
     """
-    <div class="header-container">
-        <div class="header-title">🌿 AI Plant Doctor - Smart Edition</div>
-        <div style="display:flex; justify-content:center; margin-bottom:8px;">
-            <div style="
-                padding:4px 12px;
-                border-radius:999px;
-                border:1px solid rgba(148,163,184,0.7);
-                font-size:0.78rem;
-                letter-spacing:0.16em;
-                text-transform:uppercase;
-                color:#cbd5f5;
-                background:rgba(15,23,42,0.85);
-            ">
-                Built by Sudhin • Powered by Gemini
-            </div>
+    <div class="header-container" style="text-align:center;">
+        <div style="margin-bottom:18px;">
+            [generated_image:65]
         </div>
-        <div class="header-subtitle">
+        <div class="header-title" style="margin-bottom:8px;">
+            AI Plant Doctor - Smart Edition
+        </div>
+        <div style="
+            padding:4px 12px;
+            border-radius:999px;
+            border:1px solid rgba(148,163,184,0.7);
+            font-size:0.78rem;
+            letter-spacing:0.16em;
+            text-transform:uppercase;
+            color:#cbd5f5;
+            background:rgba(15,23,42,0.85);
+            display:inline-block;
+        ">Built by Sudhin • Powered by Gemini</div>
+        <div class="header-subtitle" style="margin-top:16px;">
             Diagnose plant diseases, compare organic vs chemical treatments, and plan smart crop rotations with AI.
         </div>
     </div>
