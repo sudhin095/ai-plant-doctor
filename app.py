@@ -424,7 +424,6 @@ def get_treatment_cost(treatment_type, treatment_name):
 
 
 def get_treatment_info(treatment_type, treatment_name):
-    """Get full treatment info including quantity and dilution"""
     costs = TREATMENT_COSTS.get(treatment_type, {})
     for key, value in costs.items():
         if key.lower() == treatment_name.lower():
@@ -452,7 +451,6 @@ def get_treatment_info(treatment_type, treatment_name):
 
 
 def normalize_treatment_name(raw_name: str) -> str:
-    """Extract a clean treatment name from strings like 'Neem Oil Spray - 3% solution' or 'Neem Oil Spray: use 3 ml'."""
     if not isinstance(raw_name, str):
         return ""
     name = raw_name.strip()
@@ -541,6 +539,12 @@ def render_treatment_selection_ui(
 
     base_plants = 100
     total_cost = int(round(unit_cost * infected_plants / base_plants))
+    buying_total_cost = unit_cost + total_cost
+
+    is_buying = st.checkbox(
+        "I am buying this treatment product (pack/bottle/etc.)",
+        key="cost_calc_is_buying",
+    )
 
     st.session_state.treatment_selection = {
         "plant_type": plant_type,
@@ -552,6 +556,8 @@ def render_treatment_selection_ui(
         "base_plants": base_plants,
         "total_cost": total_cost,
         "quantity": quantity,
+        "buying_total_cost": buying_total_cost,
+        "is_buying": is_buying,
     }
 
     st.markdown(
@@ -560,10 +566,7 @@ def render_treatment_selection_ui(
             Selected: <b>{selected_name}</b> ({treatment_type_choice})<br>
             Quantity guideline: {quantity}<br>
             Estimated total treatment cost for {infected_plants} plants: <b>Rs {total_cost}</b><br>
-            <span style="font-size:0.9rem; color:#b0c4ff;">
-                This cost will be auto-filled on the Cost Calculator & ROI page.
-                The other treatment type will be set to Rs 0.
-            </span>
+            Total treatment cost if you are buying the product: <b>Rs {buying_total_cost}</b>
         </div>
         """,
         unsafe_allow_html=True,
@@ -571,7 +574,6 @@ def render_treatment_selection_ui(
 
 
 def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_count: int):
-    """Render diagnosis + treatments without total-per-plant costs, and attach selection UI."""
     disease_name = result.get("disease_name", "Unknown")
     disease_type = result.get("disease_type", "unknown")
     severity = result.get("severity", "unknown")
@@ -733,7 +735,6 @@ def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_coun
             unsafe_allow_html=True,
         )
 
-    # Cost-selection UI at end of AI Plant Doctor page
     render_treatment_selection_ui(
         plant_type=plant_type,
         disease_name=disease_name,
@@ -746,7 +747,6 @@ def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_coun
 
 
 def calculate_loss_percentage(disease_severity, infected_count, total_plants=100):
-    """Auto-calculate loss percentage based on severity and infected plants ratio"""
     severity_loss_map = {
         "healthy": 0,
         "mild": 15,
@@ -994,7 +994,6 @@ if page == "AI Plant Doctor":
         )
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # Only run analysis when button is clicked; don't tie rendering to this branch
     images = None
     if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "Select a plant...":
         if len(uploaded_files) > 3:
@@ -1082,7 +1081,6 @@ if page == "AI Plant Doctor":
                     if confidence < st.session_state.confidence_min:
                         st.warning(f"Low Confidence ({confidence}%)")
 
-                    # Only store diagnosis here; rendering happens below using last_diagnosis
                     st.session_state.last_diagnosis = {
                         "plant_type": plant_type,
                         "disease_name": result.get("disease_name", "Unknown"),
@@ -1091,7 +1089,7 @@ if page == "AI Plant Doctor":
                         "confidence": confidence,
                         "organic_cost": 0,
                         "chemical_cost": 0,
-                        "infected_count": 50,  # default; real value comes from selection UI
+                        "infected_count": 50,
                         "timestamp": datetime.now().isoformat(),
                         "result": result,
                     }
@@ -1100,7 +1098,6 @@ if page == "AI Plant Doctor":
                 st.error(f"Analysis Failed: {str(e)}")
                 progress_placeholder.empty()
 
-    # Always render last diagnosis (if any), independent of uploads/Analyze button
     diag = st.session_state.last_diagnosis
     if diag:
         st.markdown(
@@ -1287,7 +1284,7 @@ elif page == "Crop Rotation Advisor":
         rotations = result["rotations"]
         info = result["info"]
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markmarkdown(
+        st.markdown(
             """<div class="info-section"><div class="info-title">Your 3-Year Rotation Strategy</div></div>""",
             unsafe_allow_html=True,
         )
@@ -1385,12 +1382,17 @@ else:
         )
 
         if selection and isinstance(selection.get("total_cost"), int):
+            use_cost = (
+                selection.get("buying_total_cost", selection["total_cost"])
+                if selection.get("is_buying")
+                else selection["total_cost"]
+            )
             if selection["treatment_type"] == "organic":
-                organic_default = selection["total_cost"]
+                organic_default = use_cost
                 chemical_default = 0
             else:
                 organic_default = 0
-                chemical_default = selection["total_cost"]
+                chemical_default = use_cost
         else:
             organic_default = int(diag.get("organic_cost", 300) * infected_count)
             chemical_default = int(diag.get("chemical_cost", 200) * infected_count)
