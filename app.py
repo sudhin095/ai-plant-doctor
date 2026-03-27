@@ -389,6 +389,11 @@ RESPOND WITH EXACTLY THIS JSON:
   "probable_causes": ["Primary cause relevant to {plant_type}", "Secondary cause", "Environmental factor"],
   "immediate_action": ["Action 1: Specific to {plant_type}", "Action 2: Specific to {plant_type}", "Action 3: Specific to {plant_type}"],
   "organic_treatments": ["Treatment 1: Product and application for {plant_type}", "Treatment 2: Alternative for {plant_type}"],
+    "chemical_treatments": [
+    "Chemical 1: Safe for {plant_type} with dilution",
+    "Chemical 2: Alternative safe for {plant_type}"
+  ],
+  
    "prevention_long_term": ["Prevention strategy 1 for {plant_type}", "Prevention strategy 2 for {plant_type}", "Resistant varieties: If available for {plant_type}"],
   "plant_specific_notes": "Important notes specific to {plant_type} care and disease management",
   "similar_conditions": "Other {plant_type} conditions that look similar"
