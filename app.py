@@ -257,348 +257,67 @@ st.markdown(
     .stApp { background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%); color: #e4e6eb; }
     [data-testid="stAppViewContainer"] { background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%); }
     p, span, div, label { color: #e4e6eb; font-size: 1.1rem; }
-
-    .header-container {
-        background: linear-gradient(135deg, #1a2a47 0%, #2d4a7a 100%);
-        padding: 40px 20px;
-        border-radius: 15px;
-        margin-bottom: 30px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(102, 126, 234, 0.3);
-    }
-    .header-title {
-        font-size: 3rem;
-        font-weight: 700;
-        color: #ffffff;
-        text-align: center;
-        margin-bottom: 10px;
-        letter-spacing: 1px;
-    }
-    .header-subtitle {
-        font-size: 1.4rem;
-        color: #b0c4ff;
-        text-align: center;
-    }
-    .feature-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 15px 20px;
-        border-radius: 10px;
-        text-align: center;
-        font-weight: 600;
-        font-size: 1.1rem;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
-        transition: transform 0.3s ease;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .feature-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.7);
-    }
-    .upload-container {
-        background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%);
-        padding: 30px;
-        border-radius: 15px;
-        border: 2px dashed #667eea;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        margin: 20px 0;
-    }
-    .result-container {
-        background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%);
-        border-radius: 15px;
-        padding: 30px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-        margin: 20px 0;
-        border: 1px solid rgba(102, 126, 234, 0.2);
-    }
-    .disease-header {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
-        padding: 25px;
-        border-radius: 12px;
-        margin-bottom: 25px;
-        box-shadow: 0 4px 20px rgba(245, 87, 108, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
+    .header-container { background: linear-gradient(135deg, #1a2a47 0%, #2d4a7a 100%); padding: 40px 20px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); border: 1px solid rgba(102, 126, 234, 0.3); }
+    .header-title { font-size: 3rem; font-weight: 700; color: #ffffff; text-align: center; margin-bottom: 10px; letter-spacing: 1px; }
+    .header-subtitle { font-size: 1.4rem; color: #b0c4ff; text-align: center; }
+    .feature-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; border-radius: 10px; text-align: center; font-weight: 600; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5); transition: transform 0.3s ease; border: 1px solid rgba(255, 255, 255, 0.1); }
+    .feature-card:hover { transform: translateY(-5px); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.7); }
+    .upload-container { background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%); padding: 30px; border-radius: 15px; border: 2px dashed #667eea; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); margin: 20px 0; }
+    .result-container { background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%); border-radius: 15px; padding: 30px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); margin: 20px 0; border: 1px solid rgba(102, 126, 234, 0.2); }
+    .disease-header { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(245, 87, 108, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); }
     .disease-name { font-size: 2.8rem; font-weight: 700; margin-bottom: 15px; }
     .disease-meta { font-size: 1.1rem; opacity: 0.95; display: flex; gap: 20px; flex-wrap: wrap; }
-
-    .info-section {
-        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
-        border-left: 5px solid #667eea;
-        padding: 20px;
-        border-radius: 8px;
-        margin: 15px 0;
-        border: 1px solid rgba(102, 126, 234, 0.2);
-    }
-    .info-title {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #b0c4ff;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .cost-info {
-        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
-        border-left: 5px solid #667eea;
-        padding: 12px 16px;
-        border-radius: 6px;
-        margin: 12px 0;
-        font-size: 1rem;
-        color: #b0c4ff;
-        font-weight: 600;
-    }
-    .treatment-item {
-        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
-        border-left: 5px solid #667eea;
-        padding: 15px;
-        border-radius: 6px;
-        margin: 12px 0;
-        font-size: 0.95rem;
-        color: #b0c4ff;
-    }
+    .info-section { background: linear-gradient(135deg, #2a3040 0%, #353d50 100%); border-left: 5px solid #667eea; padding: 20px; border-radius: 8px; margin: 15px 0; border: 1px solid rgba(102, 126, 234, 0.2); }
+    .info-title { font-size: 1.4rem; font-weight: 700; color: #b0c4ff; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+    .cost-info { background: linear-gradient(135deg, #2a3040 0%, #353d50 100%); border-left: 5px solid #667eea; padding: 12px 16px; border-radius: 6px; margin: 12px 0; font-size: 1rem; color: #b0c4ff; font-weight: 600; }
+    .treatment-item { background: linear-gradient(135deg, #2a3040 0%, #353d50 100%); border-left: 5px solid #667eea; padding: 15px; border-radius: 6px; margin: 12px 0; font-size: 0.95rem; color: #b0c4ff; }
     .treatment-name { font-weight: 700; color: #ffffff; margin-bottom: 5px; }
     .treatment-quantity { color: #81c784; font-weight: 600; margin: 5px 0; }
     .treatment-dilution { color: #ffcc80; font-size: 0.9rem; margin: 5px 0; }
-
-    .severity-badge {
-        display: inline-block;
-        padding: 10px 18px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 1rem;
-    }
+    .severity-badge { display: inline-block; padding: 10px 18px; border-radius: 20px; font-weight: 600; font-size: 1rem; }
     .severity-healthy { background-color: #1b5e20; color: #4caf50; }
     .severity-mild { background-color: #004d73; color: #4dd0e1; }
     .severity-moderate { background-color: #633d00; color: #ffc107; }
     .severity-severe { background-color: #5a1a1a; color: #ff6b6b; }
-
-    .type-badge {
-        display: inline-block;
-        padding: 8px 14px;
-        border-radius: 15px;
-        font-weight: 600;
-        font-size: 0.95rem;
-        margin: 5px 5px 5px 0;
-    }
+    .type-badge { display: inline-block; padding: 8px 14px; border-radius: 15px; font-weight: 600; font-size: 0.95rem; margin: 5px 5px 5px 0; }
     .type-fungal { background-color: #4a148c; color: #ce93d8; }
     .type-bacterial { background-color: #0d47a1; color: #64b5f6; }
     .type-viral { background-color: #5c0b0b; color: #ef9a9a; }
     .type-pest { background-color: #4d2600; color: #ffcc80; }
     .type-nutrient { background-color: #0d3a1a; color: #81c784; }
     .type-healthy { background-color: #0d3a1a; color: #81c784; }
-
-    .debug-box {
-        background: #0f1419;
-        border: 1px solid #667eea;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 10px 0;
-        font-family: monospace;
-        font-size: 0.95rem;
-        max-height: 400px;
-        overflow-y: auto;
-        color: #b0c4ff;
-        white-space: pre-wrap;
-    }
-    .warning-box {
-        background: linear-gradient(135deg, #4d2600 0%, #3d2000 100%);
-        border: 1px solid #ffc107;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 10px 0;
-        color: #ffcc80;
-        font-size: 1.1rem;
-    }
-    .success-box {
-        background: linear-gradient(135deg, #1b5e20 0%, #0d3a1a 100%);
-        border: 1px solid #4caf50;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 10px 0;
-        color: #81c784;
-        font-size: 1.1rem;
-    }
-    .error-box {
-        background: linear-gradient(135deg, #5a1a1a 0%, #3d0d0d 100%);
-        border: 1px solid #ff6b6b;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 10px 0;
-        color: #ef9a9a;
-        font-size: 1.1rem;
-    }
-
-    .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: white !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        padding: 12px 30px !important;
-        font-weight: 600 !important;
-        font-size: 1.1rem !important;
-        border-radius: 8px !important;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
-        transition: all 0.3s ease !important;
-    }
-    .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
-    }
-
-    .image-container {
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(102, 126, 234, 0.2);
-    }
-    .tips-card {
-        background: linear-gradient(135deg, #1a2a47 0%, #2d3050 100%);
-        border: 2px solid #667eea;
-        border-radius: 10px;
-        padding: 15px;
-        margin: 10px 0;
-    }
-    .tips-card-title {
-        font-weight: 700;
-        color: #b0c4ff;
-        margin-bottom: 10px;
-        font-size: 1.2rem;
-    }
-
-    [data-testid="stSidebar"] {
-        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
-    }
-    [data-testid="metric-container"] {
-        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
-        border: 1px solid rgba(102, 126, 234, 0.2);
-        border-radius: 8px;
-    }
-    [data-testid="stExpander"] {
-        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
-        border: 1px solid rgba(102, 126, 234, 0.2);
-    }
-    .streamlit-expanderHeader {
-        color: #b0c4ff !important;
-        font-size: 1.1rem !important;
-    }
-
-    input, textarea, select {
-        background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%) !important;
-        border: 1px solid rgba(102, 126, 234, 0.3) !important;
-        color: #e4e6eb !important;
-        font-size: 1.1rem !important;
-    }
-    h2, h3, h4 {
-        font-size: 1.4rem !important;
-        color: #b0c4ff !important;
-    }
-
+    .debug-box { background: #0f1419; border: 1px solid #667eea; border-radius: 8px; padding: 15px; margin: 10px 0; font-family: monospace; font-size: 0.95rem; max-height: 400px; overflow-y: auto; color: #b0c4ff; white-space: pre-wrap; }
+    .warning-box { background: linear-gradient(135deg, #4d2600 0%, #3d2000 100%); border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 10px 0; color: #ffcc80; font-size: 1.1rem; }
+    .success-box { background: linear-gradient(135deg, #1b5e20 0%, #0d3a1a 100%); border: 1px solid #4caf50; border-radius: 8px; padding: 15px; margin: 10px 0; color: #81c784; font-size: 1.1rem; }
+    .error-box { background: linear-gradient(135deg, #5a1a1a 0%, #3d0d0d 100%); border: 1px solid #ff6b6b; border-radius: 8px; padding: 15px; margin: 10px 0; color: #ef9a9a; font-size: 1.1rem; }
+    .stButton > button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; padding: 12px 30px !important; font-weight: 600 !important; font-size: 1.1rem !important; border-radius: 8px !important; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important; transition: all 0.3s ease !important; }
+    .stButton > button:hover { transform: translateY(-2px) !important; box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important; }
+    .image-container { border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); border: 1px solid rgba(102, 126, 234, 0.2); }
+    .tips-card { background: linear-gradient(135deg, #1a2a47 0%, #2d3050 100%); border: 2px solid #667eea; border-radius: 10px; padding: 15px; margin: 10px 0; }
+    .tips-card-title { font-weight: 700; color: #b0c4ff; margin-bottom: 10px; font-size: 1.2rem; }
+    [data-testid="stSidebar"] { background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%); }
+    [data-testid="metric-container"] { background: linear-gradient(135deg, #2a3040 0%, #353d50 100%); border: 1px solid rgba(102, 126, 234, 0.2); border-radius: 8px; }
+    [data-testid="stExpander"] { background: linear-gradient(135deg, #2a3040 0%, #353d50 100%); border: 1px solid rgba(102, 126, 234, 0.2); }
+    .streamlit-expanderHeader { color: #b0c4ff !important; font-size: 1.1rem !important; }
+    input, textarea, select { background: linear-gradient(135deg, #1e2330 0%, #2a3040 100%) !important; border: 1px solid rgba(102, 126, 234, 0.3) !important; color: #e4e6eb !important; font-size: 1.1rem !important; }
+    h2, h3, h4 { font-size: 1.4rem !important; color: #b0c4ff !important; }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #0f1419; }
-    ::-webkit-scrollbar-thumb {
-        background: #667eea;
-        border-radius: 4px;
-    }
+    ::-webkit-scrollbar-thumb { background: #667eea; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #764ba2; }
-
-    .chatbot-container {
-        background: linear-gradient(135deg, #1a2a47 0%, #2d3050 100%);
-        border: 2px solid #667eea;
-        border-radius: 12px;
-        padding: 15px;
-        margin: 15px 0;
-        max-height: 500px;
-        overflow-y: auto;
-    }
-    .chat-message {
-        background: linear-gradient(135deg, #2a3040 0%, #353d50 100%);
-        border-left: 4px solid #667eea;
-        padding: 12px;
-        margin: 8px 0;
-        border-radius: 8px;
-        font-size: 0.95rem;
-    }
-
-    .page-header {
-        background: linear-gradient(135deg, #1a2a47 0%, #2d4a7a 100%);
-        padding: 30px 20px;
-        border-radius: 15px;
-        margin-bottom: 25px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(102, 126, 234, 0.3);
-    }
-    .page-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #ffffff;
-        text-align: center;
-        letter-spacing: 1px;
-    }
-    .page-subtitle {
-        font-size: 1.2rem;
-        color: #b0c4ff;
-        text-align: center;
-        margin-top: 10px;
-    }
-
-    .stat-box {
-        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-        border: 2px solid #667eea;
-        border-radius: 12px;
-        padding: 20px;
-        margin: 10px 0;
-        text-align: center;
-    }
-    .stat-value {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #667eea;
-        margin: 10px 0;
-    }
-    .stat-label {
-        font-size: 1rem;
-        color: #b0c4ff;
-    }
-
-    .rotation-card {
-        background: linear-gradient(135deg, #2d4a7a15 0%, #667eea15 100%);
-        border: 2px solid rgba(102, 126, 234, 0.4);
-        border-radius: 12px;
-        padding: 20px;
-        margin: 15px 0;
-    }
-    .rotation-year {
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: #667eea;
-        margin-bottom: 10px;
-    }
-    .crop-name {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: #667eea;
-        margin: 10px 0;
-    }
-    .crop-description {
-        font-size: 0.95rem;
-        color: #b0c4ff;
-        margin-top: 10px;
-        line-height: 1.6;
-    }
-
-    .kisan-response-box {
-        background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
-        border: 3px solid #667eea;
-        border-radius: 15px;
-        padding: 25px;
-        margin: 20px 0;
-        font-size: 1.25rem;
-        line-height: 1.8;
-        color: #b0c4ff;
-        font-weight: 500;
-    }
+    .chatbot-container { background: linear-gradient(135deg, #1a2a47 0%, #2d3050 100%); border: 2px solid #667eea; border-radius: 12px; padding: 15px; margin: 15px 0; max-height: 500px; overflow-y: auto; }
+    .chat-message { background: linear-gradient(135deg, #2a3040 0%, #353d50 100%); border-left: 4px solid #667eea; padding: 12px; margin: 8px 0; border-radius: 8px; font-size: 0.95rem; }
+    .page-header { background: linear-gradient(135deg, #1a2a47 0%, #2d4a7a 100%); padding: 30px 20px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); border: 1px solid rgba(102, 126, 234, 0.3); }
+    .page-title { font-size: 2.5rem; font-weight: 700; color: #ffffff; text-align: center; letter-spacing: 1px; }
+    .page-subtitle { font-size: 1.2rem; color: #b0c4ff; text-align: center; margin-top: 10px; }
+    .stat-box { background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border: 2px solid #667eea; border-radius: 12px; padding: 20px; margin: 10px 0; text-align: center; }
+    .stat-value { font-size: 2rem; font-weight: 700; color: #667eea; margin: 10px 0; }
+    .stat-label { font-size: 1rem; color: #b0c4ff; }
+    .rotation-card { background: linear-gradient(135deg, #2d4a7a15 0%, #667eea15 100%); border: 2px solid rgba(102, 126, 234, 0.4); border-radius: 12px; padding: 20px; margin: 15px 0; }
+    .rotation-year { font-size: 1.3rem; font-weight: 700; color: #667eea; margin-bottom: 10px; }
+    .crop-name { font-size: 1.3rem; font-weight: 600; color: #667eea; margin: 10px 0; }
+    .crop-description { font-size: 0.95rem; color: #b0c4ff; margin-top: 10px; line-height: 1.6; }
+    .kisan-response-box { background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%); border: 3px solid #667eea; border-radius: 15px; padding: 25px; margin: 20px 0; font-size: 1.25rem; line-height: 1.8; color: #b0c4ff; font-weight: 500; }
 </style>
 """,
     unsafe_allow_html=True,
@@ -1261,19 +980,6 @@ if page == "AI Plant Doctor":
                 f"""<div class="success-box">Common diseases in {plant_type}:\n\n{PLANT_COMMON_DISEASES[plant_type]}</div>""",
                 unsafe_allow_html=True,
             )
-
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown(
-            """<div class="info-section"><div class="info-title">Infected Crops Count</div></div>""",
-            unsafe_allow_html=True,
-        )
-        infected_count = st.number_input(
-            "Number of infected plants/trees in your field",
-            value=1,
-            min_value=1,
-            step=1,
-            label_visibility="collapsed",
-        )
         st.markdown("</div>", unsafe_allow_html=True)
 
     with col_upload:
@@ -1288,6 +994,8 @@ if page == "AI Plant Doctor":
         )
         st.markdown("</div>", unsafe_allow_html=True)
 
+    # Only run analysis when button is clicked; don't tie rendering to this branch
+    images = None
     if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "Select a plant...":
         if len(uploaded_files) > 3:
             st.warning("Maximum 3 images. Only first 3 will be analyzed.")
@@ -1315,93 +1023,86 @@ if page == "AI Plant Doctor":
             analyze_btn = st.button(
                 f"Analyze {plant_type}", use_container_width=True, type="primary"
             )
+    else:
+        analyze_btn = False
 
-        if analyze_btn:
-            progress_placeholder = st.empty()
-            with st.spinner(f"Analyzing {plant_type}..."):
-                try:
-                    progress_placeholder.info(f"Processing {plant_type} leaf...")
+    if analyze_btn and images is not None and plant_type:
+        progress_placeholder = st.empty()
+        with st.spinner(f"Analyzing {plant_type}..."):
+            try:
+                progress_placeholder.info(f"Processing {plant_type} leaf...")
 
-                    model_name = (
-                        "Gemini 2.5 Pro"
-                        if "Pro" in st.session_state.model_choice
-                        else "Gemini 2.5 Flash"
-                    )
-                    model_id = (
-                        "gemini-2.5-pro"
-                        if "Pro" in st.session_state.model_choice
-                        else "gemini-2.5-flash"
-                    )
-                    model = genai.GenerativeModel(model_id)
-                    if st.session_state.debug_mode:
-                        st.info(f"Using: {model_name}")
+                model_name = (
+                    "Gemini 2.5 Pro"
+                    if "Pro" in st.session_state.model_choice
+                    else "Gemini 2.5 Flash"
+                )
+                model_id = (
+                    "gemini-2.5-pro"
+                    if "Pro" in st.session_state.model_choice
+                    else "gemini-2.5-flash"
+                )
+                model = genai.GenerativeModel(model_id)
+                if st.session_state.debug_mode:
+                    st.info(f"Using: {model_name}")
 
-                    common_diseases = PLANT_COMMON_DISEASES.get(
-                        plant_type, "various plant diseases"
-                    )
-                    prompt = EXPERT_PROMPT_TEMPLATE.format(
-                        plant_type=plant_type, common_diseases=common_diseases
-                    )
+                common_diseases = PLANT_COMMON_DISEASES.get(
+                    plant_type, "various plant diseases"
+                )
+                prompt = EXPERT_PROMPT_TEMPLATE.format(
+                    plant_type=plant_type, common_diseases=common_diseases
+                )
 
-                    enhanced_images = [
-                        enhance_image_for_analysis(img.copy()) for img in images
-                    ]
-                    response = model.generate_content([prompt] + enhanced_images)
-                    raw_response = response.text
+                enhanced_images = [
+                    enhance_image_for_analysis(img.copy()) for img in images
+                ]
+                response = model.generate_content([prompt] + enhanced_images)
+                raw_response = response.text
 
-                    if st.session_state.debug_mode:
-                        with st.expander("Raw Response"):
-                            st.markdown('<div class="debug-box">', unsafe_allow_html=True)
-                            displayed = (
-                                raw_response[:3000] + "..."
-                                if len(raw_response) > 3000
-                                else raw_response
-                            )
-                            st.text(displayed)
-                            st.markdown("</div>", unsafe_allow_html=True)
-
-                    result = extract_json_robust(raw_response)
-                    if result is None:
-                        st.error("Could not parse AI response")
-
-                    progress_placeholder.empty()
-
-                    if result:
-                        is_valid, validation_msg = validate_json_result(result)
-                        confidence = result.get("confidence", 0)
-                        if confidence < st.session_state.confidence_min:
-                            st.warning(f"Low Confidence ({confidence}%)")
-
-                        st.markdown("<div class='result-container'>", unsafe_allow_html=True)
-
-                        organic_total_cost, chemical_total_cost = (
-                            render_diagnosis_and_treatments(
-                                result=result,
-                                plant_type=plant_type,
-                                infected_count=infected_count,
-                            )
+                if st.session_state.debug_mode:
+                    with st.expander("Raw Response"):
+                        st.markdown('<div class="debug-box">', unsafe_allow_html=True)
+                        displayed = (
+                            raw_response[:3000] + "..."
+                            if len(raw_response) > 3000
+                            else raw_response
                         )
-
+                        st.text(displayed)
                         st.markdown("</div>", unsafe_allow_html=True)
 
-                        st.session_state.last_diagnosis = {
-                            "plant_type": plant_type,
-                            "disease_name": result.get("disease_name", "Unknown"),
-                            "disease_type": result.get("disease_type", "unknown"),
-                            "severity": result.get("severity", "unknown"),
-                            "confidence": confidence,
-                            "organic_cost": organic_total_cost,
-                            "chemical_cost": chemical_total_cost,
-                            "infected_count": infected_count,
-                            "timestamp": datetime.now().isoformat(),
-                            "result": result,
-                        }
+                result = extract_json_robust(raw_response)
+                if result is None:
+                    st.error("Could not parse AI response")
 
-                except Exception as e:
-                    st.error(f"Analysis Failed: {str(e)}")
-                    progress_placeholder.empty()
+                progress_placeholder.empty()
 
-    elif st.session_state.last_diagnosis:
+                if result:
+                    is_valid, validation_msg = validate_json_result(result)
+                    confidence = result.get("confidence", 0)
+                    if confidence < st.session_state.confidence_min:
+                        st.warning(f"Low Confidence ({confidence}%)")
+
+                    # Only store diagnosis here; rendering happens below using last_diagnosis
+                    st.session_state.last_diagnosis = {
+                        "plant_type": plant_type,
+                        "disease_name": result.get("disease_name", "Unknown"),
+                        "disease_type": result.get("disease_type", "unknown"),
+                        "severity": result.get("severity", "unknown"),
+                        "confidence": confidence,
+                        "organic_cost": 0,
+                        "chemical_cost": 0,
+                        "infected_count": 50,  # default; real value comes from selection UI
+                        "timestamp": datetime.now().isoformat(),
+                        "result": result,
+                    }
+
+            except Exception as e:
+                st.error(f"Analysis Failed: {str(e)}")
+                progress_placeholder.empty()
+
+    # Always render last diagnosis (if any), independent of uploads/Analyze button
+    diag = st.session_state.last_diagnosis
+    if diag:
         st.markdown(
             """<div class="success-box">
                 Showing results from your last diagnosis. You can visit other pages while keeping these results.
@@ -1409,19 +1110,17 @@ if page == "AI Plant Doctor":
             unsafe_allow_html=True,
         )
 
-        last = st.session_state.last_diagnosis
-
         st.markdown("<div class='result-container'>", unsafe_allow_html=True)
 
         organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
-            result=last.get("result", {}),
-            plant_type=last.get("plant_type", "Unknown"),
-            infected_count=last.get("infected_count", 1),
+            result=diag.get("result", {}),
+            plant_type=diag.get("plant_type", "Unknown"),
+            infected_count=diag.get("infected_count", 50),
         )
 
-        last["organic_cost"] = organic_total_cost
-        last["chemical_cost"] = chemical_total_cost
-        st.session_state.last_diagnosis = last
+        diag["organic_cost"] = organic_total_cost
+        diag["chemical_cost"] = chemical_total_cost
+        st.session_state.last_diagnosis = diag
 
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1588,7 +1287,7 @@ elif page == "Crop Rotation Advisor":
         rotations = result["rotations"]
         info = result["info"]
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown(
+        st.markmarkdown(
             """<div class="info-section"><div class="info-title">Your 3-Year Rotation Strategy</div></div>""",
             unsafe_allow_html=True,
         )
@@ -1823,7 +1522,7 @@ else:
 
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(
-                f"""<div class="info-section"><div class="info-title">Net Profit Comparison (For All {analysis['infected_count']} Plants)</div></div>""",
+                """<div class="info-section"><div class="info-title">Net Profit Comparison (For All Infected Plants)</div></div>""",
                 unsafe_allow_html=True,
             )
             profit_col1, profit_col2 = st.columns(2)
