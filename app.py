@@ -14,7 +14,6 @@ st.set_page_config(
 )
 
 # ============ TREATMENT COSTS & QUANTITIES DATABASE ============
-# ============ TREATMENT COSTS & QUANTITIES DATABASE ============
 
 TREATMENT_COSTS = {
     "organic": {
@@ -278,457 +277,233 @@ REGIONS = ["North India", "South India", "East India", "West India", "Central In
 SOIL_TYPES = ["Black Soil", "Red Soil", "Laterite Soil", "Alluvial Soil", "Clay Soil"]
 MARKET_FOCUS = ["Stable essentials", "High-value cash crops", "Low input / low risk"]
 
-
-# ============ GLOBAL STYLES ============
+# ============ GLOBAL STYLES (JUDGE-READY UI) ============
 st.markdown(
     """
 <style>
-    /* Global reset & base */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    .stApp {
-        background: radial-gradient(circle at top, #1b4332 0, #020617 45%, #020617 100%);
-        color: #e5f4ec;
-        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    [data-testid="stAppViewContainer"] {
-        background: transparent;
-    }
-    p, span, div, label {
-        color: #e5f4ec;
-        font-size: 1rem;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-    /* Smooth transitions */
-    .stApp, .stButton > button, .info-section, .stat-box, .result-container,
-    .upload-container, .page-header, .feature-card, .rotation-card,
-    .kisan-response-box, .chat-message {
-        transition: all 0.25s ease;
+    * { margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    
+    .stApp { 
+        background-color: #020617; /* Very dark rich blue/black */
+        background-image: radial-gradient(circle at 15% 50%, rgba(16, 185, 129, 0.04), transparent 50%),
+                          radial-gradient(circle at 85% 30%, rgba(20, 184, 166, 0.04), transparent 50%);
+        color: #f8fafc; 
     }
-
-    /* Main header */
-    .header-container {
-        background: radial-gradient(circle at top left, rgba(34,197,94,0.25), rgba(15,23,42,0.9));
-        padding: 32px 24px;
-        border-radius: 24px;
-        margin-bottom: 24px;
-        box-shadow: 0 18px 45px rgba(0,0,0,0.6);
-        border: 1px solid rgba(148, 163, 184, 0.45);
-        backdrop-filter: blur(18px);
-    }
-    .header-title {
-        font-size: 2.7rem;
-        font-weight: 800;
-        color: #f9fafb;
+    
+    [data-testid="stAppViewContainer"] { background: transparent; }
+    p, span, div, label { color: #cbd5e1; font-size: 1.05rem; }
+    
+    /* Sleek Main Header */
+    .header-container { 
+        background: rgba(30, 41, 59, 0.4); 
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        padding: 40px 20px; 
+        border-radius: 24px; 
+        margin-bottom: 30px; 
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); 
+        border: 1px solid rgba(52, 211, 153, 0.15); 
         text-align: center;
-        margin-bottom: 6px;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
+        position: relative;
+        overflow: hidden;
     }
-    .header-subtitle {
-        font-size: 1.1rem;
-        color: #cbd5f5;
-        text-align: center;
-        max-width: 720px;
-        margin: 0 auto;
+    .header-title { 
+        font-size: 3rem; 
+        font-weight: 800; 
+        color: #ffffff; 
+        margin-bottom: 8px; 
+        letter-spacing: -0.5px; 
     }
-
-    /* Feature chips */
-    .feature-card {
-        background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(59,130,246,0.10));
-        color: #e5e7eb;
-        padding: 10px 14px;
-        border-radius: 999px;
-        text-align: center;
-        font-weight: 600;
-        font-size: 0.95rem;
-        box-shadow: 0 8px 20px rgba(15,23,42,0.8);
-        border: 1px solid rgba(148,163,184,0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-    }
-    .feature-card:hover {
-        transform: translateY(-2px) scale(1.02);
-        box-shadow: 0 14px 32px rgba(15,23,42,0.9);
-        border-color: rgba(56,189,248,0.8);
-    }
-
-    /* Upload + result containers */
-    .upload-container, .result-container {
-        background: radial-gradient(circle at top left, rgba(34,197,94,0.08), rgba(15,23,42,0.95));
-        padding: 26px 22px;
-        border-radius: 20px;
-        border: 1px solid rgba(148,163,184,0.45);
-        box-shadow: 0 14px 40px rgba(15,23,42,0.8);
-        backdrop-filter: blur(14px);
-    }
-    .upload-container {
-        margin: 18px 0;
-        border-style: dashed;
-        border-width: 1.5px;
-        border-color: rgba(94,234,212,0.8);
-    }
-
-    /* Disease hero card */
-    .disease-header {
-        background: linear-gradient(135deg, #22c55e, #16a34a, #0f766e);
-        color: white;
-        padding: 22px 20px;
-        border-radius: 18px;
+    .header-subtitle { 
+        font-size: 1.25rem; 
+        color: #94a3b8; 
+        font-weight: 400;
         margin-bottom: 20px;
-        box-shadow: 0 16px 40px rgba(22,163,74,0.7);
-        border: 1px solid rgba(255,255,255,0.14);
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
     }
-    .disease-name {
-        font-size: 2.2rem;
-        font-weight: 800;
-        letter-spacing: 0.03em;
-    }
-    .disease-meta {
-        font-size: 0.95rem;
-        opacity: 0.96;
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-
-    /* Section cards */
-    .info-section {
-        background: linear-gradient(135deg, rgba(15,23,42,0.96), rgba(15,23,42,0.98));
-        border-left: 4px solid #22c55e;
-        padding: 16px 18px;
-        border-radius: 14px;
-        margin: 14px 0;
-        border: 1px solid rgba(51,65,85,0.9);
-        box-shadow: 0 10px 26px rgba(15,23,42,0.9);
-    }
-    .info-section:hover {
-        border-left-color: #38bdf8;
-        transform: translateY(-1px);
-    }
-    .info-title {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #a5b4fc;
-        margin-bottom: 10px;
-        display: flex;
+    
+    /* Built by Badge */
+    .creator-badge {
+        display: inline-flex;
         align-items: center;
-        gap: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-    }
-
-    /* Cost and treatment cards */
-    .cost-info {
-        background: linear-gradient(135deg, rgba(15,23,42,0.98), rgba(15,23,42,1));
-        border-left: 4px solid #38bdf8;
-        padding: 10px 14px;
-        border-radius: 10px;
-        margin: 10px 0;
-        font-size: 0.98rem;
-        color: #e0f2fe;
-        font-weight: 500;
-    }
-    .treatment-item {
-        background: linear-gradient(135deg, rgba(15,23,42,0.98), rgba(15,23,42,1));
-        border-left: 4px solid rgba(52,211,153,0.85);
-        padding: 14px 14px;
-        border-radius: 12px;
-        margin: 10px 0;
+        gap: 8px;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(20, 184, 166, 0.15));
+        border: 1px solid rgba(52, 211, 153, 0.3);
+        padding: 8px 20px;
+        border-radius: 30px;
         font-size: 0.95rem;
-        color: #cbd5f5;
+        font-weight: 600;
+        color: #34d399;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);
+        transition: all 0.3s ease;
     }
-    .treatment-name {
-        font-weight: 700;
-        color: #f9fafb;
-        margin-bottom: 4px;
-        font-size: 1.02rem;
-    }
-    .treatment-quantity {
-        color: #bbf7d0;
-        font-weight: 500;
-        margin: 3px 0;
-    }
-    .treatment-dilution {
-        color: #fed7aa;
-        font-size: 0.9rem;
-        margin: 3px 0;
+    .creator-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.2);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(20, 184, 166, 0.2));
     }
 
-    /* Badges */
-    .severity-badge {
-        display: inline-block;
-        padding: 7px 14px;
-        border-radius: 999px;
-        font-weight: 600;
-        font-size: 0.85rem;
+    /* Glass Cards */
+    .feature-card { 
+        background: rgba(30, 41, 59, 0.6); 
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.35);
+        color: #f8fafc; 
+        padding: 18px 20px; 
+        border-radius: 16px; 
+        text-align: center; 
+        font-weight: 600; 
+        font-size: 1.05rem; 
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); 
+        transition: all 0.3s ease; 
+        border: 1px solid rgba(255, 255, 255, 0.05); 
     }
-    .severity-healthy { background-color: rgba(22,163,74,0.28); color: #bbf7d0; }
-    .severity-mild { background-color: rgba(56,189,248,0.28); color: #e0f2fe; }
-    .severity-moderate { background-color: rgba(251,191,36,0.28); color: #fef9c3; }
-    .severity-severe { background-color: rgba(248,113,113,0.32); color: #fee2e2; }
+    .feature-card:hover { 
+        transform: translateY(-5px); 
+        border-color: rgba(52, 211, 153, 0.4);
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.15); 
+    }
+    
+    /* Containers */
+    .upload-container, .result-container { 
+        background: rgba(15, 23, 42, 0.6); 
+        backdrop-filter: blur(12px);
+        padding: 30px; 
+        border-radius: 20px; 
+        border: 1px dashed rgba(52, 211, 153, 0.3); 
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
+        margin: 20px 0; 
+    }
+    .result-container { border: 1px solid rgba(255, 255, 255, 0.05); }
 
-    .type-badge {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 999px;
-        font-weight: 600;
-        font-size: 0.80rem;
-        margin: 4px 4px 4px 0;
-        border: 1px solid rgba(148,163,184,0.8);
-        backdrop-filter: blur(8px);
+    /* Disease Alerts */
+    .disease-header { 
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05)); 
+        color: #f8fafc; 
+        padding: 30px; 
+        border-radius: 16px; 
+        margin-bottom: 25px; 
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); 
+        border: 1px solid rgba(239, 68, 68, 0.2); 
     }
-    .type-fungal { background-color: rgba(129,140,248,0.18); color: #c7d2fe; }
-    .type-bacterial { background-color: rgba(56,189,248,0.18); color: #bae6fd; }
-    .type-viral { background-color: rgba(248,113,113,0.18); color: #fecaca; }
-    .type-pest { background-color: rgba(251,191,36,0.18); color: #fef3c7; }
-    .type-nutrient, .type-healthy { background-color: rgba(34,197,94,0.20); color: #bbf7d0; }
-
-    /* Status boxes */
-    .debug-box {
-        background: #020617;
-        border: 1px solid rgba(148,163,184,0.6);
-        border-radius: 10px;
-        padding: 12px;
-        margin: 8px 0;
-        font-family: "JetBrains Mono", monospace;
-        font-size: 0.85rem;
-        max-height: 320px;
-        overflow-y: auto;
-        color: #cbd5f5;
-        white-space: pre-wrap;
+    .disease-name { font-size: 2.5rem; font-weight: 800; margin-bottom: 15px; color: #f8fafc;}
+    .disease-meta { display: flex; gap: 15px; flex-wrap: wrap; }
+    
+    /* Info Blocks */
+    .info-section { 
+        background: rgba(30, 41, 59, 0.4); 
+        border-left: 4px solid #10b981; 
+        padding: 24px; 
+        border-radius: 0 16px 16px 0; 
+        margin: 15px 0; 
+        border-top: 1px solid rgba(255,255,255,0.03);
+        border-right: 1px solid rgba(255,255,255,0.03);
+        border-bottom: 1px solid rgba(255,255,255,0.03);
     }
-    .warning-box {
-        background: linear-gradient(135deg, rgba(245,158,11,0.16), rgba(17,24,39,0.98));
-        border: 1px solid rgba(251,191,36,0.7);
-        border-radius: 12px;
-        padding: 12px 14px;
-        margin: 10px 0;
-        color: #fef9c3;
-        font-size: 0.98rem;
+    .info-title { font-size: 1.3rem; font-weight: 700; color: #34d399; margin-bottom: 15px; }
+    
+    .cost-info, .treatment-item { 
+        background: rgba(15, 23, 42, 0.5); 
+        border-radius: 12px; 
+        padding: 16px; 
+        margin: 12px 0; 
+        border: 1px solid rgba(255,255,255,0.05);
     }
-    .success-box {
-        background: linear-gradient(135deg, rgba(34,197,94,0.16), rgba(15,23,42,0.98));
-        border: 1px solid rgba(34,197,94,0.7);
-        border-radius: 12px;
-        padding: 12px 14px;
-        margin: 10px 0;
-        color: #bbf7d0;
-        font-size: 0.98rem;
-    }
-    .error-box {
-        background: linear-gradient(135deg, rgba(248,113,113,0.20), rgba(15,23,42,0.98));
-        border: 1px solid rgba(248,113,113,0.8);
-        border-radius: 12px;
-        padding: 12px 14px;
-        margin: 10px 0;
-        color: #fee2e2;
-        font-size: 0.98rem;
-    }
-
-    /* Buttons */
-    .stButton > button {
-        background: linear-gradient(135deg, #22c55e, #16a34a, #0ea5e9) !important;
-        color: white !important;
-        border: 1px solid rgba(148,163,184,0.5) !important;
-        padding: 10px 26px !important;
-        font-weight: 600 !important;
-        font-size: 1rem !important;
-        border-radius: 999px !important;
-        box-shadow: 0 12px 30px rgba(34,197,94,0.55) !important;
-    }
-    .stButton > button:hover {
-        transform: translateY(-2px) scale(1.01);
-        box-shadow: 0 16px 40px rgba(56,189,248,0.7) !important;
-    }
-
-    /* Sidebar */
-    [data-testid="stSidebar"] {
-        background: radial-gradient(circle at top, #020617 0, #020617 45%, #020617 100%);
-        border-right: 1px solid rgba(30,64,175,0.6);
-    }
-
-    /* Metrics */
-    [data-testid="metric-container"] {
-        background: radial-gradient(circle at top left, rgba(15,23,42,0.96), rgba(15,23,42,1));
-        border: 1px solid rgba(148,163,184,0.7);
-        border-radius: 14px;
-        padding: 8px 6px;
-    }
-
-    /* Expander */
-    [data-testid="stExpander"] {
-        background: radial-gradient(circle at top left, rgba(15,23,42,0.96), rgba(15,23,42,1));
-        border: 1px solid rgba(148,163,184,0.6);
-        border-radius: 12px;
-    }
-    .streamlit-expanderHeader {
-        color: #bfdbfe !important;
-        font-size: 0.98rem !important;
-    }
-
-    /* Form controls */
-    input, textarea, select {
-        background: radial-gradient(circle at top left, rgba(15,23,42,0.98), rgba(15,23,42,1)) !important;
-        border: 1px solid rgba(148,163,184,0.6) !important;
-        color: #e5f4ec !important;
-        font-size: 0.98rem !important;
-        border-radius: 10px !important;
-    }
-    input:focus, textarea:focus, select:focus {
-        border-color: #22c55e !important;
-        box-shadow: 0 0 0 1px rgba(34,197,94,0.6) !important;
-    }
-
-    /* Headings */
-    h2, h3, h4 {
-        font-size: 1.2rem !important;
-        color: #bfdbfe !important;
-        letter-spacing: 0.06em;
+    .treatment-name { font-weight: 700; color: #f8fafc; font-size: 1.1rem; margin-bottom: 6px; }
+    .treatment-quantity { color: #6ee7b7; font-weight: 500; margin: 4px 0; font-size: 0.95rem; }
+    .treatment-dilution { color: #fbbf24; font-size: 0.9rem; margin: 4px 0; }
+    
+    /* Badges */
+    .severity-badge, .type-badge { 
+        padding: 8px 18px; 
+        border-radius: 30px; 
+        font-weight: 600; 
+        font-size: 0.9rem; 
+        letter-spacing: 0.5px;
         text-transform: uppercase;
     }
+    .severity-healthy { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .severity-mild { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .severity-moderate { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .severity-severe { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    
+    .type-fungal { background: rgba(167, 139, 250, 0.15); color: #a78bfa; border: 1px solid rgba(167, 139, 250, 0.3); }
+    .type-bacterial { background: rgba(96, 165, 250, 0.15); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); }
+    .type-viral { background: rgba(244, 114, 182, 0.15); color: #f472b6; border: 1px solid rgba(244, 114, 182, 0.3); }
+    .type-pest { background: rgba(251, 146, 60, 0.15); color: #fb923c; border: 1px solid rgba(251, 146, 60, 0.3); }
+    .type-nutrient { background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+    .type-healthy { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    
+    /* Alert Boxes */
+    .warning-box { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 16px; margin: 12px 0; color: #fcd34d; }
+    .success-box { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 16px; margin: 12px 0; color: #6ee7b7; }
+    .error-box { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 16px; margin: 12px 0; color: #fca5a5; }
+    .debug-box { background: #020617; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; color: #94a3b8; font-family: monospace; font-size: 0.9rem; }
 
-    /* Scrollbars */
+    /* Primary Buttons */
+    .stButton > button { 
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; 
+        color: white !important;
+        border: none !important; 
+        padding: 12px 30px !important; 
+        font-weight: 600 !important; 
+        font-size: 1.1rem !important;
+        border-radius: 12px !important; 
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important; 
+        transition: all 0.3s ease !important;
+    }
+    .stButton > button:hover { 
+        transform: translateY(-2px) !important; 
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5) !important; 
+    }
+    
+    /* Components */
+    .image-container { border-radius: 16px; overflow: hidden; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.1); }
+    .tips-card { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 16px; margin: 10px 0; }
+    .tips-card-title { font-weight: 700; color: #34d399; margin-bottom: 8px; font-size: 1.1rem; }
+    
+    [data-testid="stSidebar"] { background: rgba(15, 23, 42, 0.8) !important; backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.05); }
+    [data-testid="metric-container"] { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; }
+    [data-testid="stExpander"] { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; }
+    .streamlit-expanderHeader { color: #f8fafc !important; font-size: 1.1rem !important; font-weight: 500 !important;}
+    
+    input, textarea, select { 
+        background: rgba(15, 23, 42, 0.6) !important; 
+        border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+        color: #f8fafc !important; 
+        border-radius: 8px !important;
+    }
+    input:focus, textarea:focus, select:focus { border-color: #10b981 !important; }
+    
+    h2, h3, h4 { color: #f8fafc !important; font-weight: 700 !important; }
+    
+    /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #020617; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-
-    /* Page headers (for subpages) */
-    .page-header {
-        background: radial-gradient(circle at top left, rgba(34,197,94,0.18), rgba(15,23,42,0.98));
-        padding: 24px 18px;
-        border-radius: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 16px 40px rgba(15,23,42,0.8);
-        border: 1px solid rgba(148,163,184,0.7);
-    }
-    .page-title {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #f9fafb;
-        text-align: center;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-    }
-    .page-subtitle {
-        font-size: 0.98rem;
-        color: #cbd5f5;
-        text-align: center;
-        margin-top: 6px;
-    }
-
-    /* Stats */
-    .stat-box {
-        background: radial-gradient(circle at top, rgba(15,23,42,0.98), rgba(15,23,42,1));
-        border: 1px solid rgba(148,163,184,0.7);
-        border-radius: 16px;
-        padding: 16px 10px;
-        margin: 8px 0;
-        text-align: center;
-        box-shadow: 0 12px 32px rgba(15,23,42,0.9);
-    }
-    .stat-value {
-        font-size: 1.6rem;
-        font-weight: 700;
-        color: #22c55e;
-        margin: 4px 0;
-    }
-    .stat-label {
-        font-size: 0.9rem;
-        color: #cbd5f5;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-    }
-
-    /* Crop rotation + Kisan cards */
-    .rotation-card {
-        background: radial-gradient(circle at top left, rgba(15,23,42,0.96), rgba(15,23,42,1));
-        border: 1px solid rgba(148,163,184,0.7);
-        border-radius: 16px;
-        padding: 18px 16px;
-        margin: 12px 0;
-        box-shadow: 0 14px 36px rgba(15,23,42,0.9);
-    }
-    .rotation-year {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #38bdf8;
-        margin-bottom: 6px;
-    }
-    .crop-name {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #22c55e;
-        margin: 8px 0;
-    }
-    .crop-description {
-        font-size: 0.94rem;
-        color: #cbd5f5;
-        line-height: 1.6;
-    }
-
-    .kisan-response-box {
-        background: radial-gradient(circle at top left, rgba(15,23,42,0.98), rgba(15,23,42,1));
-        border: 1px solid rgba(148,163,184,0.7);
-        border-radius: 18px;
-        padding: 20px 18px;
-        margin: 16px 0;
-        font-size: 1.05rem;
-        line-height: 1.75;
-        color: #e5f4ec;
-        box-shadow: 0 16px 40px rgba(15,23,42,0.9);
-    }
-
-    .chatbot-container {
-        background: radial-gradient(circle at top left, rgba(15,23,42,0.98), rgba(15,23,42,1));
-        border: 1px solid rgba(148,163,184,0.7);
-        border-radius: 14px;
-        padding: 14px;
-        margin: 14px 0;
-        max-height: 460px;
-        overflow-y: auto;
-    }
-    .chat-message {
-        background: linear-gradient(135deg, rgba(15,23,42,1), rgba(30,64,175,0.45));
-        border-left: 4px solid #22c55e;
-        padding: 10px 12px;
-        margin: 6px 0;
-        border-radius: 10px;
-        font-size: 0.95rem;
-        color: #e5f4ec;
-    }
-
-    /* Images */
-    .image-container {
-        border-radius: 14px;
-        overflow: hidden;
-        box-shadow: 0 14px 36px rgba(15,23,42,0.9);
-        border: 1px solid rgba(148,163,184,0.7);
-    }
-
-    /* Tips */
-    .tips-card {
-        background: radial-gradient(circle at top left, rgba(15,23,42,0.98), rgba(15,23,42,1));
-        border: 1px solid rgba(56,189,248,0.7);
-        border-radius: 12px;
-        padding: 12px 14px;
-        margin: 10px 0;
-    }
-    .tips-card-title {
-        font-weight: 600;
-        color: #bfdbfe;
-        margin-bottom: 6px;
-        font-size: 1rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-    }
+    ::-webkit-scrollbar-thumb { background: rgba(52, 211, 153, 0.5); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #10b981; }
+    
+    /* Chat & Others */
+    .chatbot-container { background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 20px; max-height: 500px; overflow-y: auto; }
+    .chat-message { background: rgba(30, 41, 59, 0.6); border-left: 3px solid #10b981; padding: 16px; margin: 10px 0; border-radius: 0 12px 12px 0; font-size: 1rem; color: #e2e8f0; }
+    
+    .page-header { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(16px); padding: 30px 20px; border-radius: 20px; margin-bottom: 30px; border: 1px solid rgba(52, 211, 153, 0.15); text-align: center; }
+    .page-title { font-size: 2.5rem; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; }
+    .page-subtitle { font-size: 1.1rem; color: #94a3b8; margin-top: 8px; }
+    
+    .stat-box { background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 16px; padding: 20px; margin: 10px 0; text-align: center; transition: all 0.3s ease; }
+    .stat-box:hover { background: rgba(16, 185, 129, 0.1); transform: translateY(-3px); }
+    .stat-value { font-size: 2rem; font-weight: 800; color: #34d399; margin: 8px 0; }
+    .stat-label { font-size: 1rem; color: #94a3b8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    .rotation-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 24px; margin: 15px 0; transition: all 0.3s ease;}
+    .rotation-card:hover { border-color: rgba(52, 211, 153, 0.3); transform: translateY(-3px); }
+    .rotation-year { font-size: 1.1rem; font-weight: 700; color: #34d399; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+    .crop-name { font-size: 1.5rem; font-weight: 700; color: #f8fafc; margin: 8px 0; }
+    .crop-description { font-size: 1rem; color: #cbd5e1; margin-top: 12px; line-height: 1.6; }
+    
+    .kisan-response-box { background: rgba(16, 185, 129, 0.05); border-left: 4px solid #10b981; border-radius: 0 16px 16px 0; padding: 25px; margin: 20px 0; font-size: 1.15rem; line-height: 1.8; color: #e2e8f0; font-weight: 400; }
 </style>
 """,
     unsafe_allow_html=True,
@@ -743,12 +518,10 @@ except Exception:
 
 EXPERT_PROMPT_TEMPLATE = """You are an elite plant pathologist with 40 years of specialized experience diagnosing diseases in {plant_type}.
 You are an expert specifically in {plant_type} diseases and health issues.
-
 SPECIALIZED ANALYSIS FOR: {plant_type}
 Common diseases in {plant_type}: {common_diseases}
 
 Your task is to provide the MOST ACCURATE diagnosis specifically for {plant_type}.
-
 CRITICAL RULES:
 1. RESPOND ONLY WITH VALID JSON - NO markdown, NO explanations
 2. Use your specialized knowledge of {plant_type}
@@ -829,6 +602,7 @@ def get_severity_badge_class(severity):
 def get_treatment_cost(treatment_type, treatment_name):
     costs = TREATMENT_COSTS.get(treatment_type, {})
     treatment_name_lower = treatment_name.lower()
+    
     for key, value in costs.items():
         if key.lower() == treatment_name_lower:
             return value["cost"] if isinstance(value, dict) else value
@@ -975,8 +749,8 @@ def render_treatment_selection_ui(
         <div class="cost-info" style="margin-top: 10px;">
             Selected: <b>{selected_name}</b> ({treatment_type_choice})<br>
             Quantity guideline: {quantity}<br>
-            Estimated total treatment cost for {infected_plants} plants: <b>Rs {total_cost}</b><br>
-            <span style="font-size:0.9rem; color:#b0c4ff;">
+            Estimated total treatment cost for {infected_plants} plants: <b style="color: #34d399;">Rs {total_cost}</b><br>
+            <span style="font-size:0.9rem; color:#94a3b8;">
                 This is based on typical Indian retail prices and standard doses
                 for about 100 plants.
             </span>
@@ -1078,7 +852,7 @@ def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_coun
                     <div class="treatment-name">💊 {t_name}</div>
                     <div class="treatment-quantity">Quantity: {quantity}</div>
                     <div class="treatment-dilution">Dilution: {dilution}</div>
-                    <div class="cost-info" style="margin-top: 8px; border-left: 5px solid #81c784;">
+                    <div class="cost-info" style="margin-top: 8px; border-left: 3px solid #34d399;">
                         Cost: Rs {cost}
                     </div>
                 </div>
@@ -1108,7 +882,7 @@ def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_coun
                     <div class="treatment-name">⚗️ {t_name}</div>
                     <div class="treatment-quantity">Quantity: {quantity}</div>
                     <div class="treatment-dilution">Dilution: {dilution}</div>
-                    <div class="cost-info" style="margin-top: 8px; border-left: 5px solid #64b5f6;">
+                    <div class="cost-info" style="margin-top: 8px; border-left: 3px solid #60a5fa;">
                         Cost: Rs {cost}
                     </div>
                 </div>
@@ -1293,7 +1067,8 @@ def get_manual_rotation_plan(plant_name):
         model = genai.GenerativeModel("gemini-2.5-flash")
     except Exception:
         return None
-    prompt = f"""You are an agricultural expert with deep knowledge of crop rotation and soil health. For the plant: {plant_name}
+    prompt = f"""You are an agricultural expert with deep knowledge of crop rotation and soil health.
+For the plant: {plant_name}
 Provide ONLY a valid JSON response in this exact format (no markdown, no explanations, no code blocks):
 {{"rotations": ["Crop1", "Crop2", "Crop3"], "info": {{"{plant_name}": "Detailed info about {plant_name}", "Crop1": "Why good after {plant_name}", "Crop2": "Why follows Crop1", "Crop3": "Why completes cycle"}}}}"""
     try:
@@ -1350,24 +1125,9 @@ def get_farmer_bot_response(user_question, diagnosis_context=None):
 st.markdown(
     """
     <div class="header-container">
-        <div class="header-title">🌿 AI Plant Doctor - Smart Edition</div>
-        <div style="display:flex; justify-content:center; margin-bottom:8px;">
-            <div style="
-                padding:4px 12px;
-                border-radius:999px;
-                border:1px solid rgba(148,163,184,0.7);
-                font-size:0.78rem;
-                letter-spacing:0.16em;
-                text-transform:uppercase;
-                color:#cbd5f5;
-                background:rgba(15,23,42,0.85);
-            ">
-                Built by Sudhin • Powered by Gemini
-            </div>
-        </div>
-        <div class="header-subtitle">
-            Diagnose plant diseases, compare organic vs chemical treatments, and plan smart crop rotations with AI.
-        </div>
+        <div class="header-title">🌿 AI Plant Doctor <span style="color: #34d399; font-weight: 300;">| Smart Edition</span></div>
+        <div class="header-subtitle">Advanced Crop Disease Diagnosis & Treatment</div>
+        <div class="creator-badge">✨ Built by Sudhin • Powered by Gemini</div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -1379,7 +1139,7 @@ with col1:
 with col2:
     st.markdown('<div class="feature-card">🎯 Disease Detection</div>', unsafe_allow_html=True)
 with col3:
-    st.markdown('<div class="feature-card">🔬 Expert</div>', unsafe_allow_html=True)
+    st.markdown('<div class="feature-card">🔬 Expert Analysis</div>', unsafe_allow_html=True)
 with col4:
     st.markdown('<div class="feature-card">🚀 95%+ Accurate</div>', unsafe_allow_html=True)
 
@@ -1635,15 +1395,14 @@ elif page == "KisanAI Assistant":
         for msg in st.session_state.farmer_bot_messages[-20:]:
             if msg["role"] == "farmer":
                 st.markdown(
-                    f'<div class="chat-message"><b>👨 You:</b> {msg["content"]}</div>',
-                    unsafe_allow_html=True,
+                    f'<div class="chat-message" style="border-left: 3px solid #60a5fa;"><b>👨 You:</b> {msg["content"]}</div>',
+                unsafe_allow_html=True,
                 )
             else:
                 st.markdown(
                     f'<div class="chat-message"><b>🤖 KisanAI:</b> {msg["content"]}</div>',
                     unsafe_allow_html=True,
                 )
-    # FIXED: markmarkdown -> markdown
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1772,7 +1531,7 @@ elif page == "Crop Rotation Advisor":
             )
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
-            """<div class="stat-box"><div style="font-size: 1.2rem; color: #667eea; font-weight: 600;">✅ Benefits of Rotation</div><div style="margin-top: 15px; color: #b0c4ff; font-size: 1rem;">• 60-80% reduction in pathogen buildup<br>• Improved soil health and structure<br>• Lower chemical input costs<br>• More resilient farming system<br>• Enhanced biodiversity</div></div>""",
+            """<div class="stat-box"><div style="font-size: 1.2rem; color: #34d399; font-weight: 700;">✅ Benefits of Rotation</div><div style="margin-top: 15px; color: #cbd5e1; font-size: 1.05rem; line-height: 1.8;">• 60-80% reduction in pathogen buildup<br>• Improved soil health and structure<br>• Lower chemical input costs<br>• More resilient farming system<br>• Enhanced biodiversity</div></div>""",
             unsafe_allow_html=True,
         )
 
@@ -1902,7 +1661,7 @@ else:
         col_loss1, col_loss2, col_loss3 = st.columns(3)
         with col_loss1:
             st.markdown(
-                f"""<div class="stat-box"><div class="stat-label">Loss Percentage (%)</div><div class="stat-value" style="color: #ff6b6b;">{auto_loss_percentage}%</div></div>""",
+                f"""<div class="stat-box"><div class="stat-label">Loss Percentage (%)</div><div class="stat-value" style="color: #f87171;">{auto_loss_percentage}%</div></div>""",
                 unsafe_allow_html=True,
             )
         with col_loss2:
@@ -1914,7 +1673,7 @@ else:
             )
         with col_loss3:
             st.markdown(
-                f"""<div class="stat-box"><div class="stat-label">Potential Loss</div><div class="stat-value" style="color: #ff6b6b;">Rs {potential_loss_value:,}</div></div>""",
+                f"""<div class="stat-box"><div class="stat-label">Potential Loss</div><div class="stat-value" style="color: #f87171;">Rs {potential_loss_value:,}</div></div>""",
                 unsafe_allow_html=True,
             )
 
@@ -1962,7 +1721,7 @@ else:
                 )
             with result_col2:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">Loss Prevention ({analysis['loss_percentage']}%)</div><div class="stat-value" style="color: #4caf50;">Rs {analysis['loss_prevented']:,}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">Loss Prevention ({analysis['loss_percentage']}%)</div><div class="stat-value" style="color: #34d399;">Rs {analysis['loss_prevented']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
             with result_col3:
@@ -1979,12 +1738,12 @@ else:
             comp_col1, comp_col2 = st.columns(2)
             with comp_col1:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">Organic ROI</div><div class="stat-value" style="color: #81c784;">{analysis['org_roi']}%</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Total Cost: Rs {analysis['total_organic_cost']:,}<br>Net Benefit: Rs {analysis['organic_net']:,}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">Organic ROI</div><div class="stat-value" style="color: #34d399;">{analysis['org_roi']}%</div><div style="margin-top: 10px; color: #94a3b8; font-size: 0.95rem;">Total Cost: Rs {analysis['total_organic_cost']:,}<br>Net Benefit: Rs {analysis['organic_net']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
             with comp_col2:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">Chemical ROI</div><div class="stat-value" style="color: #64b5f6;">{analysis['chem_roi']}%</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Total Cost: Rs {analysis['total_chemical_cost']:,}<br>Net Benefit: Rs {analysis['chemical_net']:,}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">Chemical ROI</div><div class="stat-value" style="color: #60a5fa;">{analysis['chem_roi']}%</div><div style="margin-top: 10px; color: #94a3b8; font-size: 0.95rem;">Total Cost: Rs {analysis['total_chemical_cost']:,}<br>Net Benefit: Rs {analysis['chemical_net']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
 
@@ -2006,28 +1765,28 @@ else:
             profit_col1, profit_col2 = st.columns(2)
             with profit_col1:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">🌱 Organic Net Profit</div><div class="stat-value" style="color: #81c784;">Rs {net_profit_org:,}</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Loss Prevented: Rs {analysis['loss_prevented']:,}<br>Total Treatment: Rs {analysis['total_organic_cost']:,}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">🌱 Organic Net Profit</div><div class="stat-value" style="color: #34d399;">Rs {net_profit_org:,}</div><div style="margin-top: 10px; color: #94a3b8; font-size: 0.95rem;">Loss Prevented: Rs {analysis['loss_prevented']:,}<br>Total Treatment: Rs {analysis['total_organic_cost']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
             with profit_col2:
                 st.markdown(
-                    f"""<div class="stat-box"><div class="stat-label">💊 Chemical Net Profit</div><div class="stat-value" style="color: #64b5f6;">Rs {net_profit_chem:,}</div><div style="margin-top: 10px; color: #b0c4ff; font-size: 0.9rem;">Loss Prevented: Rs {analysis['loss_prevented']:,}<br>Total Treatment: Rs {analysis['total_chemical_cost']:,}</div></div>""",
+                    f"""<div class="stat-box"><div class="stat-label">💊 Chemical Net Profit</div><div class="stat-value" style="color: #60a5fa;">Rs {net_profit_chem:,}</div><div style="margin-top: 10px; color: #94a3b8; font-size: 0.95rem;">Loss Prevented: Rs {analysis['loss_prevented']:,}<br>Total Treatment: Rs {analysis['total_chemical_cost']:,}</div></div>""",
                     unsafe_allow_html=True,
                 )
 
             st.markdown("<br>", unsafe_allow_html=True)
             if analysis["org_roi"] > analysis["chem_roi"]:
                 st.markdown(
-                    f"""<div class="success-box">✅ Organic treatment provides better ROI ({analysis['org_roi']}% vs {analysis['chem_roi']}%)! Invest in organic methods for sustainable farming and long-term soil health.</div>""",
+                    f"""<div class="success-box">✅ <b>Organic treatment provides better ROI ({analysis['org_roi']}% vs {analysis['chem_roi']}%)!</b> Invest in organic methods for sustainable farming and long-term soil health.</div>""",
                     unsafe_allow_html=True,
                 )
             elif analysis["chem_roi"] > analysis["org_roi"]:
                 st.markdown(
-                    f"""<div class="success-box">✅ Chemical treatment offers higher immediate ROI ({analysis['chem_roi']}% vs {analysis['org_roi']}%), but consider organic for long-term sustainability and soil preservation.</div>""",
+                    f"""<div class="success-box" style="color: #60a5fa; border-color: rgba(96, 165, 250, 0.3); background: rgba(96, 165, 250, 0.1);">✅ <b>Chemical treatment offers higher immediate ROI ({analysis['chem_roi']}% vs {analysis['org_roi']}%)</b>, but consider organic for long-term sustainability and soil preservation.</div>""",
                     unsafe_allow_html=True,
                 )
             else:
                 st.markdown(
-                    """<div class="success-box">✅ Both treatments have similar ROI. Choose based on your farming preference and long-term sustainability goals.</div>""",
+                    """<div class="success-box">✅ <b>Both treatments have similar ROI.</b> Choose based on your farming preference and long-term sustainability goals.</div>""",
                     unsafe_allow_html=True,
                 )
