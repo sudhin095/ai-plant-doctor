@@ -14,11 +14,12 @@ st.set_page_config(
 )
 
 # ============ TREATMENT COSTS & QUANTITIES DATABASE ============
+# ============ TREATMENT COSTS & QUANTITIES DATABASE ============
 
 TREATMENT_COSTS = {
     "organic": {
         "Cow Urine Extract": {
-            "cost": 80,
+            "cost": 80,   # locally prepared / very low-cost input
             "quantity": "2-3 liters per 100 plants",
             "dilution": "1:5 with water",
         },
@@ -38,6 +39,7 @@ TREATMENT_COSTS = {
             "dilution": "1:10 with water",
         },
         "Neem Oil Spray": {
+            # ~₹340–550 per liter retail; 500 ml ≈ ₹170–275
             "cost": 250,
             "quantity": "500ml per 100 plants",
             "dilution": "3% solution - 5ml per liter",
@@ -77,23 +79,28 @@ TREATMENT_COSTS = {
             "quantity": "500g per 100 plants",
             "dilution": "0.5% solution - 5g per liter",
         },
+        # Spinosad is a bio‑insecticide; market price for 100 ml is ~₹1,900–2,000
         "Spinosad": {
             "cost": 2000,
             "quantity": "100ml per 100 plants",
             "dilution": "0.02% solution - 0.2ml per liter",
         },
+        # Added: seaweed extract as a common organic biostimulant
         "Seaweed Extract": {
+            # 500 ml pack ≈ ₹500–530; assuming ~250 ml per 100 plants
             "cost": 260,
             "quantity": "250ml per 100 plants",
             "dilution": "0.3% solution - 3ml per liter",
         },
     },
     "chemical": {
+        # Bavistin / Carbendazim 50% WP: 100 g ≈ ₹90–140
         "Carbendazim (Bavistin)": {
             "cost": 120,
             "quantity": "100g per 100 plants",
             "dilution": "0.1% solution - 1g per liter",
         },
+        # Indofil M-45 (Mancozeb 75% WP): 100 g ≈ ₹75; 500 g ≈ ₹279
         "Mancozeb (Indofil)": {
             "cost": 120,
             "quantity": "150g per 100 plants",
@@ -119,6 +126,7 @@ TREATMENT_COSTS = {
             "quantity": "50ml per 100 plants",
             "dilution": "0.005% solution - 0.05ml per liter",
         },
+        # Confidor (Imidacloprid 17.8% SL): 100 ml ≈ ₹300–380
         "Imidacloprid (Confidor)": {
             "cost": 350,
             "quantity": "80ml per 100 plants",
@@ -139,6 +147,7 @@ TREATMENT_COSTS = {
             "quantity": "100g per 100 plants",
             "dilution": "0.04% solution - 0.4g per liter",
         },
+        # Amistar / Amistar Top: 100 ml ≈ ₹560–700
         "Azoxystrobin (Amistar)": {
             "cost": 650,
             "quantity": "80ml per 100 plants",
@@ -154,12 +163,16 @@ TREATMENT_COSTS = {
             "quantity": "200ml per 100 plants",
             "dilution": "0.3% solution - 3ml per liter",
         },
+        # Added: Ridomil Gold (Metalaxyl + Mancozeb)
         "Metalaxyl + Mancozeb (Ridomil Gold)": {
+            # 100 g pack ≈ ₹180–190
             "cost": 190,
             "quantity": "100g per 100 plants",
             "dilution": "0.25% solution - 2.5g per liter",
         },
+        # Added: Tilt (Propiconazole 25% EC)
         "Propiconazole (Tilt)": {
+            # 100 ml ≈ ₹190; 250 ml ≈ ₹390
             "cost": 190,
             "quantity": "100ml per 100 plants",
             "dilution": "0.1% solution - 1ml per liter",
@@ -168,7 +181,6 @@ TREATMENT_COSTS = {
 }
 
 # ============ CROP ROTATION DATABASE ============
-
 CROP_ROTATION_DATA = {
     "Tomato": {
         "rotations": ["Beans", "Cabbage", "Cucumber"],
@@ -267,7 +279,6 @@ SOIL_TYPES = ["Black Soil", "Red Soil", "Laterite Soil", "Alluvial Soil", "Clay 
 MARKET_FOCUS = ["Stable essentials", "High-value cash crops", "Low input / low risk"]
 
 # ============ GLOBAL STYLES ============
-
 st.markdown(
     """
 <style>
@@ -342,7 +353,6 @@ st.markdown(
 )
 
 # ============ GEMINI CONFIG ============
-
 try:
     genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 except Exception:
@@ -366,7 +376,7 @@ CRITICAL RULES:
 6. Discount diseases that don't typically affect {plant_type}
 
 RESPOND WITH EXACTLY THIS JSON:
-{
+{{
   "plant_species": "{plant_type}",
   "disease_name": "Specific disease name or Unable to diagnose",
   "disease_type": "fungal/bacterial/viral/pest/nutrient/environmental/healthy",
@@ -379,11 +389,10 @@ RESPOND WITH EXACTLY THIS JSON:
   "probable_causes": ["Primary cause relevant to {plant_type}", "Secondary cause", "Environmental factor"],
   "immediate_action": ["Action 1: Specific to {plant_type}", "Action 2: Specific to {plant_type}", "Action 3: Specific to {plant_type}"],
   "organic_treatments": ["Treatment 1: Product and application for {plant_type}", "Treatment 2: Alternative for {plant_type}"],
-  "prevention_long_term": ["Prevention strategy 1 for {plant_type}", "Prevention strategy 2 for {plant_type}", "Resistant varieties: If available for {plant_type}"],
+   "prevention_long_term": ["Prevention strategy 1 for {plant_type}", "Prevention strategy 2 for {plant_type}", "Resistant varieties: If available for {plant_type}"],
   "plant_specific_notes": "Important notes specific to {plant_type} care and disease management",
   "similar_conditions": "Other {plant_type} conditions that look similar"
-}
-"""
+}}"""
 
 PLANT_COMMON_DISEASES = {
     "Tomato": "Early blight, Late blight, Septoria leaf spot, Fusarium wilt, Bacterial wilt, Spider mites, Powdery mildew",
@@ -557,10 +566,13 @@ def render_treatment_selection_ui(
     quantity = info.get("quantity", "As per package")
 
     base_plants = 100
-    if infected_plants <= base_plants:
-        total_cost = int(round(unit_cost))
-    else:
-        total_cost = int(round(unit_cost * infected_plants / base_plants))
+    total_cost = int(round(unit_cost * infected_plants / base_plants))
+    buying_total_cost = unit_cost + total_cost
+
+    is_buying = st.checkbox(
+        "I am buying this treatment product (pack/bottle/etc.)",
+        key="cost_calc_is_buying",
+    )
 
     st.session_state.treatment_selection = {
         "plant_type": plant_type,
@@ -572,6 +584,8 @@ def render_treatment_selection_ui(
         "base_plants": base_plants,
         "total_cost": total_cost,
         "quantity": quantity,
+        "buying_total_cost": buying_total_cost,
+        "is_buying": is_buying,
     }
 
     st.markdown(
@@ -580,10 +594,7 @@ def render_treatment_selection_ui(
             Selected: <b>{selected_name}</b> ({treatment_type_choice})<br>
             Quantity guideline: {quantity}<br>
             Estimated total treatment cost for {infected_plants} plants: <b>Rs {total_cost}</b><br>
-            <span style="font-size:0.9rem; color:#b0c4ff;">
-                This is based on typical Indian retail prices and standard doses
-                for about 100 plants.
-            </span>
+            Total treatment cost if you are buying the product: <b>Rs {buying_total_cost}</b>
         </div>
         """,
         unsafe_allow_html=True,
@@ -768,17 +779,23 @@ def calculate_loss_percentage(disease_severity, infected_count, total_plants=100
     Estimate yield loss (%) based on:
     1) Severity band (healthy/mild/moderate/severe) -> typical loss range
     2) Fraction of plants that are infected
+
+    Method:
+    - Map severity to a loss band (literature-style ranges)
+    - Take the midpoint of that band as base_loss
+    - Scale by infected_ratio = infected_count / total_plants
+    - Clamp to [0, 80] to avoid unrealistic extremes
     """
     severity_bands = {
-        "healthy": (0, 2),
-        "mild": (5, 15),
-        "moderate": (20, 40),
-        "severe": (50, 70),
+        "healthy": (0, 2),      # 0–2% loss
+        "mild": (5, 15),        # 5–15% loss
+        "moderate": (20, 40),   # 20–40% loss
+        "severe": (50, 70),     # 50–70% loss
     }
 
     sev = (disease_severity or "moderate").lower()
     low, high = severity_bands.get(sev, severity_bands["moderate"])
-    base_loss = (low + high) / 2.0
+    base_loss = (low + high) / 2.0  # midpoint of the band
 
     if total_plants <= 0:
         infected_ratio = 1.0
@@ -786,6 +803,8 @@ def calculate_loss_percentage(disease_severity, infected_count, total_plants=100
         infected_ratio = max(0.0, min(infected_count / total_plants, 1.0))
 
     loss_percent = base_loss * infected_ratio
+
+    # Clamp to a reasonable range
     loss_percent = max(0.0, min(loss_percent, 80.0))
 
     return int(round(loss_percent))
@@ -808,62 +827,33 @@ def enhance_image_for_analysis(image):
     return image
 
 
-def extract_json_robust(response_text: str):
-    """
-    Try multiple strategies to extract a JSON object from the model response
-    without ever raising an exception.
-    """
+def extract_json_robust(response_text):
     if not response_text:
         return None
-
-    # 1) Best case: response is pure JSON
     try:
         return json.loads(response_text)
     except Exception:
         pass
 
     cleaned = response_text
-
-    # 2) Strip ```json ... ``` or ``` ... ``` code fences if present
     if "```json" in cleaned:
-        parts = cleaned.split("```json", 1)
-        if len(parts) > 1:
-            cleaned = parts[1]
-        if "```" in cleaned:
-            cleaned = cleaned.split("```", 1)[0]
+        cleaned = cleaned.split("```json").split("```")[1]
     elif "```" in cleaned:
-        parts = cleaned.split("```", 1)
-        if len(parts) > 1:
-            cleaned = parts[1]
-        if "```" in cleaned:
-            cleaned = cleaned.split("```", 1)[0]
-
-    cleaned = cleaned.strip()
-
-    # 3) Handle the case where the model starts directly with keys like:
-    #    "plant_species": "Tomato", ...
-    #    i.e., missing the outer { } braces
-    if cleaned.startswith('"plant_species"') or cleaned.startswith("'plant_species'"):
-        cleaned = "{\n" + cleaned
-        if not cleaned.rstrip().endswith("}"):
-            cleaned = cleaned.rstrip().rstrip(",") + "\n}"
+        cleaned = cleaned.split("```")[2].split("```")[0]
 
     try:
-        return json.loads(cleaned)
+        return json.loads(cleaned.strip())
     except Exception:
         pass
 
-    # 4) Fallback: grab the first {...} block anywhere in the text
     match = re.search(r"\{[\s\S]*\}", response_text)
     if match:
-        candidate = match.group(0)
         try:
-            return json.loads(candidate)
+            return json.loads(match.group())
         except Exception:
             pass
-
-    # If nothing worked, return None instead of raising
     return None
+
 
 def validate_json_result(data):
     required_fields = [
@@ -948,7 +938,6 @@ def get_farmer_bot_response(user_question, diagnosis_context=None):
 
 
 # ============ MAIN UI HEADER ============
-
 st.markdown(
     """<div class="header-container"><div class="header-title">🌿 AI Plant Doctor - Smart Edition</div></div>""",
     unsafe_allow_html=True,
@@ -967,7 +956,6 @@ with col4:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ============ SIDEBAR ============
-
 with st.sidebar:
     page = st.radio(
         "📂 Pages",
@@ -982,7 +970,6 @@ with st.sidebar:
         st.write(f"✓ {plant}")
 
 # ============ SESSION STATE DEFAULTS ============
-
 if "last_diagnosis" not in st.session_state:
     st.session_state.last_diagnosis = None
 if "treatment_selection" not in st.session_state:
@@ -1104,7 +1091,7 @@ if page == "AI Plant Doctor":
                     enhance_image_for_analysis(img.copy()) for img in images
                 ]
                 response = model.generate_content([prompt] + enhanced_images)
-                raw_response = response.text or ""
+                raw_response = response.text
 
                 if st.session_state.debug_mode:
                     with st.expander("Raw Response"):
@@ -1226,6 +1213,7 @@ elif page == "KisanAI Assistant":
                     f'<div class="chat-message"><b>🤖 KisanAI:</b> {msg["content"]}</div>',
                     unsafe_allow_html=True,
                 )
+    # FIXED: markmarkdown -> markdown
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1430,7 +1418,11 @@ else:
         )
 
         if selection and isinstance(selection.get("total_cost"), int):
-            use_cost = selection["total_cost"]
+            use_cost = (
+                selection.get("buying_total_cost", selection["total_cost"])
+                if selection.get("is_buying")
+                else selection["total_cost"]
+            )
             if selection["treatment_type"] == "organic":
                 organic_default = use_cost
                 chemical_default = 0
@@ -1572,6 +1564,7 @@ else:
                 unsafe_allow_html=True,
             )
 
+            # If cost is 0, net profit is 0; otherwise total_value - treatment_cost
             net_profit_org = 0
             if analysis["total_organic_cost"] > 0:
                 net_profit_org = analysis["total_value"] - analysis["total_organic_cost"]
