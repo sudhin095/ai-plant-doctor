@@ -1317,10 +1317,10 @@ def translate_report(report_text, language):
             )
             return response.text
         except Exception as e2:
-    if "429" in str(e2) or "quota" in str(e2).lower():
-        return report_text + "\n\n⏳ Translation unavailable right now — rate limit hit. Try again in 60 seconds."
-    return report_text + f"\n\n❌ Translation failed: {str(e2)}"
-    
+            if "429" in str(e2) or "quota" in str(e2).lower():
+                return report_text + "\n\n⏳ Translation unavailable right now — rate limit hit. Try again in 60 seconds."
+        return report_text + f"\n\n❌ Translation failed: {str(e2)}"
+        
 def calculate_loss_percentage(severity, infected_count, total_plants):
     """
     Calculates projected yield loss based on current infection + predicted spread.
