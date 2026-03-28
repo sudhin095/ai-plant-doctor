@@ -1300,14 +1300,24 @@ def translate_report(report_text, language):
     if language == "English":
         return report_text
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         response = model.generate_content(
-            f"Translate this farm report to {language}. Keep all numbers, Rs symbols, and percentages exactly as they are. Only translate the text labels and sentences:\n\n{report_text}"
+            f"Translate this farm report to {language}. "
+            f"Keep all numbers, Rs symbols, % signs, and colons exactly as they are. "
+            f"Only translate the English words and labels:\n\n{report_text}"
         )
         return response.text
-    except Exception:
-        return report_text + "\n\n(Translation failed — showing English version)"
-
+    except Exception as e:
+        try:
+            model = genai.GenerativeModel("gemini-2.5-pro")
+            response = model.generate_content(
+                f"Translate this farm report to {language}. "
+                f"Keep all numbers, Rs symbols, % signs, and colons exactly as they are. "
+                f"Only translate the English words and labels:\n\n{report_text}"
+            )
+            return response.text
+        except Exception as e2:
+            return report_text + f"\n\n(Translation failed: {str(e2)})"
 
 def calculate_loss_percentage(severity, infected_count, total_plants):
     """
