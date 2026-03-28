@@ -1094,6 +1094,7 @@ def render_treatment_selection_ui(
         "base_plants": base_plants,
         "total_cost": total_cost,
         "quantity": quantity,
+        'total_plants': total_plants
     }
 
     st.markdown(
@@ -1284,41 +1285,33 @@ def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_coun
     return organic_total_block, chemical_total_block
 
 
-def calculate_loss_percentage(disease_severity, infected_count, total_plants=100):
+def calculate_smart_loss(severity, infected_count, total_plants):
     """
-    Estimate yield loss (%) based on:
-    1) Severity band (healthy/mild/moderate/severe) -> typical loss range
-    2) Fraction of plants that are infected
-
-    Method:
-    - Map severity to a loss band (literature-style ranges)
-    - Take the midpoint of that band as base_loss
-    - Scale by infected_ratio = infected_count / total_plants
-    - Clamp to [0, 80] to avoid unrealistic extremes
+    Calculates projected yield loss based on current infection + predicted spread.
+    This shows the farmer the true cost of DOING NOTHING.
     """
-    severity_bands = {
-        "healthy": (0, 2),      # 0–2% loss
-        "mild": (5, 15),        # 5–15% loss
-        "moderate": (20, 40),   # 20–40% loss
-        "severe": (50, 70),     # 50–70% loss
+    if total_plants <= 0: return 0
+    
+    # 1. Base Severity (How much yield a sick plant loses)
+    loss_bands = {"healthy": 0.01, "mild": 0.12, "moderate": 0.28, "severe": 0.52}
+    base_loss = loss_bands.get(severity.lower(), 0.28)
+    
+    # 2. Current Infection Ratio
+    current_ratio = min(infected_count / total_plants, 1.0)
+    
+    # 3. The "Do Nothing" Spread Multiplier 
+    spread_multipliers = {
+        "healthy": 1.0,   
+        "mild": 2.5,      
+        "moderate": 5.0,  
+        "severe": 8.5     
     }
-
-    sev = (disease_severity or "moderate").lower()
-    low, high = severity_bands.get(sev, severity_bands["moderate"])
-    base_loss = (low + high) / 2.0  # midpoint of the band
-
-    if total_plants <= 0:
-        infected_ratio = 1.0
-    else:
-        infected_ratio = max(0.0, min(infected_count / total_plants, 1.0))
-
-    loss_percent = base_loss * infected_ratio
-
-    # Clamp to a reasonable range
-    loss_percent = max(0.0, min(loss_percent, 80.0))
-
-    return int(round(loss_percent))
-
+    spread_factor = spread_multipliers.get(severity.lower(), 5.0)
+    
+    # Projected ratio of farm infected if no action is taken
+    projected_ratio = min(current_ratio * spread_factor, 1.0)
+    
+    return base_loss * projected_ratio * 100
 
 def resize_image(image, max_width=600, max_height=500):
     image.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
@@ -2036,24 +2029,39 @@ else:
             )
 
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("📊 Calculate ROI Analysis", use_container_width=True, type="primary"):
-            org_benefit = potential_loss_value - organic_cost_total
+        if st.button("Calculate ROI Analysis", use_container_width=True, type="primary"):
+    
+    # --- Core ROI Math ---
+            org_benefit  = potential_loss_value - organic_cost_total
             chem_benefit = potential_loss_value - chemical_cost_total
+    
+            org_roi  = int(org_benefit  / organic_cost_total  * 100) if organic_cost_total  > 0 else 0
+            chem_roi = int(chem_benefit / chemical_cost_total * 100) if chemical_cost_total > 0 else 0
+
             analysis = {
-                "total_value": total_revenue,
-                "loss_prevented": potential_loss_value,
-                "loss_percentage": auto_loss_percentage,
-                "org_roi": int((org_benefit / organic_cost_total * 100))
-                if organic_cost_total > 0
-                else 0,
-                "chem_roi": int((chem_benefit / chemical_cost_total * 100))
-                if chemical_cost_total > 0
-                else 0,
-                "organic_net": org_benefit,
-                "chemical_net": chem_benefit,
+                "total_value":        total_revenue,
+                "loss_prevented":     potential_loss_value,
+                "loss_percentage":    auto_loss_percentage,
+                "org_roi":            org_roi,
+                "chem_roi":           chem_roi,
+                "organic_net":        org_benefit,
+                "chemical_net":       chem_benefit,
                 "total_organic_cost": organic_cost_total,
-                "total_chemical_cost": chemical_cost_total,
-                "infected_count": infected_count,
+                "total_chemical_cost":chemical_cost_total,
+                "infected_count":     infected_count,
+                
+                # --- NEW: Walk Away Logic ---
+                "do_nothing_loss":    potential_loss_value,   # what farmer loses if untreated
+                "walk_away_org":      potential_loss_value - organic_cost_total,   # net saved by going organic
+                "walk_away_chem":     potential_loss_value - chemical_cost_total,  # net saved by going chemical
+            }
+    
+            st.session_state.cost_roi_result = {
+        "plant_name":           plant_name,
+        "disease_name":         disease_name,
+        "analysis":             analysis,
+        "organic_cost_input":   organic_cost_total,
+        "chemical_cost_input":  chemical_cost_total,
             }
             st.session_state.cost_roi_result = {
                 "plant_name": plant_name,
@@ -2148,3 +2156,18 @@ else:
                     """<div class="success-box">✅ Both treatments have similar ROI. Choose based on your farming preference and long-term sustainability goals.</div>""",
                     unsafe_allow_html=True,
                 )
+            # --- Walk Away Warning ---
+            do_nothing = analysis["do_nothing_loss"]
+            walk_org   = analysis["walk_away_org"]
+            walk_chem  = analysis["walk_away_chem"]
+            
+            if do_nothing > organic_cost_total or do_nothing > chemical_cost_total:
+                st.markdown(f"""
+                <div class="warning-box">
+                    ⚠️ <b>URGENT: Cost of Doing Nothing = ₹{do_nothing:,}</b><br>
+                    If you walk away without treating, your projected crop loss is 
+                    <b>₹{do_nothing:,}</b> — far more than the cost of treatment.<br><br>
+                    🌿 Treating with <b>Organic</b> saves you <b>₹{walk_org:,}</b> net.<br>
+                    🧪 Treating with <b>Chemical</b> saves you <b>₹{walk_chem:,}</b> net.
+                </div>
+                """, unsafe_allow_html=True)
