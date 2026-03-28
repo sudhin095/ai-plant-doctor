@@ -1015,7 +1015,7 @@ def render_treatment_selection_ui(
     )
 
     default_n = max(int(default_infected_count or 1), 1)
- infected_plants = st.number_input(
+infected_plants = st.number_input(
     "Number of infected plants you want to treat (for cost & ROI)",
     min_value=1,
     step=1,
