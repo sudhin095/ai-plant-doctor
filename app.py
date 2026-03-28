@@ -2198,7 +2198,7 @@ else:
                 </div>
                 """, unsafe_allow_html=True)
 
-                              st.markdown("<br>", unsafe_allow_html=True)
+                st.markdown("<br>", unsafe_allow_html=True)
                 report_language = st.selectbox(
                     "🌐 Select Report Language",
                     ["English", "Hindi", "Punjabi", "Marathi", "Telugu", "Tamil", "Kannada", "Bengali"],
