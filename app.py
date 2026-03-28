@@ -1720,9 +1720,9 @@ if page == "AI Plant Doctor":
                         <span style="font-size:0.8rem; color:#aaa;">{str(e)}</span>
                     </div>
                     """, unsafe_allow_html=True)
-progress_placeholder.empty()
+            progress_placeholder.empty()
 
-        st.markdown("<div class='result-container'>", unsafe_allow_html=True)
+            st.markdown("<div class='result-container'>", unsafe_allow_html=True)
 
         organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
             result=diag.get("result", {}),
