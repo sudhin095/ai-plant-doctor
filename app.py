@@ -1706,30 +1706,21 @@ if page == "AI Plant Doctor":
                     }
 
             except Exception as e:
-    if "429" in str(e) or "quota" in str(e).lower() or "rate" in str(e).lower():
-        st.markdown("""
-        <div class="warning-box">
-            ⏳ <b>Too many requests!</b> The AI is taking a short break.<br>
-            Please wait <b>60 seconds</b> and try again. This is temporary.
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.markdown(f"""
-        <div class="error-box">
-            ❌ <b>Analysis Failed.</b> Please try again.<br>
-            <span style="font-size:0.8rem; color:#aaa;">{str(e)}</span>
-        </div>
-        """, unsafe_allow_html=True)               
-        progress_placeholder.empty()
-
-    diag = st.session_state.last_diagnosis
-    if diag:
-        st.markdown(
-            """<div class="success-box">
-                Showing results from your last diagnosis. You can visit other pages while keeping these results.
-            </div>""",
-            unsafe_allow_html=True,
-        )
+                if "429" in str(e) or "quota" in str(e).lower() or "rate" in str(e).lower():
+                    st.markdown("""
+                    <div class="warning-box">
+                        ⏳ <b>Too many requests!</b> The AI is taking a short break.<br>
+                        Please wait <b>60 seconds</b> and try again. This is temporary.
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div class="error-box">
+                        ❌ <b>Analysis Failed.</b> Please try again.<br>
+                        <span style="font-size:0.8rem; color:#aaa;">{str(e)}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+progress_placeholder.empty()
 
         st.markdown("<div class='result-container'>", unsafe_allow_html=True)
 
