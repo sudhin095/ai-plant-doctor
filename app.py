@@ -1001,6 +1001,18 @@ def normalize_treatment_name(raw_name: str) -> str:
         name = name.split(":", 1)[0].strip()
     return name
 
+# ============ LOSS CALCULATION ==========
+def calculate_loss_percentage(disease_severity, infected_count, total_plants=10000):
+    """
+    Smart yield loss %: severity bands scaled by infection ratio
+    healthy: 1% | mild: 12% | moderate: 28% | severe: 52%
+    Ex: moderate + 500/10k plants = 1.4% total loss
+    """
+    rates = {"healthy": 0.01, "mild": 0.12, "moderate": 0.28, "severe": 0.52}
+    base = rates.get(disease_severity.lower(), 0.28)
+    ratio = min(infected_count / total_plants, 1.0)
+    pct = min(base * ratio * 100, 80)
+    return round(pct, 1)    
 
 def render_treatment_selection_ui(
     plant_type: str,
@@ -1920,12 +1932,18 @@ else:
         plant_name = diag.get("plant_type", "Unknown")
         disease_name = diag.get("disease_name", "Unknown")
 
+# Smart inputs for realistic ROI
         selection = st.session_state.treatment_selection
-        if selection and isinstance(selection.get("infected_plants"), int):
-            infected_count = selection["infected_plants"]
-        else:
-            infected_count = diag.get("infected_count", 50)
+        infected_count = selection["infected_plants"] if selection else diag.get("infected_count", 500)
+        total_plants_acre = st.number_input(
+        "Total Plants per Acre", min_value=1000, max_value=50000, 
+        value=10000 if not plant_name else {"Tomato":10000, "Rose":30000}.get(plant_name, 10000),
+        step=1000, help="Tomato=10k, Rose=30k, Cucumber=12k"
+        )
 
+        col_yield, col_price = st.columns(2)
+        yield_kg_acre = st.number_input("Expected Yield (kg/acre)", 5000, 50000, 20000)
+        price_per_kg = st.number_input("Market Price (₹/kg)", 10, 200, 40)
         col_diag1, col_diag2, col_diag3, col_diag4, col_diag5 = st.columns(5)
         with col_diag1:
             st.markdown(
@@ -1981,30 +1999,45 @@ else:
             chemical_default = int(diag.get("chemical_cost", 200) * infected_count)
 
         col_input1, col_input2, col_input3, col_input4 = st.columns(4)
-        with col_input1:
-            organic_cost_total = st.number_input(
-                "Organic Treatment Cost (Rs) - All Plants",
-                value=organic_default,
-                min_value=0,
-                step=100,
-                help=f"Total cost for treating {infected_count} plants",
-            )
-        with col_input2:
-            chemical_cost_total = st.number_input(
-                "Chemical Treatment Cost (Rs) - All Plants",
-                value=chemical_default,
-                min_value=0,
-                step=100,
-                help=f"Total cost for treating {infected_count} plants",
-            )
-        with col_input3:
-            yield_kg = st.number_input(
-                "Expected Yield (kg)", value=1000, min_value=100, step=100
-            )
-        with col_input4:
-            market_price = st.number_input(
-                "Market Price per kg (Rs)", value=40, min_value=1, step=5
-            )
+with col_input1:
+    yield_kg = st.number_input("Expected Yield (kg)", value=1000, min_value=100, step=100)
+with col_input2:
+    market_price = st.number_input("Market Price per kg (₹)", value=40, min_value=1, step=5)
+
+# ========== AUTO LOSS ANALYSIS ==========
+st.markdown(
+    """<div class="info-section"><div class="info-title">Loss Analysis Auto-Calculated</div></div>""",
+    unsafe_allow_html=True,
+)
+
+auto_loss_pct = calculate_loss_percentage(
+    diag.get("severity", "moderate"), infected_count
+)
+
+col1, col2, col3 = st.columns(3)
+total_rev = int(yield_kg * market_price)
+loss_val = int(total_rev * auto_loss_pct / 100)
+
+with col1:
+    st.markdown(
+        f"""<div class="stat-box"><div class="stat-label">Loss %</div>
+        <div class="stat-value" style="color: #ff6b6b">{auto_loss_pct}%</div></div>""",
+        unsafe_allow_html=True,
+    )
+with col2:
+    st.markdown(
+        f"""<div class="stat-box"><div class="stat-label">Total Yield</div>
+        <div class="stat-value">Rs {total_rev:,}</div></div>""",
+        unsafe_allow_html=True,
+    )
+with col3:
+    st.markdown(
+        f"""<div class="stat-box"><div class="stat-label">Potential Loss</div>
+        <div class="stat-value" style="color: #ff6b6b">Rs {loss_val:,}</div></div>""",
+        unsafe_allow_html=True,
+    )
+
+st.markdown("<br>", unsafe_allow_html=True)            )
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
@@ -2024,7 +2057,7 @@ else:
             )
         with col_loss2:
             total_revenue = int(yield_kg * market_price)
-            potential_loss_value = int(total_revenue * (auto_loss_percentage / 100))
+            potential_loss_value = int(total_revenue * auto_loss_pct / 100)
             st.markdown(
                 f"""<div class="stat-box"><div class="stat-label">Total Yield Value</div><div class="stat-value">Rs {total_revenue:,}</div></div>""",
                 unsafe_allow_html=True,
