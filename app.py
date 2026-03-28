@@ -278,124 +278,110 @@ REGIONS = ["North India", "South India", "East India", "West India", "Central In
 SOIL_TYPES = ["Black Soil", "Red Soil", "Laterite Soil", "Alluvial Soil", "Clay Soil"]
 MARKET_FOCUS = ["Stable essentials", "High-value cash crops", "Low input / low risk"]
 
-# ============ GLOBAL STYLES (UPGRADED V3 - ALIVE EDITION) ============
+# ============ GLOBAL STYLES (PREMIUM CYBER-ORGANIC) ============
 st.markdown(
     """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
 
-    /* Root variable animations */
-    :root {
-        --primary: #00ff88;
-        --secondary: #00d4ff;
-        --bg-dark: #0a0f0d;
+    /* 1. Animated Mesh Gradient Background */
+    .stApp {
+        background: radial-gradient(circle at 0% 0%, rgba(0, 255, 136, 0.15) 0%, transparent 40%),
+                    radial-gradient(circle at 100% 100%, rgba(0, 212, 255, 0.15) 0%, transparent 40%),
+                    #050a09;
+        color: #e0f2f1;
     }
 
     * { font-family: 'Plus Jakarta Sans', sans-serif; }
 
-    /* Animated Gradient Background */
-    .stApp {
-        background: linear-gradient(-45deg, #05110d, #0a1f1a, #020a09, #081a14);
-        background-size: 400% 400%;
-        animation: gradientBG 15s ease infinite;
-        color: #e0f2f1;
-    }
-
-    @keyframes gradientBG {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-
-    /* Floating Glass Cards */
+    /* 2. Advanced Glassmorphism Cards */
     div[data-testid="stVerticalBlock"] > div:has(div.stMarkdown) {
         background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        padding: 25px;
-        transition: transform 0.3s ease, border 0.3s ease;
-        margin-bottom: 15px;
+        border-radius: 24px;
+        padding: 30px;
+        margin-bottom: 20px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
+    /* Floating Animation on Hover */
     div[data-testid="stVerticalBlock"] > div:has(div.stMarkdown):hover {
-        transform: translateY(-5px);
+        transform: translateY(-8px);
         border: 1px solid rgba(0, 255, 136, 0.4);
-        box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 255, 136, 0.1);
     }
 
-    /* Neon Titles */
+    /* 3. Kinetic Typography (Headings) */
     h1, h2, h3 {
-        background: linear-gradient(90deg, #00ff88, #60efff);
+        background: linear-gradient(135deg, #ffffff 0%, #00ff88 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 800 !important;
         letter-spacing: -1px;
     }
 
-    /* Futuristic Buttons */
+    /* 4. High-Octane Buttons */
     .stButton > button {
         width: 100%;
-        background: linear-gradient(135deg, #00ff88 0%, #00bcff 100%) !important;
-        color: #000 !important;
+        background: linear-gradient(90deg, #00ff88, #00d4ff, #00ff88) !important;
+        background-size: 200% auto !important;
+        color: #001a14 !important;
         border: none !important;
-        padding: 12px 24px !important;
-        border-radius: 12px !important;
-        font-weight: 700 !important;
+        padding: 14px 28px !important;
+        border-radius: 14px !important;
+        font-weight: 800 !important;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3) !important;
+        letter-spacing: 1.5px;
+        transition: 0.5s !important;
+        box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4) !important;
     }
 
     .stButton > button:hover {
-        transform: scale(1.03) !important;
-        box-shadow: 0 8px 25px rgba(0, 255, 136, 0.5) !important;
-        filter: brightness(1.1);
+        background-position: right center !important;
+        transform: scale(1.02) !important;
+        box-shadow: 0 10px 30px rgba(0, 255, 136, 0.6) !important;
     }
 
-    /* Custom Input Styling */
+    /* 5. Modern Input Fields */
     .stTextInput input, .stSelectbox div[data-baseweb="select"] {
         background-color: rgba(255, 255, 255, 0.05) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 10px !important;
-        color: white !important;
+        border-radius: 12px !important;
+        color: #ffffff !important;
+        padding: 10px !important;
     }
 
-    /* Sidebar Refinement */
+    /* 6. Sidebar Refresh */
     [data-testid="stSidebar"] {
-        background-color: rgba(5, 15, 12, 0.9) !important;
+        background: rgba(2, 10, 9, 0.95) !important;
         border-right: 1px solid rgba(0, 255, 136, 0.1) !important;
     }
 
-    /* Metrics / ROI Boxes */
-    div[data-testid="metric-container"] {
-        background: rgba(0, 255, 136, 0.05);
+    /* 7. Metric Styling */
+    [data-testid="stMetric"] {
+        background: rgba(0, 255, 136, 0.07);
         border: 1px solid rgba(0, 255, 136, 0.2);
-        padding: 15px;
-        border-radius: 15px;
+        padding: 20px;
+        border-radius: 20px;
         text-align: center;
     }
 
-    /* Success/Warning Boxes */
+    /* Success/Alert Box Upgrade */
     .stAlert {
         background: rgba(0, 255, 136, 0.1) !important;
-        color: #00ff88 !important;
         border: 1px solid #00ff88 !important;
-        border-radius: 15px !important;
+        border-radius: 18px !important;
+        backdrop-filter: blur(5px);
     }
-
-    /* Hiding Streamlit clutter */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-
+    
+    /* Remove default Streamlit shadows */
+    .stApp > header { display: none !important; }
     </style>
     """,
     unsafe_allow_html=True,
 )
-
 # ============ GEMINI CONFIG ============
 try:
     genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
