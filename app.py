@@ -1350,6 +1350,23 @@ st.markdown(
     """
     <div class="header-container">
         <div class="header-title">🌿 AI Plant Doctor - Smart Edition</div>
+        <div style="display:flex; justify-content:center; margin-bottom:8px;">
+            <div style="
+                padding:4px 12px;
+                border-radius:999px;
+                border:1px solid rgba(148,163,184,0.7);
+                font-size:0.78rem;
+                letter-spacing:0.16em;
+                text-transform:uppercase;
+                color:#cbd5f5;
+                background:rgba(15,23,42,0.85);
+            ">
+                Built by Sudhin • Powered by Gemini
+            </div>
+        </div>
+        <div class="header-subtitle">
+            Diagnose plant diseases, compare organic vs chemical treatments, and plan smart crop rotations with AI.
+        </div>
     </div>
     """,
     unsafe_allow_html=True,
