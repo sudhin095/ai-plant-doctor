@@ -1301,7 +1301,7 @@ def calculate_loss_percentage(severity, infected_count, total_plants):
     if total_plants <= 0: return 0
     
     # 1. Base Severity (How much yield a sick plant loses)
-    loss_bands = {"healthy": 0.01, "mild": 0.12, "moderate": 0.28, "severe": 0.52}
+    loss_bands = {"healthy": 0.02, "mild": 0.20, "moderate": 0.45, "severe": 0.75}
     base_loss = loss_bands.get(severity.lower(), 0.28)
     
     # 2. Current Infection Ratio
