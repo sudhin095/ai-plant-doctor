@@ -1364,8 +1364,6 @@ st.markdown(
                 Built by Sudhin • Powered by Gemini
             </div>
         </div>
-        <div class="header-subtitle">
-            Diagnose plant diseases, compare organic vs chemical treatments, and plan smart crop rotations with AI.
         </div>
     </div>
     """,
