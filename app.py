@@ -1285,7 +1285,7 @@ def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_coun
     return organic_total_block, chemical_total_block
 
 
-def calculate_smart_loss(severity, infected_count, total_plants):
+def calculate_loss_percentage(severity, infected_count, total_plants):
     """
     Calculates projected yield loss based on current infection + predicted spread.
     This shows the farmer the true cost of DOING NOTHING.
