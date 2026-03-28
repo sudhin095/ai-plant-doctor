@@ -278,106 +278,122 @@ REGIONS = ["North India", "South India", "East India", "West India", "Central In
 SOIL_TYPES = ["Black Soil", "Red Soil", "Laterite Soil", "Alluvial Soil", "Clay Soil"]
 MARKET_FOCUS = ["Stable essentials", "High-value cash crops", "Low input / low risk"]
 
-# ============ GLOBAL STYLES (PREMIUM CYBER-ORGANIC) ============
+# ============ GLOBAL STYLES (V4: NEBULA-GLASS EDITION) ============
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;700;900&display=swap');
 
-    /* 1. Animated Mesh Gradient Background */
+    /* 1. KINETIC AURORA BACKGROUND */
     .stApp {
-        background: radial-gradient(circle at 0% 0%, rgba(0, 255, 136, 0.15) 0%, transparent 40%),
-                    radial-gradient(circle at 100% 100%, rgba(0, 212, 255, 0.15) 0%, transparent 40%),
-                    #050a09;
-        color: #e0f2f1;
+        background: #020606;
+        background-image: 
+            radial-gradient(at 0% 0%, hsla(161, 100%, 15%, 0.5) 0, transparent 50%), 
+            radial-gradient(at 100% 0%, hsla(188, 100%, 15%, 0.5) 0, transparent 50%), 
+            radial-gradient(at 100% 100%, hsla(161, 100%, 15%, 0.5) 0, transparent 50%), 
+            radial-gradient(at 0% 100%, hsla(188, 100%, 15%, 0.5) 0, transparent 50%);
+        animation: aurora 20s ease infinite;
+        background-attachment: fixed;
     }
 
-    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    @keyframes aurora {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
 
-    /* 2. Advanced Glassmorphism Cards */
+    * { font-family: 'Lexend Deca', sans-serif; }
+
+    /* 2. FLOATING REFLECTIVE CARDS */
     div[data-testid="stVerticalBlock"] > div:has(div.stMarkdown) {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(16px) saturate(180%);
-        -webkit-backdrop-filter: blur(16px) saturate(180%);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 24px;
-        padding: 30px;
-        margin-bottom: 20px;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(25px) saturate(200%);
+        -webkit-backdrop-filter: blur(25px) saturate(200%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 30px;
+        padding: 35px;
+        margin-bottom: 25px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
-    /* Floating Animation on Hover */
     div[data-testid="stVerticalBlock"] > div:has(div.stMarkdown):hover {
-        transform: translateY(-8px);
-        border: 1px solid rgba(0, 255, 136, 0.4);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 255, 136, 0.1);
+        transform: scale(1.01) translateY(-10px);
+        border: 1px solid rgba(43, 255, 0, 0.3);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 20px rgba(43, 255, 0, 0.1);
     }
 
-    /* 3. Kinetic Typography (Headings) */
+    /* 3. QUANTUM HEADERS (Neon Glow) */
     h1, h2, h3 {
-        background: linear-gradient(135deg, #ffffff 0%, #00ff88 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 800 !important;
-        letter-spacing: -1px;
+        color: #ffffff !important;
+        font-weight: 900 !important;
+        text-transform: uppercase;
+        letter-spacing: -2px;
+        text-shadow: 0 0 20px rgba(43, 255, 0, 0.4);
     }
 
-    /* 4. High-Octane Buttons */
+    /* 4. THE "HYPER-DRIVE" BUTTON */
     .stButton > button {
         width: 100%;
-        background: linear-gradient(90deg, #00ff88, #00d4ff, #00ff88) !important;
-        background-size: 200% auto !important;
-        color: #001a14 !important;
-        border: none !important;
-        padding: 14px 28px !important;
-        border-radius: 14px !important;
+        height: 60px;
+        background: transparent !important;
+        color: #2bff00 !important;
+        border: 2px solid #2bff00 !important;
+        border-radius: 15px !important;
         font-weight: 800 !important;
+        font-size: 1.1rem !important;
         text-transform: uppercase;
-        letter-spacing: 1.5px;
-        transition: 0.5s !important;
-        box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4) !important;
+        letter-spacing: 2px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s ease !important;
+        z-index: 1;
+    }
+
+    .stButton > button::before {
+        content: "";
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(43, 255, 0, 0.2), transparent);
+        transition: 0.5s;
+        z-index: -1;
+    }
+
+    .stButton > button:hover::before {
+        left: 100%;
     }
 
     .stButton > button:hover {
-        background-position: right center !important;
-        transform: scale(1.02) !important;
-        box-shadow: 0 10px 30px rgba(0, 255, 136, 0.6) !important;
+        background: #2bff00 !important;
+        color: #000 !important;
+        box-shadow: 0 0 40px rgba(43, 255, 0, 0.6) !important;
+        transform: translateY(-2px);
     }
 
-    /* 5. Modern Input Fields */
-    .stTextInput input, .stSelectbox div[data-baseweb="select"] {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 12px !important;
-        color: #ffffff !important;
-        padding: 10px !important;
-    }
-
-    /* 6. Sidebar Refresh */
+    /* 5. SIDEBAR GLASS-BLUR */
     [data-testid="stSidebar"] {
-        background: rgba(2, 10, 9, 0.95) !important;
-        border-right: 1px solid rgba(0, 255, 136, 0.1) !important;
+        background: rgba(0, 10, 8, 0.8) !important;
+        backdrop-filter: blur(15px) !important;
+        border-right: 1px solid rgba(43, 255, 0, 0.2) !important;
     }
 
-    /* 7. Metric Styling */
+    /* 6. NEON METRIC BADGES */
     [data-testid="stMetric"] {
-        background: rgba(0, 255, 136, 0.07);
-        border: 1px solid rgba(0, 255, 136, 0.2);
-        padding: 20px;
+        background: linear-gradient(145deg, rgba(43, 255, 0, 0.05), rgba(0, 242, 255, 0.05));
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 25px !important;
         border-radius: 20px;
-        text-align: center;
+        box-shadow: inset 0 0 20px rgba(255,255,255,0.02);
     }
 
-    /* Success/Alert Box Upgrade */
-    .stAlert {
-        background: rgba(0, 255, 136, 0.1) !important;
-        border: 1px solid #00ff88 !important;
-        border-radius: 18px !important;
-        backdrop-filter: blur(5px);
+    /* 7. PROGRESS BAR & SLIDER GLOW */
+    .stSlider > div [data-baseweb="slider"] {
+        background: #2bff00 !important;
     }
     
-    /* Remove default Streamlit shadows */
-    .stApp > header { display: none !important; }
+    /* Hide Streamlit Header Clutter */
+    header { visibility: hidden; }
+    .stDeployButton { display: none !important; }
     </style>
     """,
     unsafe_allow_html=True,
