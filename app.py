@@ -1015,21 +1015,21 @@ def render_treatment_selection_ui(
     )
 
     default_n = max(int(default_infected_count or 1), 1)
-infected_plants = st.number_input(
-    "Number of infected plants you want to treat (for cost & ROI)",
-    min_value=1,
-    step=1,
-    value=default_n,
-    key="costcalc_infected_plants"
-)
-
-total_plants = st.number_input(
-    "Total plants on your farm (for loss % calculation)",
-    min_value=1,
-    step=100,
-    value=10000,
-    key="costcalc_total_plants"
-)    
+    infected_plants = st.number_input(
+        "Number of infected plants you want to treat (for cost & ROI)",
+        min_value=1,
+        step=1,
+        value=default_n,
+        key="costcalc_infected_plants"
+    )
+    
+    total_plants = st.number_input(
+        "Total plants on your farm (for loss % calculation)",
+        min_value=1,
+        step=100,
+        value=10000,
+        key="costcalc_total_plants"
+    )    
 
     organic_names = [
         normalize_treatment_name(t)
