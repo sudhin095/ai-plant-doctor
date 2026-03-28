@@ -1021,7 +1021,9 @@ def render_treatment_selection_ui(
         step=1,
         value=default_n,
         key="cost_calc_infected_plants",
+        total_plants = st.number_input("Total plants on your farm (for loss % calculation)", min_value=1, step=100, value=10000, key="costcalc_total_plants")    
     )
+    
 
     organic_names = [
         normalize_treatment_name(t)
@@ -2003,11 +2005,13 @@ else:
         st.markdown(
             """<div class="info-section"><div class="info-title">Loss Analysis (Auto-Calculated)</div></div>""",
             unsafe_allow_html=True,
-        )
+            )
 
         auto_loss_percentage = calculate_loss_percentage(
-            diag.get("severity", "moderate"), infected_count, total_plants=100
-        )
+    diag.get('severity', 'moderate'),
+    infected_count,
+    st.session_state.get('costcalc_total_plants', 10000)
+            )
 
         col_loss1, col_loss2, col_loss3 = st.columns(3)
         with col_loss1:
