@@ -1014,28 +1014,28 @@ def render_treatment_selection_ui(
         unsafe_allow_html=True,
     )
 
-    if "costcalc_infected_plants" not in st.session_state:
-        st.session_state["costcalc_infected_plants"] = max(int(default_infected_count or 1), 1)
-    if "costcalc_total_plants" not in st.session_state:
-        st.session_state["costcalc_total_plants"] = 10000
+    if "farm_infected_plants" not in st.session_state:
+        st.session_state["farm_infected_plants"] = max(int(default_infected_count or 1), 1)
+    if "farm_total_plants" not in st.session_state:
+        st.session_state["farm_total_plants"] = 10000
 
     infected_plants = st.number_input(
         "Number of infected plants you want to treat (for cost & ROI)",
         min_value=1,
         step=1,
-        value=st.session_state["costcalc_infected_plants"],
+        value=st.session_state["farm_infected_plants"],
         key="costcalc_infected_plants"
     )
-    st.session_state["costcalc_infected_plants"] = infected_plants
+    st.session_state["farm_infected_plants"] = infected_plants
 
     total_plants = st.number_input(
         "Total plants on your farm (for loss % calculation)",
         min_value=1,
         step=100,
-        value=st.session_state["costcalc_total_plants"],
+        value=st.session_state["farm_total_plants"],
         key="costcalc_total_plants"
     )
-    st.session_state["costcalc_total_plants"] = total_plants    
+    st.session_state["farm_total_plants"] = total_plants    
     organic_names = [
         normalize_treatment_name(t)
         for t in (organic_treatments or [])
@@ -2020,8 +2020,8 @@ else:
 
         auto_loss_percentage = calculate_loss_percentage(
     diag.get('severity', 'moderate'),
-    infected_count,
-    st.session_state.get('costcalc_total_plants', 10000)
+    st.session_state.get("farm_infected_plants", 50),
+    st.session_state.get("farm_total_plants", 10000)
             )
 
         col_loss1, col_loss2, col_loss3 = st.columns(3)
