@@ -1379,9 +1379,6 @@ with col2:
     st.markdown('<div class="feature-card">🎯 Disease Detection</div>', unsafe_allow_html=True)
 with col3:
     st.markdown('<div class="feature-card">🔬 Expert</div>', unsafe_allow_html=True)
-with col4:
-    st.markdown('<div class="feature-card">🚀 95%+ Accurate</div>', unsafe_allow_html=True)
-
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ============ SIDEBAR ============
