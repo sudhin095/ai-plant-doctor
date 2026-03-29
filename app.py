@@ -1473,12 +1473,7 @@ def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_coun
     return organic_total_block, chemical_total_block
 
 # Treatment selection - won't clear diagnosis
-if st.session_state.last_diagnosis:
-    render_treatment_selection_ui(
-        plant_type=plant_type,
-        disease_name=disease_name,
-        organic
-        )
+
 def translate_report(report_text, language):
     if language == "English":
         return report_text
