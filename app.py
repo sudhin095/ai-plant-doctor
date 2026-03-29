@@ -1847,7 +1847,7 @@ if page == "AI Plant Doctor":
         plant_label = plant_type if plant_type and plant_type != "Select a plant..." else "Unknown Plant"
         
         with st.spinner(f"Analyzing {plant_label}..."):
-            progress_placeholder.markdown(
+                progress_placeholder.markdown(
                 f"""<div class="info-section">
                     <div class="info-title">Gemini AI Processing</div>
                     Analyzing leaf images for {plant_label} diseases...
