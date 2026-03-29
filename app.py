@@ -1916,26 +1916,34 @@ if page == "AI Plant Doctor":
             progress_placeholder.empty()
 
             diag = st.session_state.last_diagnosis
-        
+
             if diag:
+                current_infected = st.session_state.get(
+                    "farm_infected_plants",
+                    diag.get("infected_count", 50)
+                )
+                diag["infected_count"] = current_infected
+                st.session_state.last_diagnosis = diag
+            
                 st.markdown("""
                 <div class="success-box">
-                    Showing results from your last diagnosis. You can visit other pages while keeping these results.
+                    Showing results from your last diagnosis. You can change infected and total plant inputs without losing this response.
                 </div>
                 """, unsafe_allow_html=True)
-        
+            
                 st.markdown("<div class='result-container'>", unsafe_allow_html=True)
-        
+            
                 organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
                     result=diag.get("result", {}),
                     plant_type=diag.get("plant_type", "Unknown"),
-                    infected_count=diag.get("infected_count", 50),
+                    infected_count=current_infected,
                 )
-        
+            
                 diag["organic_cost"] = organic_total_cost
                 diag["chemical_cost"] = chemical_total_cost
+                diag["infected_count"] = current_infected
                 st.session_state.last_diagnosis = diag
-        
+            
                 st.markdown("</div>", unsafe_allow_html=True)
             
 # --- KisanAI Assistant ---
