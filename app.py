@@ -1809,22 +1809,15 @@ if page == "AI Plant Doctor":
 
     images = None
     analyze_btn = False
-
-    if uploaded_files and plant_type:
+    if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "Select a plant...":
         if len(uploaded_files) > 3:
             st.warning("Maximum 3 images. Only first 3 will be analyzed.")
             uploaded_files = uploaded_files[:3]
-
         images = [Image.open(f) for f in uploaded_files]
 
         if st.session_state.show_tips:
             st.markdown(
-                f"""
-                <div class="tips-card">
-                    <div class="tips-card-title">Ready to Analyze {plant_type}</div>
-                    Upload complete. Click the button below to get the AI diagnosis.
-                </div>
-                """,
+                f"""<div class="tips-card"><div class="tips-card-title">Analyzing {plant_type}</div>Gemini diagnosis in progress...</div>""",
                 unsafe_allow_html=True,
             )
 
@@ -1841,10 +1834,9 @@ if page == "AI Plant Doctor":
         col_b1, col_b2, col_b3 = st.columns(3)
         with col_b2:
             analyze_btn = st.button(
-                f"Analyze {plant_type}",
-                use_container_width=True,
-                type="primary",
+                f"Analyze {plant_type}", use_container_width=True, type="primary"
             )
+
 
     if analyze_btn and images is not None and plant_type:
         progress_placeholder = st.empty()
