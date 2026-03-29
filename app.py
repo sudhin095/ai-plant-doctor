@@ -1756,6 +1756,7 @@ if "confidence_min" not in st.session_state:
 # --- AI Plant Doctor ---
 if page == "AI Plant Doctor":
     col_plant, col_upload = st.columns([1, 2])
+
     with col_plant:
         st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
         st.subheader("Select Plant Type")
@@ -1765,6 +1766,7 @@ if page == "AI Plant Doctor":
         selected_plant = st.selectbox(
             "What plant do you have?", plant_options, label_visibility="collapsed"
         )
+
         if selected_plant == "Other (Manual Entry)":
             custom_plant = st.text_input("Enter plant name", placeholder="e.g., Banana, Orange")
             plant_type = custom_plant if custom_plant else "Unknown Plant"
@@ -1792,10 +1794,12 @@ if page == "AI Plant Doctor":
 
     images = None
     analyze_btn = False
+
     if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "Select a plant...":
         if len(uploaded_files) > 3:
             st.warning("Maximum 3 images. Only first 3 will be analyzed.")
             uploaded_files = uploaded_files[:3]
+
         images = [Image.open(f) for f in uploaded_files]
 
         if st.session_state.show_tips:
@@ -1812,8 +1816,8 @@ if page == "AI Plant Doctor":
                 display_image = resize_image(image.copy())
                 st.image(display_image, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
 
+        st.markdown("<br>", unsafe_allow_html=True)
         col_b1, col_b2, col_b3 = st.columns(3)
         with col_b2:
             analyze_btn = st.button(
@@ -1822,6 +1826,7 @@ if page == "AI Plant Doctor":
 
     if analyze_btn and images is not None and plant_type:
         progress_placeholder = st.empty()
+
         with st.spinner(f"Analyzing {plant_type}..."):
             try:
                 progress_placeholder.info(f"Processing {plant_type} leaf...")
@@ -1837,6 +1842,7 @@ if page == "AI Plant Doctor":
                     else "gemini-2.5-flash"
                 )
                 model = genai.GenerativeModel(model_id)
+
                 if st.session_state.debug_mode:
                     st.info(f"Using: {model_name}")
 
@@ -1850,6 +1856,7 @@ if page == "AI Plant Doctor":
                 enhanced_images = [
                     enhance_image_for_analysis(img.copy()) for img in images
                 ]
+
                 response = model.generate_content([prompt] + enhanced_images)
                 raw_response = response.text
 
@@ -1865,14 +1872,15 @@ if page == "AI Plant Doctor":
                         st.markdown("</div>", unsafe_allow_html=True)
 
                 result = extract_json_robust(raw_response)
+
                 if result is None:
                     st.error("Could not parse AI response")
-
-                progress_placeholder.empty()
+                    progress_placeholder.empty()
 
                 if result:
                     is_valid, validation_msg = validate_json_result(result)
                     confidence = result.get("confidence", 0)
+
                     if confidence < st.session_state.confidence_min:
                         st.warning(f"Low Confidence ({confidence}%)")
 
@@ -1893,33 +1901,42 @@ if page == "AI Plant Doctor":
                 if "429" in str(e) or "quota" in str(e).lower() or "rate" in str(e).lower():
                     st.markdown("""
                     <div class="warning-box">
-                        ⏳ <b>Too many requests!</b> The AI is taking a short break.<br>
-                        Please wait <b>60 seconds</b> and try again. This is temporary.
+                    ⏳ <b>Too many requests!</b> The AI is taking a short break.<br>
+                    Please wait <b>60 seconds</b> and try again. This is temporary.
                     </div>
                     """, unsafe_allow_html=True)
                 else:
                     st.markdown(f"""
                     <div class="error-box">
-                        ❌ <b>Analysis Failed.</b> Please try again.<br>
-                        <span style="font-size:0.8rem; color:#aaa;">{str(e)}</span>
+                    ❌ <b>Analysis Failed.</b> Please try again.<br>
+                    <span style="font-size:0.8rem; color:#aaa;">{str(e)}</span>
                     </div>
                     """, unsafe_allow_html=True)
+
             progress_placeholder.empty()
 
-            st.markdown("<div class='result-container'>", unsafe_allow_html=True)
-
             diag = st.session_state.last_diagnosis
-            
-            if analyze_btn and diag:
+        
+            if diag:
+                st.markdown("""
+                <div class="success-box">
+                    Showing results from your last diagnosis. You can visit other pages while keeping these results.
+                </div>
+                """, unsafe_allow_html=True)
+        
+                st.markdown("<div class='result-container'>", unsafe_allow_html=True)
+        
                 organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
                     result=diag.get("result", {}),
                     plant_type=diag.get("plant_type", "Unknown"),
                     infected_count=diag.get("infected_count", 50),
                 )
+        
                 diag["organic_cost"] = organic_total_cost
                 diag["chemical_cost"] = chemical_total_cost
-            else:
-                organic_total_cost = chemical_total_cost = 0
+                st.session_state.last_diagnosis = diag
+        
+                st.markdown("</div>", unsafe_allow_html=True)
             
 # --- KisanAI Assistant ---
 elif page == "KisanAI Assistant":
