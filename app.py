@@ -1837,13 +1837,12 @@ if page == "AI Plant Doctor":
                 f"Analyze {plant_type}", use_container_width=True, type="primary"
             )
 
-
     if analyze_btn and images is not None and plant_type:
         progress_placeholder = st.empty()
-
         with st.spinner(f"Analyzing {plant_type}..."):
             try:
                 progress_placeholder.info(f"Processing {plant_type} leaf...")
+
 
                 model_name = (
                     "Gemini 2.5 Pro"
