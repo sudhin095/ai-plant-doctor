@@ -1044,6 +1044,7 @@ h2, h3, h4 {
 """,
     unsafe_allow_html=True,
 )
+
 # ============ GEMINI CONFIG ============
 try:
     genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
@@ -1908,18 +1909,20 @@ if page == "AI Plant Doctor":
 
             st.markdown("<div class='result-container'>", unsafe_allow_html=True)
 
-        diag = st.session_state.get("last_diagnosis") or {}
-        if diag.get("result"):
-            organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
-                result=diag.get("result", {}),
-                plant_type=diag.get("plant_type", "Unknown"),
-                infected_count=diag.get("infected_count", 50),
-            )
-            diag["organic_cost"] = organic_total_cost
-            diag["chemical_cost"] = chemical_total_cost
-            st.session_state.last_diagnosis = diag
 
-        st.markdown("</div>", unsafe_allow_html=True)
+
+    diag = st.session_state.get("last_diagnosis") or {}
+    if diag.get("result"):
+        organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
+            result=diag.get("result", {}),
+            plant_type=diag.get("plant_type", "Unknown"),
+            infected_count=diag.get("infected_count", 50),
+        )
+        diag["organic_cost"] = organic_total_cost
+        diag["chemical_cost"] = chemical_total_cost
+        st.session_state.last_diagnosis = diag
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # --- KisanAI Assistant ---
 elif page == "KisanAI Assistant":
