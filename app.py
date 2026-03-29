@@ -1319,7 +1319,7 @@ def translate_report(report_text, language):
         except Exception as e2:
             if "429" in str(e2) or "quota" in str(e2).lower():
                 return report_text + "\n\n⏳ Translation unavailable right now — rate limit hit. Try again in 60 seconds."
-        return report_text + f"\n\n❌ Translation failed: {str(e2)}"
+            return report_text + f"\n\n❌ Translation failed: {str(e2)}"
         
 def calculate_loss_percentage(severity, infected_count, total_plants):
     """
@@ -1724,8 +1724,16 @@ if page == "AI Plant Doctor":
 
             st.markdown("<div class='result-container'>", unsafe_allow_html=True)
 
-        organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
-        diag = st.session_state.get("last_diagnosis", {})        organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(            result=diag.get("result", {}),            plant_type=diag.get("plant_type", "Unknown"),            infected_count=diag.get("infected_count", 50),        )        diag["organic_cost"] = organic_total_cost        diag["chemical_cost"] = chemical_total_cost        st.session_state.last_diagnosis = diag        st.session_state.last_diagnosis = diag
+        diag = st.session_state.get("last_diagnosis") or {}
+        if diag.get("result"):
+            organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
+                result=diag.get("result", {}),
+                plant_type=diag.get("plant_type", "Unknown"),
+                infected_count=diag.get("infected_count", 50),
+            )
+            diag["organic_cost"] = organic_total_cost
+            diag["chemical_cost"] = chemical_total_cost
+            st.session_state.last_diagnosis = diag
 
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1900,7 +1908,7 @@ elif page == "Crop Rotation Advisor":
         col_year1, col_year2, col_year3 = st.columns(3)
         with col_year1:
             st.markdown(
-                f"""<div class="rotation-card"><div class="rotation-year">📌 Year 1</div><div class="crop-name">{result.get('plant_type', 'Unknown')}</div><div class="crop-description">{info.get(result.get('plant_type', 'Unknown'), 'Primary crop for cultivation.')}</div></div>""",
+                f"""<div class="rotation-card"><div class="rotation-year">📌 Year 1</div><div class="crop-name">{result['plant_type']}</div><div class="crop-description">{info.get(result['plant_type'], 'Primary crop for cultivation.')}</div></div>""",
                 unsafe_allow_html=True,
             )
         with col_year2:
