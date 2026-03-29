@@ -1725,15 +1725,7 @@ if page == "AI Plant Doctor":
             st.markdown("<div class='result-container'>", unsafe_allow_html=True)
 
         organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
-        diag = st.session_state.get("last_diagnosis", {})
-            result=diag.get("result", {}),
-            plant_type=diag.get("plant_type", "Unknown"),
-            infected_count=diag.get("infected_count", 50),
-        )
-
-        diag["organic_cost"] = organic_total_cost
-        diag["chemical_cost"] = chemical_total_cost
-        st.session_state.last_diagnosis = diag
+        diag = st.session_state.get("last_diagnosis", {})        organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(            result=diag.get("result", {}),            plant_type=diag.get("plant_type", "Unknown"),            infected_count=diag.get("infected_count", 50),        )        diag["organic_cost"] = organic_total_cost        diag["chemical_cost"] = chemical_total_cost        st.session_state.last_diagnosis = diag        st.session_state.last_diagnosis = diag
 
         st.markdown("</div>", unsafe_allow_html=True)
 
