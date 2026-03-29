@@ -1478,7 +1478,7 @@ if st.session_state.last_diagnosis:
         plant_type=plant_type,
         disease_name=disease_name,
         organic
-        
+    )
 def translate_report(report_text, language):
     if language == "English":
         return report_text
