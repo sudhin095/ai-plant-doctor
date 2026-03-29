@@ -1920,12 +1920,6 @@ if page == "AI Plant Doctor":
             else:
                 organic_total_cost = chemical_total_cost = 0
             
-                    diag["organic_cost"] = organic_total_cost
-                    diag["chemical_cost"] = chemical_total_cost
-                    st.session_state.last_diagnosis = diag
-    
-            st.markdown("</div>", unsafe_allow_html=True)
-
 # --- KisanAI Assistant ---
 elif page == "KisanAI Assistant":
     st.markdown(
