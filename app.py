@@ -1824,16 +1824,9 @@ if page == "AI Plant Doctor":
                     unsafe_allow_html=True,
                 )
     
-            st.markdown("<div class='result-container' style='text-align:center;'>", unsafe_allow_html=True)
-            num_imgs = len(images)
-            if num_imgs == 1:
-                left_sp, img_col, right_sp = st.columns([1, 2, 1])
-                cols = [img_col]
-            elif num_imgs == 2:
-                left_sp, c1, c2, right_sp = st.columns([0.5, 2, 2, 0.5])
-                cols = [c1, c2]
-            else:
-                cols = st.columns(num_imgs)
+            st.markdown("<div class='result-container'>", unsafe_allow_html=True)
+            st.markdown("### 📸 Your Images")
+            cols = st.columns(3)
             for idx, (col, image) in enumerate(zip(cols, images)):
                 with col:
                     st.caption(f"Image {idx + 1}")
@@ -1842,10 +1835,12 @@ if page == "AI Plant Doctor":
             st.markdown("</div>", unsafe_allow_html=True)
             st.markdown("<br>", unsafe_allow_html=True)
     
-            col_b1, col_b2, col_b3 = st.columns([2, 3, 2])
-            with col_b2:
-                button_label = f"Analyze {plant_type}" if plant_type and plant_type != "Select a plant..." else "Analyze Plant"
+            button_label = f"Analyze {plant_type}" if plant_type and plant_type != "Select a plant..." else "Analyze Plant"
+            st.markdown("---", unsafe_allow_html=True)
+            analyze_col, _ = st.columns([1, 3])
+            with analyze_col:
                 analyze_btn = st.button(button_label, use_container_width=True, type="primary")
+            st.markdown("---", unsafe_allow_html=True)
 
     # ===== FIXED ANALYSIS BLOCK =====
         if analyze_btn and images is not None:
