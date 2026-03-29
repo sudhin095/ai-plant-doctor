@@ -279,7 +279,6 @@ SOIL_TYPES = ["Black Soil", "Red Soil", "Laterite Soil", "Alluvial Soil", "Clay 
 MARKET_FOCUS = ["Stable essentials", "High-value cash crops", "Low input / low risk"]
 
 # ============ GLOBAL STYLES ============
-# ============ GLOBAL STYLES ============
 st.markdown(
     """
 <style>
@@ -1044,7 +1043,6 @@ h2, h3, h4 {
 """,
     unsafe_allow_html=True,
 )
-
 # ============ GEMINI CONFIG ============
 try:
     genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
@@ -1209,7 +1207,7 @@ def render_treatment_selection_ui(
         min_value=1,
         step=1,
         value=st.session_state["farm_infected_plants"],
-        key=f"costcalc_infected_plants_{plant_type}_{disease_name}"
+        key="costcalc_infected_plants"
     )
     st.session_state["farm_infected_plants"] = infected_plants
 
@@ -1218,7 +1216,7 @@ def render_treatment_selection_ui(
         min_value=1,
         step=100,
         value=st.session_state["farm_total_plants"],
-        key=f"costcalc_total_plants_{plant_type}_{disease_name}"
+        key="costcalc_total_plants"
     )
     st.session_state["farm_total_plants"] = total_plants    
     organic_names = [
@@ -1471,14 +1469,15 @@ def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_coun
             """,
             unsafe_allow_html=True,
         )
-
-    render_treatment_selection_ui(
+    
+        render_treatment_selection_ui(
         plant_type=plant_type,
         disease_name=disease_name,
         organic_treatments=organic_treatments,
         chemical_treatments=chemical_treatments,
         default_infected_count=infected_count,
-    )
+        )
+
 
     return organic_total_block, chemical_total_block
 def translate_report(report_text, language):
@@ -1504,7 +1503,7 @@ def translate_report(report_text, language):
         except Exception as e2:
             if "429" in str(e2) or "quota" in str(e2).lower():
                 return report_text + "\n\n⏳ Translation unavailable right now — rate limit hit. Try again in 60 seconds."
-            return report_text + f"\n\n❌ Translation failed: {str(e2)}"
+        return report_text + f"\n\n❌ Translation failed: {str(e2)}"
         
 def calculate_loss_percentage(severity, infected_count, total_plants):
     """
@@ -1757,174 +1756,219 @@ if "confidence_min" not in st.session_state:
 # --- AI Plant Doctor ---
 if page == "AI Plant Doctor":
     col_plant, col_upload = st.columns([1, 2])
+
     with col_plant:
         st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
         st.subheader("Select Plant Type")
+
         plant_options = ["Select a plant..."] + sorted(list(PLANT_COMMON_DISEASES.keys())) + [
             "Other (Manual Entry)"
         ]
+
         selected_plant = st.selectbox(
-            "What plant do you have?", plant_options, label_visibility="collapsed"
+            "What plant do you have?",
+            plant_options,
+            label_visibility="collapsed",
         )
+
         if selected_plant == "Other (Manual Entry)":
-            custom_plant = st.text_input("Enter plant name", placeholder="e.g., Banana, Orange")
-            plant_type = custom_plant if custom_plant else "Unknown Plant"
+            custom_plant = st.text_input(
+                "Enter plant name",
+                placeholder="e.g., Banana, Orange"
+            )
+            plant_type = custom_plant.strip() if custom_plant.strip() else None
         else:
             plant_type = selected_plant if selected_plant != "Select a plant..." else None
 
         if plant_type and plant_type in PLANT_COMMON_DISEASES:
             st.markdown(
-                f"""<div class="success-box">Common diseases in {plant_type}:\n\n{PLANT_COMMON_DISEASES[plant_type]}</div>""",
+                f"""
+                <div class="success-box">
+                    Common diseases in {plant_type}:<br><br>
+                    {PLANT_COMMON_DISEASES[plant_type]}
+                </div>
+                """,
                 unsafe_allow_html=True,
             )
+
         st.markdown("</div>", unsafe_allow_html=True)
 
     with col_upload:
         st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
         st.subheader("Upload Leaf Images")
         st.caption("Up to 3 images for best results")
+
         uploaded_files = st.file_uploader(
             "Select images",
             type=["jpg", "jpeg", "png"],
             accept_multiple_files=True,
             label_visibility="collapsed",
         )
+
         st.markdown("</div>", unsafe_allow_html=True)
 
-    images = None
-    analyze_btn = False
-    if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "Select a plant...":
-        if len(uploaded_files) > 3:
-            st.warning("Maximum 3 images. Only first 3 will be analyzed.")
-            uploaded_files = uploaded_files[:3]
-        images = [Image.open(f) for f in uploaded_files]
-
-        if st.session_state.show_tips:
-            st.markdown(
-                f"""<div class="tips-card"><div class="tips-card-title">Analyzing {plant_type}</div>Gemini diagnosis in progress...</div>""",
-                unsafe_allow_html=True,
-            )
-
-        st.markdown("<div class='result-container'>", unsafe_allow_html=True)
-        cols = st.columns(len(images))
-        for idx, (col, image) in enumerate(zip(cols, images)):
-            with col:
-                st.caption(f"Image {idx + 1}")
-                display_image = resize_image(image.copy())
-                st.image(display_image, use_container_width=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        col_b1, col_b2, col_b3 = st.columns(3)
-        with col_b2:
-            analyze_btn = st.button(
-                f"Analyze {plant_type}", use_container_width=True, type="primary"
-            )
-
-    if analyze_btn and images is not None and plant_type:
-        progress_placeholder = st.empty()
-        with st.spinner(f"Analyzing {plant_type}..."):
-            try:
-                progress_placeholder.info(f"Processing {plant_type} leaf...")
-
-                model_name = (
-                    "Gemini 2.5 Pro"
-                    if "Pro" in st.session_state.model_choice
-                    else "Gemini 2.5 Flash"
+        images = None
+        analyze_btn = False
+    
+        if uploaded_files and len(uploaded_files) > 0:
+            if len(uploaded_files) > 3:
+                st.warning("Maximum 3 images. Only first 3 will be analyzed.")
+                uploaded_files = uploaded_files[:3]
+    
+            images = [Image.open(f) for f in uploaded_files]
+    
+            if st.session_state.show_tips:
+                title_name = plant_type if plant_type and plant_type != "Select a plant..." else "the plant"
+                st.markdown(
+                    f"""<div class="tips-card"><div class="tips-card-title">Ready to Analyze {title_name}</div>Upload complete. Click the button below to get the AI diagnosis.</div>""",
+                    unsafe_allow_html=True,
                 )
-                model_id = (
-                    "gemini-2.5-pro"
-                    if "Pro" in st.session_state.model_choice
-                    else "gemini-2.5-flash"
-                )
-                model = genai.GenerativeModel(model_id)
-                if st.session_state.debug_mode:
-                    st.info(f"Using: {model_name}")
+    
+            st.markdown("<div class='result-container'>", unsafe_allow_html=True)
+            cols = st.columns(len(images))
+            for idx, (col, image) in enumerate(zip(cols, images)):
+                with col:
+                    st.caption(f"Image {idx + 1}")
+                    display_image = resize_image(image.copy())
+                    st.image(display_image, use_container_width=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+    
+            col_b1, col_b2, col_b3 = st.columns(3)
+            with col_b2:
+                button_label = f"Analyze {plant_type}" if plant_type and plant_type != "Select a plant..." else "Analyze Plant"
+                analyze_btn = st.button(button_label, use_container_width=True, type="primary")
 
-                common_diseases = PLANT_COMMON_DISEASES.get(
-                    plant_type, "various plant diseases"
+    # ===== FIXED ANALYSIS BLOCK =====
+        if analyze_btn and images is not None:
+            progress_placeholder = st.empty()
+        
+            # Determine the name to show
+            plant_label = plant_type if plant_type and plant_type != "Select a plant..." else "Unknown Plant"
+        
+            with st.spinner(f"Analyzing {plant_label}..."):
+                progress_placeholder.markdown(
+                    f"""<div class="info-section">
+                        <div class="info-title">Gemini AI Processing</div>
+                        Analyzing leaf images for {plant_label} diseases...
+                    </div>""",
+                    unsafe_allow_html=True,
                 )
-                prompt = EXPERT_PROMPT_TEMPLATE.format(
-                    plant_type=plant_type, common_diseases=common_diseases
-                )
-
-                enhanced_images = [
-                    enhance_image_for_analysis(img.copy()) for img in images
-                ]
-                response = model.generate_content([prompt] + enhanced_images)
-                raw_response = response.text
-
-                if st.session_state.debug_mode:
-                    with st.expander("Raw Response"):
-                        st.markdown('<div class="debug-box">', unsafe_allow_html=True)
-                        displayed = (
-                            raw_response[:3000] + "..."
-                            if len(raw_response) > 3000
-                            else raw_response
+            
+                try:
+                    model_id = "gemini-2.5-pro" if "Pro" in st.session_state.model_choice else "gemini-2.5-flash"
+                    model_name = (
+                        "Gemini 2.5 Pro"
+                        if "Pro" in st.session_state.model_choice
+                        else "Gemini 2.5 Flash"
+                    )
+                
+                    model = genai.GenerativeModel(model_id)
+                    common_diseases = PLANT_COMMON_DISEASES.get(plant_label, "various plant diseases")
+                
+                    prompt = EXPERT_PROMPT_TEMPLATE.format(
+                        plant_type=plant_label,
+                        common_diseases=common_diseases,
+                    )
+                
+                    enhanced_images = [enhance_image_for_analysis(img.copy()) for img in images]
+                    response = model.generate_content([prompt] + enhanced_images)
+                
+                    raw_response = response.text
+                
+                    # Parse result
+                    result = extract_json_robust(raw_response)
+                
+                    if result is None:
+                        st.error("Could not parse AI response")
+                    else:
+                        confidence = result.get('confidence', 0)
+                        if confidence < st.session_state.confidence_min:
+                            st.warning(f"Low Confidence: {confidence}%")
+                    
+                        # Save diagnosis context
+                        st.session_state.last_diagnosis = {
+                            'plant_type': plant_label,
+                            'disease_name': result.get('disease_name', 'Unknown'),
+                            'disease_type': result.get('disease_type', 'unknown'),
+                            'severity': result.get('severity', 'unknown'),
+                            'confidence': confidence,
+                            'timestamp': datetime.now().isoformat(),
+                            'result': result
+                        }
+                    
+                        # Set default infected plant count if not exists
+                        if 'farm_infected_plants' not in st.session_state:
+                            st.session_state.farm_infected_plants = 50
+                        if 'farm_total_plants' not in st.session_state:
+                            st.session_state.farm_total_plants = 1000
+                        
+                        progress_placeholder.empty()
+                    
+                        # Render the diagnosis UI
+                        render_diagnosis_and_treatments(
+                            result, 
+                            plant_label, 
+                            infected_count=st.session_state.farm_infected_plants
                         )
-                        st.text(displayed)
-                        st.markdown("</div>", unsafe_allow_html=True)
-
-                result = extract_json_robust(raw_response)
-                if result is None:
-                    st.error("Could not parse AI response")
-
+                    
+                except Exception as e:
+                    progress_placeholder.empty()
+                    if "429" in str(e) or "quota" in str(e).lower() or "rate" in str(e).lower():
+                        st.markdown(
+                            """<div class="warning-box">
+                            <b>Too many requests!</b> The AI is taking a short break.<br>
+                            Please wait <b>60 seconds</b> and try again. This is temporary.
+                            </div>""",
+                            unsafe_allow_html=True,
+                        )
+                    else:
+                        st.markdown(
+                            f"""<div class="error-box">
+                            <b>Analysis Failed.</b> Please try again.<br>
+                            <span style="font-size:0.8rem; color:#aaa;">{str(e)}</span>
+                            </div>""",
+                            unsafe_allow_html=True,
+                        )
+                    
                 progress_placeholder.empty()
 
-                if result:
-                    is_valid, validation_msg = validate_json_result(result)
-                    confidence = result.get("confidence", 0)
-                    if confidence < st.session_state.confidence_min:
-                        st.warning(f"Low Confidence ({confidence}%)")
-
-                    st.session_state.last_diagnosis = {
-                        "plant_type": plant_type,
-                        "disease_name": result.get("disease_name", "Unknown"),
-                        "disease_type": result.get("disease_type", "unknown"),
-                        "severity": result.get("severity", "unknown"),
-                        "confidence": confidence,
-                        "organic_cost": 0,
-                        "chemical_cost": 0,
-                        "infected_count": 50,
-                        "timestamp": datetime.now().isoformat(),
-                        "result": result,
-                    }
-
-            except Exception as e:
-                if "429" in str(e) or "quota" in str(e).lower() or "rate" in str(e).lower():
-                    st.markdown("""
-                    <div class="warning-box">
-                        ⏳ <b>Too many requests!</b> The AI is taking a short break.<br>
-                        Please wait <b>60 seconds</b> and try again. This is temporary.
+            diag = st.session_state.get("last_diagnosis")
+    
+            if diag is not None:
+                current_infected = st.session_state.get(
+                    "farm_infected_plants",
+                    diag.get("infected_count", 50),
+                )
+    
+                diag["infected_count"] = current_infected
+                st.session_state.last_diagnosis = diag
+    
+                st.markdown(
+                    """
+                    <div class="success-box">
+                        Showing results from your last diagnosis. You can switch pages and come back without losing this response.
                     </div>
-                    """, unsafe_allow_html=True)
-                else:
-                    st.markdown(f"""
-                    <div class="error-box">
-                        ❌ <b>Analysis Failed.</b> Please try again.<br>
-                        <span style="font-size:0.8rem; color:#aaa;">{str(e)}</span>
-                    </div>
-                    """, unsafe_allow_html=True)
-            progress_placeholder.empty()
-
-            st.markdown("<div class='result-container'>", unsafe_allow_html=True)
-
-
-
-    diag = st.session_state.get("last_diagnosis") or {}
-    if diag.get("result"):
-        organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
-            result=diag.get("result", {}),
-            plant_type=diag.get("plant_type", "Unknown"),
-            infected_count=diag.get("infected_count", 50),
-        )
-        diag["organic_cost"] = organic_total_cost
-        diag["chemical_cost"] = chemical_total_cost
-        st.session_state.last_diagnosis = diag
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# --- KisanAI Assistant ---
+                    """,
+                    unsafe_allow_html=True,
+                )
+    
+                st.markdown("<div class='result-container'>", unsafe_allow_html=True)
+    
+                organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
+                    result=diag.get("result", {}),
+                    plant_type=diag.get("plant_type", "Unknown"),
+                    infected_count=current_infected,
+                )
+    
+                diag["organic_cost"] = organic_total_cost
+                diag["chemical_cost"] = chemical_total_cost
+                diag["infected_count"] = current_infected
+                st.session_state.last_diagnosis = diag
+    
+                st.markdown("</div>", unsafe_allow_html=True)
+            
+    # --- KisanAI Assistant ---
 elif page == "KisanAI Assistant":
     st.markdown(
         """<div class="page-header"><div class="page-title">🤖 KisanAI Assistant</div><div class="page-subtitle">Your Personal Agricultural Advisor</div></div>""",
@@ -2387,22 +2431,89 @@ else:
                     unsafe_allow_html=True,
                 )
             # --- Walk Away Warning ---
-            do_nothing = analysis["do_nothing_loss"]
-            walk_org   = analysis["walk_away_org"]
-            walk_chem  = analysis["walk_away_chem"]
-            
-            if do_nothing > organic_cost_total or do_nothing > chemical_cost_total:
-                st.markdown(f"""
-                <div class="warning-box">
-                    ⚠️ <b>URGENT: Cost of Doing Nothing = ₹{do_nothing:,}</b><br>
-                    If you walk away without treating, your projected crop loss is 
-                    <b>₹{do_nothing:,}</b> — far more than the cost of treatment.<br><br>
-                    🌿 Treating with <b>Organic</b> saves you <b>₹{walk_org:,}</b> net.<br>
-                    🧪 Treating with <b>Chemical</b> saves you <b>₹{walk_chem:,}</b> net.
-                </div>
-                """, unsafe_allow_html=True)
+            selection = st.session_state.get("treatment_selection")
+            selected_type = selection.get("treatment_type") if selection else None
 
+            organic_net = potential_loss_value - organic_cost_total
+            chemical_net = potential_loss_value - chemical_cost_total
+
+            if selected_type == "organic":
+                if organic_net < 0:
+                    if chemical_net >= 0:
+                        st.markdown(
+                            f"""
+                            <div class="warning-box">
+                                ⚠️ <b>Organic treatment is not profitable.</b><br>
+                                Organic net return: <b>₹{organic_net:,}</b><br>
+                                🧪 Chemical treatment net return: <b>₹{chemical_net:,}</b><br><br>
+                                <b>Recommendation:</b> Switch to <b>Chemical</b> treatment — it is profitable while Organic is not.
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                    else:
+                        st.markdown(
+                            f"""
+                            <div class="warning-box">
+                                ⚠️ <b>Both treatment options are unprofitable.</b><br>
+                                Organic net return: <b>₹{organic_net:,}</b><br>
+                                Chemical net return: <b>₹{chemical_net:,}</b><br><br>
+                                <b>Recommendation:</b> Not treating the infected plants is more profitable than either option.
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                elif chemical_net > organic_net:
+                    st.markdown(
+                        f"""
+                        <div class="warning-box">
+                            ⚠️ 🌿 <b>Organic treatment is profitable</b> at <b>₹{organic_net:,}</b> net —
+                            but 🧪 <b>Chemical treatment is even more profitable</b> at <b>₹{chemical_net:,}</b> net.<br><br>
+                            <b>Recommendation:</b> Switch to <b>Chemical</b> treatment for better returns.
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+            elif selected_type == "chemical":
+                if chemical_net < 0:
+                    if organic_net >= 0:
+                        st.markdown(
+                            f"""
+                            <div class="warning-box">
+                                ⚠️ <b>Chemical treatment is not profitable.</b><br>
+                                Chemical net return: <b>₹{chemical_net:,}</b><br>
+                                🌿 Organic treatment net return: <b>₹{organic_net:,}</b><br><br>
+                                <b>Recommendation:</b> Switch to <b>Organic</b> treatment — it is profitable while Chemical is not.
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                    else:
+                        st.markdown(
+                            f"""
+                            <div class="warning-box">
+                                ⚠️ <b>Both treatment options are unprofitable.</b><br>
+                                Organic net return: <b>₹{organic_net:,}</b><br>
+                                Chemical net return: <b>₹{chemical_net:,}</b><br><br>
+                                <b>Recommendation:</b> Not treating the infected plants is more profitable than either option.
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                elif organic_net > chemical_net:
+                    st.markdown(
+                        f"""
+                        <div class="warning-box">
+                            ⚠️ 🧪 <b>Chemical treatment is profitable</b> at <b>₹{chemical_net:,}</b> net —
+                            but 🌿 <b>Organic treatment is even more profitable</b> at <b>₹{organic_net:,}</b> net.<br><br>
+                            <b>Recommendation:</b> Switch to <b>Organic</b> treatment for better returns.
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
             st.markdown("<br>", unsafe_allow_html=True)
+
             report_language = st.selectbox(
                 "🌐 Select Report Language",
                 ["English", "Hindi", "Punjabi", "Marathi", "Telugu", "Tamil", "Kannada", "Bengali"],
