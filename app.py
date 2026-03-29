@@ -2458,7 +2458,7 @@ else:
                                 ⚠️ <b>Both treatment options are unprofitable.</b><br>
                                 Organic net return: <b>₹{organic_net:,}</b><br>
                                 Chemical net return: <b>₹{chemical_net:,}</b><br><br>
-                                <b>Recommendation:</b> Not treating is more profitable than either option.
+                                <b>Recommendation:</b> Not treating is more profitable than either options.
                             </div>
                             """,
                             unsafe_allow_html=True,
