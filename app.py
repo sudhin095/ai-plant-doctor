@@ -1917,17 +1917,11 @@ if page == "AI Plant Doctor":
                 diag["chemical_cost"] = chemical_total_cost
             else:
                 organic_total_cost = chemical_total_cost = 0
-                    organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
-                        result=diag.get("result", {}),
-                        plant_type=diag.get("plant_type", "Unknown"),
-                        infected_count=diag.get("infected_count", 50),
-                    )
-
-        diag["organic_cost"] = organic_total_cost
-        diag["chemical_cost"] = chemical_total_cost
-        st.session_state.last_diagnosis = diag
-
-        st.markdown("</div>", unsafe_allow_html=True)
+                    diag["organic_cost"] = organic_total_cost
+                    diag["chemical_cost"] = chemical_total_cost
+                    st.session_state.last_diagnosis = diag
+            
+                    st.markdown("</div>", unsafe_allow_html=True)
 
 # --- KisanAI Assistant ---
 elif page == "KisanAI Assistant":
