@@ -14,7 +14,6 @@ st.set_page_config(
 )
 
 # ============ TREATMENT COSTS & QUANTITIES DATABASE ============
-# ============ TREATMENT COSTS & QUANTITIES DATABASE ============
 
 TREATMENT_COSTS = {
     "organic": {
