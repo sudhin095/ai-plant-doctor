@@ -1503,7 +1503,7 @@ def translate_report(report_text, language):
         except Exception as e2:
             if "429" in str(e2) or "quota" in str(e2).lower():
                 return report_text + "\n\n⏳ Translation unavailable right now — rate limit hit. Try again in 60 seconds."
-        return report_text + f"\n\n❌ Translation failed: {str(e2)}"
+            return report_text + f"\n\n❌ Translation failed: {str(e2)}"
         
 def calculate_loss_percentage(severity, infected_count, total_plants):
     """
@@ -1841,97 +1841,97 @@ if page == "AI Plant Doctor":
 
     # ===== FIXED ANALYSIS BLOCK =====
         if analyze_btn and images is not None:
-        progress_placeholder = st.empty()
+            progress_placeholder = st.empty()
         
-        # Determine the name to show
-        plant_label = plant_type if plant_type and plant_type != "Select a plant..." else "Unknown Plant"
+            # Determine the name to show
+            plant_label = plant_type if plant_type and plant_type != "Select a plant..." else "Unknown Plant"
         
-        with st.spinner(f"Analyzing {plant_label}..."):
-            progress_placeholder.markdown(
-                f"""<div class="info-section">
-                    <div class="info-title">Gemini AI Processing</div>
-                    Analyzing leaf images for {plant_label} diseases...
-                </div>""",
-                unsafe_allow_html=True,
-            )
+            with st.spinner(f"Analyzing {plant_label}..."):
+                progress_placeholder.markdown(
+                    f"""<div class="info-section">
+                        <div class="info-title">Gemini AI Processing</div>
+                        Analyzing leaf images for {plant_label} diseases...
+                    </div>""",
+                    unsafe_allow_html=True,
+                )
             
-            try:
-                model_id = "gemini-2.5-pro" if "Pro" in st.session_state.model_choice else "gemini-2.5-flash"
-                model_name = (
-                    "Gemini 2.5 Pro"
-                    if "Pro" in st.session_state.model_choice
-                    else "Gemini 2.5 Flash"
-                )
+                try:
+                    model_id = "gemini-2.5-pro" if "Pro" in st.session_state.model_choice else "gemini-2.5-flash"
+                    model_name = (
+                        "Gemini 2.5 Pro"
+                        if "Pro" in st.session_state.model_choice
+                        else "Gemini 2.5 Flash"
+                    )
                 
-                model = genai.GenerativeModel(model_id)
-                common_diseases = PLANT_COMMON_DISEASES.get(plant_label, "various plant diseases")
+                    model = genai.GenerativeModel(model_id)
+                    common_diseases = PLANT_COMMON_DISEASES.get(plant_label, "various plant diseases")
                 
-                prompt = EXPERT_PROMPT_TEMPLATE.format(
-                    plant_type=plant_label,
-                    common_diseases=common_diseases,
-                )
+                    prompt = EXPERT_PROMPT_TEMPLATE.format(
+                        plant_type=plant_label,
+                        common_diseases=common_diseases,
+                    )
                 
-                enhanced_images = [enhance_image_for_analysis(img.copy()) for img in images]
-                response = model.generate_content([prompt] + enhanced_images)
+                    enhanced_images = [enhance_image_for_analysis(img.copy()) for img in images]
+                    response = model.generate_content([prompt] + enhanced_images)
                 
-                raw_response = response.text
+                    raw_response = response.text
                 
-                # Parse result
-                result = extract_json_robust(raw_response)
+                    # Parse result
+                    result = extract_json_robust(raw_response)
                 
-                if result is None:
-                    st.error("Could not parse AI response")
-                else:
-                    confidence = result.get('confidence', 0)
-                    if confidence < st.session_state.confidence_min:
-                        st.warning(f"Low Confidence: {confidence}%")
+                    if result is None:
+                        st.error("Could not parse AI response")
+                    else:
+                        confidence = result.get('confidence', 0)
+                        if confidence < st.session_state.confidence_min:
+                            st.warning(f"Low Confidence: {confidence}%")
                     
-                    # Save diagnosis context
-                    st.session_state.last_diagnosis = {
-                        'plant_type': plant_label,
-                        'disease_name': result.get('disease_name', 'Unknown'),
-                        'disease_type': result.get('disease_type', 'unknown'),
-                        'severity': result.get('severity', 'unknown'),
-                        'confidence': confidence,
-                        'timestamp': datetime.now().isoformat(),
-                        'result': result
-                    }
+                        # Save diagnosis context
+                        st.session_state.last_diagnosis = {
+                            'plant_type': plant_label,
+                            'disease_name': result.get('disease_name', 'Unknown'),
+                            'disease_type': result.get('disease_type', 'unknown'),
+                            'severity': result.get('severity', 'unknown'),
+                            'confidence': confidence,
+                            'timestamp': datetime.now().isoformat(),
+                            'result': result
+                        }
                     
-                    # Set default infected plant count if not exists
-                    if 'farm_infected_plants' not in st.session_state:
-                        st.session_state.farm_infected_plants = 50
-                    if 'farm_total_plants' not in st.session_state:
-                        st.session_state.farm_total_plants = 1000
+                        # Set default infected plant count if not exists
+                        if 'farm_infected_plants' not in st.session_state:
+                            st.session_state.farm_infected_plants = 50
+                        if 'farm_total_plants' not in st.session_state:
+                            st.session_state.farm_total_plants = 1000
                         
+                        progress_placeholder.empty()
+                    
+                        # Render the diagnosis UI
+                        render_diagnosis_and_treatments(
+                            result, 
+                            plant_label, 
+                            infected_count=st.session_state.farm_infected_plants
+                        )
+                    
+                except Exception as e:
                     progress_placeholder.empty()
+                    if "429" in str(e) or "quota" in str(e).lower() or "rate" in str(e).lower():
+                        st.markdown(
+                            """<div class="warning-box">
+                            <b>Too many requests!</b> The AI is taking a short break.<br>
+                            Please wait <b>60 seconds</b> and try again. This is temporary.
+                            </div>""",
+                            unsafe_allow_html=True,
+                        )
+                    else:
+                        st.markdown(
+                            f"""<div class="error-box">
+                            <b>Analysis Failed.</b> Please try again.<br>
+                            <span style="font-size:0.8rem; color:#aaa;">{str(e)}</span>
+                            </div>""",
+                            unsafe_allow_html=True,
+                        )
                     
-                    # Render the diagnosis UI
-                    render_diagnosis_and_treatments(
-                        result, 
-                        plant_label, 
-                        infected_count=st.session_state.farm_infected_plants
-                    )
-                    
-            except Exception as e:
                 progress_placeholder.empty()
-                if "429" in str(e) or "quota" in str(e).lower() or "rate" in str(e).lower():
-                    st.markdown(
-                        """<div class="warning-box">
-                        <b>Too many requests!</b> The AI is taking a short break.<br>
-                        Please wait <b>60 seconds</b> and try again. This is temporary.
-                        </div>""",
-                        unsafe_allow_html=True,
-                    )
-                else:
-                    st.markdown(
-                        f"""<div class="error-box">
-                        <b>Analysis Failed.</b> Please try again.<br>
-                        <span style="font-size:0.8rem; color:#aaa;">{str(e)}</span>
-                        </div>""",
-                        unsafe_allow_html=True,
-                    )
-                    
-            progress_placeholder.empty()
 
         diag = st.session_state.get("last_diagnosis")
     
