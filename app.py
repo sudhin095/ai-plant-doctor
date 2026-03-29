@@ -1469,6 +1469,14 @@ def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_coun
             """,
             unsafe_allow_html=True,
         )
+    
+        render_treatment_selection_ui(
+        plant_type=plant_type,
+        disease_name=disease_name,
+        organic_treatments=organic_treatments,
+        chemical_treatments=chemical_treatments,
+        default_infected_count=infected_count,
+        )
 
 
     return organic_total_block, chemical_total_block
