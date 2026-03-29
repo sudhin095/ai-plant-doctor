@@ -1809,15 +1809,18 @@ if page == "AI Plant Doctor":
 
     images = None
     analyze_btn = False
-    if uploaded_files and len(uploaded_files) > 0 and plant_type and plant_type != "Select a plant...":
+
+    if uploaded_files and len(uploaded_files) > 0:
         if len(uploaded_files) > 3:
             st.warning("Maximum 3 images. Only first 3 will be analyzed.")
             uploaded_files = uploaded_files[:3]
+
         images = [Image.open(f) for f in uploaded_files]
 
         if st.session_state.show_tips:
+            title_name = plant_type if plant_type and plant_type != "Select a plant..." else "the plant"
             st.markdown(
-                f"""<div class="tips-card"><div class="tips-card-title">Analyzing {plant_type}</div>Gemini diagnosis in progress...</div>""",
+                f"""<div class="tips-card"><div class="tips-card-title">Ready to Analyze {title_name}</div>Upload complete. Click the button below to get the AI diagnosis.</div>""",
                 unsafe_allow_html=True,
             )
 
@@ -1833,16 +1836,24 @@ if page == "AI Plant Doctor":
 
         col_b1, col_b2, col_b3 = st.columns(3)
         with col_b2:
-            analyze_btn = st.button(
-                f"Analyze {plant_type}", use_container_width=True, type="primary"
-            )
+            button_label = f"Analyze {plant_type}" if plant_type and plant_type != "Select a plant..." else "Analyze Plant"
+            analyze_btn = st.button(button_label, use_container_width=True, type="primary")
 
-    if analyze_btn and images is not None and plant_type:
+    # ===== FIXED ANALYSIS BLOCK =====
+    if analyze_btn and images is not None:
         progress_placeholder = st.empty()
-        with st.spinner(f"Analyzing {plant_type}..."):
-            try:
-                progress_placeholder.info(f"Processing {plant_type} leaf...")
-
+        
+        # Set default plant name if none given
+        plant_label = plant_type if plant_type and plant_type != "Select a plant..." else "Unknown Plant"
+        
+        with st.spinner(f"Analyzing {plant_label}..."):
+            progress_placeholder.markdown(
+                f"""<div class="info-section">
+                    <div class="info-title">Gemini AI Processing</div>
+                    Analyzing leaf images for {plant_label} diseases...
+                </div>""",
+                unsafe_allow_html=True
+            )
 
                 model_name = (
                     "Gemini 2.5 Pro"
