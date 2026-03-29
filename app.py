@@ -1043,7 +1043,6 @@ h2, h3, h4 {
 """,
     unsafe_allow_html=True,
 )
-
 # ============ GEMINI CONFIG ============
 try:
     genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
