@@ -1865,7 +1865,7 @@ if page == "AI Plant Doctor":
                     if "Pro" in st.session_state.model_choice
                     else "gemini-2.5-flash"
                 )
-
+            try: 
                 model = genai.GenerativeModel(model_id)
 
                 if st.session_state.debug_mode:
