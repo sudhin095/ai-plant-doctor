@@ -1083,14 +1083,32 @@ except Exception:
 
 # ─── Optional clients (won't crash if keys missing) ────────────────────────
 def _get_secret(name: str) -> str:
-    """Read from st.secrets first (Streamlit Cloud), fallback to os.environ (local)."""
+    """
+    Bulletproof secret reader — works on Streamlit Cloud AND local dev.
+    Strategy:
+      1. st.secrets[name]         — direct key lookup (most reliable on Cloud)
+      2. st.secrets.get(name, "") — fallback for older Streamlit
+      3. os.environ.get(name, "") — local .env / shell exports
+    """
+    # Method 1: direct bracket access (handles [section] nesting too)
     try:
-        v = st.secrets.get(name, "")
-        if v:
-            return v
+        if hasattr(st, "secrets") and name in st.secrets:
+            val = st.secrets[name]
+            if val:
+                return str(val).strip()
     except Exception:
         pass
-    return os.environ.get(name, "")
+    # Method 2: .get() method
+    try:
+        if hasattr(st, "secrets"):
+            val = st.secrets.get(name, "")
+            if val:
+                return str(val).strip()
+    except Exception:
+        pass
+    # Method 3: environment variable
+    val = os.environ.get(name, "")
+    return val.strip() if val else ""
 
 _groq_key       = _get_secret("GROQ_API_KEY")
 _openrouter_key = _get_secret("OPENROUTER_API_KEY")
@@ -2083,152 +2101,158 @@ with col4:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
+# ============ SESSION STATE PRE-INIT (must be before sidebar) ============
+if "debug_mode" not in st.session_state:
+    st.session_state.debug_mode = False
+if "show_tips" not in st.session_state:
+    st.session_state.show_tips = True
+if "confidence_min" not in st.session_state:
+    st.session_state.confidence_min = 65
+
 # ============ SIDEBAR ============
 with st.sidebar:
+    # ── Navigation ────────────────────────────────────────────────
     page = st.radio(
-        "📂 Pages",
+        "📂 Navigation",
         ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"],
+        label_visibility="collapsed",
     )
     st.markdown("---")
 
-    # ── Connection badges ─────────────────────────────────────────
-    st.markdown("### 🤖 AI Engine Status")
-    col_g, col_gr = st.columns(2)
-    with col_g:
-        st.markdown(
-            "<div style='background:rgba(46,204,110,0.12);border:1px solid rgba(46,204,110,0.4);"
-            "border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;'>"
-            "<b style='color:#2ecc6e'>✅ Gemini</b><br><span style='color:#8fbf9a'>Active</span></div>",
-            unsafe_allow_html=True
+    # ── API Status row ────────────────────────────────────────────
+    st.markdown(
+        "<p style='font-size:0.72rem;font-weight:800;color:#8fbf9a;"
+        "letter-spacing:0.14em;text-transform:uppercase;margin-bottom:8px'>API Status</p>",
+        unsafe_allow_html=True
+    )
+    _status_items = [
+        ("Gemini", True, "#2ecc6e"),
+        ("Groq", bool(_groq_client), "#2ecc6e" if _groq_client else "#f05c5c"),
+        ("OpenRouter", bool(_openrouter_client), "#2ecc6e" if _openrouter_client else "#f0b040"),
+    ]
+    _status_html = "<div style='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px'>"
+    for _name, _ok, _col in _status_items:
+        _icon = "✅" if _ok else ("⚠️" if _name == "Groq" else "○")
+        _status_html += (
+            f"<span style='background:rgba(30,30,30,0.6);border:1px solid {_col}44;"
+            f"border-radius:20px;padding:3px 10px;font-size:0.73rem;"
+            f"color:{_col};white-space:nowrap'>{_icon} {_name}</span>"
         )
-    with col_gr:
-        if _groq_client:
-            st.markdown(
-                "<div style='background:rgba(46,204,110,0.12);border:1px solid rgba(46,204,110,0.4);"
-                "border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;'>"
-                "<b style='color:#2ecc6e'>✅ Groq</b><br><span style='color:#8fbf9a'>Connected</span></div>",
-                unsafe_allow_html=True
-            )
-        else:
-            st.markdown(
-                "<div style='background:rgba(240,92,92,0.10);border:1px solid rgba(240,92,92,0.35);"
-                "border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;'>"
-                "<b style='color:#f05c5c'>⚠️ Groq</b><br><span style='color:#f05c5c'>No key</span></div>",
-                unsafe_allow_html=True
-            )
-
-    col_or, col_cache = st.columns(2)
-    with col_or:
-        if _openrouter_client:
-            st.markdown(
-                "<div style='background:rgba(46,204,110,0.12);border:1px solid rgba(46,204,110,0.4);"
-                "border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;'>"
-                "<b style='color:#2ecc6e'>✅ OpenRouter</b><br><span style='color:#8fbf9a'>Connected</span></div>",
-                unsafe_allow_html=True
-            )
-        else:
-            st.markdown(
-                "<div style='background:rgba(240,176,64,0.10);border:1px solid rgba(240,176,64,0.35);"
-                "border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;'>"
-                "<b style='color:#f0b040'>ℹ️ OpenRouter</b><br><span style='color:#f0b040'>Optional</span></div>",
-                unsafe_allow_html=True
-            )
-    with col_cache:
-        cache_count = len(_RESPONSE_CACHE)
-        st.markdown(
-            f"<div style='background:rgba(92,168,240,0.10);border:1px solid rgba(92,168,240,0.35);"
-            f"border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;'>"
-            f"<b style='color:#5ca8f0'>⚡ Cache</b><br><span style='color:#5ca8f0'>{cache_count} saved</span></div>",
-            unsafe_allow_html=True
-        )
-
+    _status_html += f"<span style='background:rgba(92,168,240,0.12);border:1px solid #5ca8f044;"                     f"border-radius:20px;padding:3px 10px;font-size:0.73rem;color:#5ca8f0;white-space:nowrap'>"                     f"⚡ {len(_RESPONSE_CACHE)} cached</span></div>"
+    st.markdown(_status_html, unsafe_allow_html=True)
     st.markdown("---")
 
-    # ── Vision model chooser ──────────────────────────────────────
-    st.markdown("### 🔭 Vision Model")
-    st.caption("Choose which Gemini model runs FIRST for plant diagnosis")
-
+    # ── 🔭 Vision Model selector ──────────────────────────────────
+    st.markdown(
+        "<p style='font-size:0.72rem;font-weight:800;color:#8fbf9a;"
+        "letter-spacing:0.14em;text-transform:uppercase;margin-bottom:6px'>🔭 Vision Model</p>",
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        "<p style='font-size:0.75rem;color:#3f5c47;margin-bottom:6px'>"
+        "Primary model for plant diagnosis. Falls back automatically if quota is hit.</p>",
+        unsafe_allow_html=True
+    )
     vision_primary = st.selectbox(
-        "Primary vision model",
+        "vision_model",
         [
-            "gemini-2.5-flash  ✦ Best Quality (250/day)",
-            "gemini-1.5-flash  ⚡ High Quota (1,500/day)",
-            "gemini-1.5-flash-8b  🪶 Lightest (1,500/day)",
+            "gemini-2.5-flash — Best Quality (250/day)",
+            "gemini-1.5-flash — High Quota (1,500/day)",
+            "gemini-1.5-flash-8b — Lightest (1,500/day)",
         ],
         index=0,
         label_visibility="collapsed",
-        key="vision_primary_choice"
+        key="vision_primary_choice",
     )
-    # Map display → model id
     _vision_primary_map = {
-        "gemini-2.5-flash  ✦ Best Quality (250/day)": "gemini-2.5-flash",
-        "gemini-1.5-flash  ⚡ High Quota (1,500/day)": "gemini-1.5-flash",
-        "gemini-1.5-flash-8b  🪶 Lightest (1,500/day)": "gemini-1.5-flash-8b",
+        "gemini-2.5-flash — Best Quality (250/day)":   "gemini-2.5-flash",
+        "gemini-1.5-flash — High Quota (1,500/day)":   "gemini-1.5-flash",
+        "gemini-1.5-flash-8b — Lightest (1,500/day)":  "gemini-1.5-flash-8b",
     }
     _chosen_primary = _vision_primary_map[vision_primary]
-    # Rebuild chain: chosen first, then remaining two in default order
-    _default_remaining = [m for m in ["gemini-2.5-flash","gemini-1.5-flash","gemini-1.5-flash-8b"] if m != _chosen_primary]
+    _default_remaining = [m for m in ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"]
+                          if m != _chosen_primary]
     VISION_MODEL_CHAIN[:] = [_chosen_primary] + _default_remaining
 
-    use_openrouter_vision = st.checkbox(
-        "🌐 Enable Qwen2.5-VL fallback (OpenRouter)",
-        value=bool(_openrouter_client),
-        disabled=not bool(_openrouter_client),
-        help="Uses Qwen2.5-VL-7B via OpenRouter as emergency vision fallback when all Gemini models are at capacity"
-    )
-
-    # Prefer Pro toggle
     prefer_pro_toggle = st.checkbox(
-        "⭐ Try gemini-2.5-pro first (slower, most accurate)",
+        "Use gemini-2.5-pro (best accuracy, slower)",
         value=False,
         key="model_choice",
-        help="Prepends gemini-2.5-pro to the chain. Uses more quota but gives best possible accuracy."
+        help="Prepends gemini-2.5-pro to the vision chain for maximum accuracy. Uses more quota.",
     )
 
+    # OpenRouter vision fallback — silently wired in, no toggle needed
+    # (auto-enabled if key present, ignored otherwise)
     st.markdown("---")
 
-    # ── Text model chooser ────────────────────────────────────────
-    st.markdown("### 💬 Text Model (Chatbot & Tools)")
-    st.caption("Groq handles chatbot, crop rotation & translation")
-
-    if _groq_client:
-        groq_primary = st.selectbox(
-            "Primary text model",
-            [
-                "llama-3.1-8b-instant  ⚡ 14,400/day (Fastest)",
-                "llama-3.3-70b-versatile  🧠 1,000/day (Best Quality)",
-            ],
-            index=0,
-            label_visibility="collapsed",
-            key="groq_primary_choice"
-        )
-        _groq_primary_map = {
-            "llama-3.1-8b-instant  ⚡ 14,400/day (Fastest)": "llama-3.1-8b-instant",
-            "llama-3.3-70b-versatile  🧠 1,000/day (Best Quality)": "llama-3.3-70b-versatile",
-        }
-        _chosen_groq = _groq_primary_map[groq_primary]
-        _groq_remaining = [m for m in ["llama-3.1-8b-instant","llama-3.3-70b-versatile"] if m != _chosen_groq]
-        GROQ_TEXT_MODELS[:] = [_chosen_groq] + _groq_remaining
-    else:
-        st.caption("⚠️ Add `GROQ_API_KEY` to Streamlit secrets for 14,400 free text req/day")
-
-    st.markdown("---")
-
-    # ── Daily quota summary ───────────────────────────────────────
-    st.markdown("### 📊 Daily Free Quota")
-    total_vision = 250 + 1500 + 1500
-    total_text   = (14400 if _groq_client else 0) + 1500
+    # ── 💬 Text Model selector ─────────────────────────────────────
     st.markdown(
-        f"<div style='font-size:0.82rem;color:#8fbf9a;line-height:1.8'>"
-        f"🔭 Vision: <b style='color:#2ecc6e'>~{total_vision:,} req/day</b><br>"
-        f"💬 Text: <b style='color:#2ecc6e'>~{total_text:,} req/day</b>"
-        + (" + ∞ OpenRouter" if _openrouter_client else "")
-        + "</div>",
+        "<p style='font-size:0.72rem;font-weight:800;color:#8fbf9a;"
+        "letter-spacing:0.14em;text-transform:uppercase;margin-bottom:6px'>💬 Text Model</p>",
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        "<p style='font-size:0.75rem;color:#3f5c47;margin-bottom:6px'>"
+        "Used for KisanAI chat, crop rotation & translation. Groq is fastest.</p>",
         unsafe_allow_html=True
     )
 
+    # Always show text model selector — Groq options if connected, Gemini if not
+    if _groq_client:
+        _text_options = [
+            "Groq — Llama 3.1-8B  (14,400/day, Fastest)",
+            "Groq — Llama 3.3-70B  (1,000/day, Best Quality)",
+            "Gemini 1.5 Flash  (fallback only)",
+        ]
+    else:
+        _text_options = [
+            "Gemini 1.5 Flash  (1,500/day)",
+            "Gemini 2.5 Flash  (250/day)",
+        ]
+
+    text_model_choice = st.selectbox(
+        "text_model",
+        _text_options,
+        index=0,
+        label_visibility="collapsed",
+        key="text_model_choice",
+    )
+
+    # Wire the text model choice into the live Groq chain
+    if _groq_client:
+        if "Llama 3.3-70B" in text_model_choice:
+            GROQ_TEXT_MODELS[:] = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+        else:
+            GROQ_TEXT_MODELS[:] = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]
+
+    if not _groq_client:
+        st.markdown(
+            "<p style='font-size:0.73rem;color:#f0b040;margin-top:4px'>"
+            "💡 Add <code>GROQ_API_KEY</code> in Streamlit secrets for 14,400 free req/day</p>",
+            unsafe_allow_html=True
+        )
+
     st.markdown("---")
-    st.caption("🔒 All API keys loaded from Streamlit Secrets")
+
+    # ── ⚙️ Settings ───────────────────────────────────────────────
+    st.markdown(
+        "<p style='font-size:0.72rem;font-weight:800;color:#8fbf9a;"
+        "letter-spacing:0.14em;text-transform:uppercase;margin-bottom:6px'>⚙️ Settings</p>",
+        unsafe_allow_html=True
+    )
+    st.session_state.debug_mode = st.checkbox(
+        "Debug mode", value=st.session_state.get("debug_mode", False)
+    )
+    st.session_state.show_tips = st.checkbox(
+        "Show tips", value=st.session_state.get("show_tips", True)
+    )
+    st.session_state.confidence_min = st.slider(
+        "Min confidence threshold",
+        min_value=30, max_value=90,
+        value=st.session_state.get("confidence_min", 65),
+        step=5,
+        help="Diagnoses below this confidence will show a low-confidence warning"
+    )
 
 # ============ SESSION STATE DEFAULTS ============
 if "last_diagnosis" not in st.session_state:
@@ -2245,12 +2269,7 @@ if "kisan_response" not in st.session_state:
     st.session_state.kisan_response = None
 if "model_choice" not in st.session_state:
     st.session_state.model_choice = False  # prefer_pro_toggle default
-if "debug_mode" not in st.session_state:
-    st.session_state.debug_mode = False
-if "show_tips" not in st.session_state:
-    st.session_state.show_tips = True
-if "confidence_min" not in st.session_state:
-    st.session_state.confidence_min = 65
+# debug_mode / show_tips / confidence_min managed by sidebar
 
 # ============ MAIN PAGES ============
 
