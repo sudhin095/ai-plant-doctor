@@ -5,6 +5,11 @@ try:
     GROQ_AVAILABLE = True
 except ImportError:
     GROQ_AVAILABLE = False
+try:
+    from openai import OpenAI as OpenAIClient
+    OPENAI_SDK_AVAILABLE = True
+except ImportError:
+    OPENAI_SDK_AVAILABLE = False
 from PIL import Image
 import os
 import json
@@ -283,7 +288,6 @@ REGIONS = ["North India", "South India", "East India", "West India", "Central In
 SOIL_TYPES = ["Black Soil", "Red Soil", "Laterite Soil", "Alluvial Soil", "Clay Soil"]
 MARKET_FOCUS = ["Stable essentials", "High-value cash crops", "Low input / low risk"]
 
-# ============ GLOBAL STYLES ============
 # ============ GLOBAL STYLES ============
 st.markdown(
     """
@@ -1049,22 +1053,27 @@ h2, h3, h4 {
 """,
     unsafe_allow_html=True,
 )
+
+
 # ============ MULTI-MODEL CONFIG ============
-# VISION FALLBACK CHAIN (all same Gemini key, separate quota pools)
-# Free limits: 2.5 Flash 250 RPD → 1.5 Flash 1500 RPD → 1.5 Flash-8B 1500 RPD
+# ─── Gemini vision chain (same API key, separate quota pools) ──────────────
+# Free limits: 2.5 Flash ~250 RPD → 1.5 Flash 1500 RPD → 1.5 Flash-8B 1500 RPD
 VISION_MODEL_CHAIN = [
-    "gemini-2.5-flash",       # Best quality, 250 RPD free
-    "gemini-1.5-flash",       # Great quality, 1500 RPD free (6x more!)
-    "gemini-1.5-flash-8b",    # Lighter, 1500 RPD free (last resort)
+    "gemini-2.5-flash",       # PRIMARY  — best quality (250 RPD)
+    "gemini-1.5-flash",       # FALLBACK — higher quota (1500 RPD)
+    "gemini-1.5-flash-8b",    # LAST RESORT — lightest (1500 RPD)
 ]
 
-# TEXT FALLBACK CHAIN (Groq is completely free, 14400 RPD)
-# Used for: KisanAI chatbot, crop rotation, translation
-TEXT_MODEL_CHAIN = {
-    "groq_primary":   "llama-3.3-70b-versatile",  # 30 RPM, 1000 RPD free
-    "groq_fast":      "llama-3.1-8b-instant",      # 30 RPM, 14400 RPD free
-    "gemini_fallback":"gemini-1.5-flash",           # Fallback if Groq unavailable
-}
+# ─── OpenRouter vision fallback (completely free via openrouter.ai) ────────
+OPENROUTER_VISION_MODEL = "qwen/qwen-2.5-vl-7b-instruct:free"
+OPENROUTER_TEXT_MODEL   = "meta-llama/llama-3.3-70b-instruct:free"
+
+# ─── Text-only chain (chatbot, crop rotation, translation) ────────────────
+# Groq: 14,400 free RPD  |  OpenRouter: unlimited free tier
+GROQ_TEXT_MODELS = [
+    "llama-3.1-8b-instant",     # 14,400 RPD free — very fast
+    "llama-3.3-70b-versatile",  # 1,000  RPD free — highest quality
+]
 
 try:
     genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
@@ -1072,64 +1081,211 @@ except Exception:
     st.error("GEMINI_API_KEY not found in environment variables!")
     st.stop()
 
-# Setup Groq client (optional — only for text tasks)
-_groq_key = os.environ.get("GROQ_API_KEY", "")
+# ─── Optional clients (won't crash if keys missing) ────────────────────────
+_groq_key        = os.environ.get("GROQ_API_KEY", "")
+_openrouter_key  = os.environ.get("OPENROUTER_API_KEY", "")
+
 _groq_client = None
+_openrouter_client = None
+
 if GROQ_AVAILABLE and _groq_key:
     try:
         _groq_client = GroqClient(api_key=_groq_key)
     except Exception:
         _groq_client = None
 
-def _is_quota_error(e):
-    s = str(e).lower()
-    return any(x in s for x in ["429", "quota", "rate limit", "resource_exhausted", "too many"])
+if OPENAI_SDK_AVAILABLE and _openrouter_key:
+    try:
+        _openrouter_client = OpenAIClient(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=_openrouter_key,
+        )
+    except Exception:
+        _openrouter_client = None
 
-def gemini_vision_with_fallback(parts: list, model_preference: str = "auto"):
-    """Try vision models in fallback order. Returns (response_text, model_used)."""
-    chain = VISION_MODEL_CHAIN.copy()
-    # If user explicitly chose Pro, try it first
-    if model_preference == "pro":
-        chain = ["gemini-2.5-pro"] + chain
-    for model_id in chain:
+# ─── Response cache (avoid re-calling API for same image+plant) ──────────────
+import hashlib as _hashlib
+_RESPONSE_CACHE: dict = {}   # { cache_key: (result_dict, raw_text) }
+_CACHE_MAX = 50              # keep last 50 results in memory
+
+def _make_cache_key(parts: list, plant_type: str) -> str:
+    hasher = _hashlib.md5()
+    hasher.update(plant_type.encode())
+    for p in parts:
+        if isinstance(p, str):
+            hasher.update(p[:200].encode())
+        else:
+            try:
+                import io as _io
+                buf = _io.BytesIO()
+                p.save(buf, format="PNG")
+                hasher.update(buf.getvalue()[:4096])
+            except Exception:
+                pass
+    return hasher.hexdigest()
+
+def _cache_get(key: str):
+    return _RESPONSE_CACHE.get(key)
+
+def _cache_set(key: str, value):
+    if len(_RESPONSE_CACHE) >= _CACHE_MAX:
+        oldest = next(iter(_RESPONSE_CACHE))
+        del _RESPONSE_CACHE[oldest]
+    _RESPONSE_CACHE[key] = value
+
+def _is_quota_err(e):
+    s = str(e).lower()
+    return any(x in s for x in ["429", "quota", "rate limit", "resource_exhausted",
+                                  "too many", "overloaded", "capacity"])
+
+def _retry_generate(model_id: str, parts: list, max_retries: int = 3):
+    """Single model call with exponential back-off on transient/quota errors."""
+    import time as _time
+    last_err = None
+    for attempt in range(max_retries):
         try:
             m = genai.GenerativeModel(model_id)
             resp = m.generate_content(parts)
-            return resp.text, model_id
+            text = getattr(resp, "text", "") or ""
+            if text.strip():
+                return text
+            raise ValueError("Empty response from model")
         except Exception as e:
-            if _is_quota_error(e):
-                continue   # try next model
-            raise          # non-quota error → re-raise
-    raise RuntimeError("All Gemini vision models exhausted quota. Please wait and try again.")
+            last_err = e
+            is_quota = _is_quota_err(e)
+            is_transient = any(x in str(e).lower() for x in
+                               ["500", "503", "internal", "unavailable", "timeout",
+                                "deadline", "empty", "connection"])
+            if (is_quota or is_transient) and attempt < max_retries - 1:
+                wait = 2 ** attempt          # 1s → 2s → 4s
+                _time.sleep(wait)
+                continue
+            break
+    raise last_err
+
+def gemini_vision_with_fallback(parts: list, prefer_pro: bool = False):
+    """
+    Ultra-stable vision call:
+      1. Gemini 2.5 Flash  (primary, best quality)
+      2. Gemini 1.5 Flash  (fallback, higher quota)
+      3. Gemini 1.5 Flash-8B (last-resort Gemini)
+      4. OpenRouter Qwen2.5-VL (free, no key required beyond OR key)
+    Each model gets up to 3 auto-retries with exponential back-off.
+    """
+    chain = VISION_MODEL_CHAIN.copy()
+    if prefer_pro:
+        chain = ["gemini-2.5-pro"] + chain
+
+    last_err = None
+    for model_id in chain:
+        try:
+            text = _retry_generate(model_id, parts, max_retries=3)
+            return text, model_id
+        except Exception as e:
+            last_err = e
+            if _is_quota_err(e):
+                continue          # quota hit → try next model immediately
+            # Non-quota hard error on primary → still try fallbacks
+            continue
+
+    # All Gemini models exhausted → OpenRouter Qwen vision
+    if _openrouter_client:
+        try:
+            import base64 as _b64, io as _io
+            content_parts = []
+            for part in parts:
+                if isinstance(part, str):
+                    content_parts.append({"type": "text", "text": part})
+                else:
+                    buf = _io.BytesIO()
+                    part.save(buf, format="PNG")
+                    b64 = _b64.b64encode(buf.getvalue()).decode()
+                    content_parts.append({
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/png;base64,{b64}"}
+                    })
+            resp = _openrouter_client.chat.completions.create(
+                model=OPENROUTER_VISION_MODEL,
+                messages=[{"role": "user", "content": content_parts}],
+                max_tokens=3000,
+                timeout=30,
+            )
+            text = resp.choices[0].message.content or ""
+            if text.strip():
+                return text, OPENROUTER_VISION_MODEL
+        except Exception as or_err:
+            last_err = or_err
+
+    raise RuntimeError(
+        "⏳ All vision models are temporarily at capacity. "
+        "Please wait ~60 seconds and try again. "
+        f"(Last error: {str(last_err)[:100]})"
+    )
 
 def gemini_text_with_fallback(prompt: str):
-    """Try Groq first (free, fast), fall back to Gemini for text-only tasks."""
-    # 1. Try Groq primary (best quality, free)
+    """
+    Ultra-stable text call:
+      1. Groq Llama-3.1-8B  (14,400 free RPD — fastest)
+      2. Groq Llama-3.3-70B (1,000  free RPD — best quality)
+      3. OpenRouter Llama-70B (free tier)
+      4. Gemini 2.5 Flash → 1.5 Flash → 1.5 Flash-8B
+    Each provider gets auto-retries with back-off.
+    """
+    import time as _time
+
+    # 1. Groq — fastest + highest free quota
     if _groq_client:
-        for groq_model in [TEXT_MODEL_CHAIN["groq_primary"], TEXT_MODEL_CHAIN["groq_fast"]]:
+        for gm in GROQ_TEXT_MODELS:
+            for attempt in range(3):
+                try:
+                    resp = _groq_client.chat.completions.create(
+                        model=gm,
+                        messages=[{"role": "user", "content": prompt}],
+                        max_tokens=2048,
+                        temperature=0.3,
+                        timeout=20,
+                    )
+                    text = (resp.choices[0].message.content or "").strip()
+                    if text:
+                        return text, f"Groq/{gm}"
+                except Exception as e:
+                    if _is_quota_err(e) and attempt < 2:
+                        _time.sleep(2 ** attempt)
+                        continue
+                    break
+
+    # 2. OpenRouter text
+    if _openrouter_client:
+        for attempt in range(2):
             try:
-                resp = _groq_client.chat.completions.create(
-                    model=groq_model,
+                resp = _openrouter_client.chat.completions.create(
+                    model=OPENROUTER_TEXT_MODEL,
                     messages=[{"role": "user", "content": prompt}],
                     max_tokens=2048,
-                    temperature=0.3,
+                    timeout=25,
                 )
-                return resp.choices[0].message.content.strip(), f"Groq/{groq_model.split('-')[1]}"
+                text = (resp.choices[0].message.content or "").strip()
+                if text:
+                    return text, "OpenRouter/Llama-70B"
             except Exception as e:
-                if _is_quota_error(e):
+                if _is_quota_err(e) and attempt < 1:
+                    _time.sleep(2)
                     continue
                 break
-    # 2. Fall back to Gemini text models
-    for model_id in ["gemini-1.5-flash", "gemini-2.5-flash", "gemini-1.5-flash-8b"]:
+
+    # 3. Gemini text fallback chain
+    for model_id in ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"]:
         try:
-            m = genai.GenerativeModel(model_id)
-            resp = m.generate_content(prompt)
-            return resp.text.strip(), model_id
+            text = _retry_generate(model_id, [prompt], max_retries=3)
+            return text, model_id
         except Exception as e:
-            if _is_quota_error(e):
+            if _is_quota_err(e):
                 continue
-            raise
-    raise RuntimeError("All text models exhausted quota. Please wait a moment and try again.")
+            continue
+
+    raise RuntimeError(
+        "⏳ All text models are temporarily at capacity. Please wait a moment and try again."
+    )
 
 EXPERT_PROMPT_TEMPLATE = """You are a world-class plant pathologist and image analyst with 40 years of field experience diagnosing diseases in {plant_type}.
 
@@ -1669,8 +1825,8 @@ def translate_report(report_text, language):
         result, _ = gemini_text_with_fallback(prompt)
         return result
     except Exception as e:
-        if _is_quota_error(e):
-            return report_text + "\n\n⏳ Translation unavailable right now — all models at capacity. Try again in 60 seconds."
+        if _is_quota_err(e):
+            return report_text + "\n\n⏳ Translation unavailable — all models at capacity. Try again shortly."
         return report_text + f"\n\n❌ Translation failed: {str(e)[:80]}"
         
 def calculate_loss_percentage(severity, infected_count, total_plants):
@@ -1718,12 +1874,23 @@ def enhance_image_for_analysis(image):
     return image
 
 
+def _repair_json(s: str) -> str:
+    """Best-effort JSON repair: trailing commas, single quotes, unescaped newlines."""
+    # Remove trailing commas before } or ]
+    s = re.sub(r",\s*([}\]])", r"\1", s)
+    # Replace smart quotes
+    s = s.replace("\u201c", '"').replace("\u201d", '"').replace("\u2018", "'").replace("\u2019", "'")
+    # Fix unescaped literal newlines inside strings (heuristic)
+    s = re.sub(r'(?<!\\)\n(?=[^"]*")', ' ', s)
+    return s
+
 def extract_json_robust(response_text):
     """
     Safely extract a JSON object from the model response.
-    Returns a dict on success, or None on failure.
+    Handles: markdown fences, trailing commas, smart quotes,
+             partial JSON, and completely broken responses.
+    Returns a dict on success, or None on total failure.
     """
-    # Normalize to string
     if isinstance(response_text, list):
         response_text = "\n".join(str(x) for x in response_text)
     elif not isinstance(response_text, str):
@@ -1732,7 +1899,7 @@ def extract_json_robust(response_text):
     if not response_text or not response_text.strip():
         return None
 
-    # 1) Try direct JSON
+    # 1) Direct parse
     try:
         return json.loads(response_text)
     except Exception:
@@ -1741,27 +1908,53 @@ def extract_json_robust(response_text):
     cleaned = response_text
 
     # 2) Strip ```json ... ``` or ``` ... ``` fences
-    if "```json" in cleaned:
-        parts = cleaned.split("```json", 1)
-        if len(parts) > 1:
-            cleaned = parts[1]
-        if "```" in cleaned:
-            cleaned = cleaned.split("```", 1)[0]
-    elif "```" in cleaned:
-        parts = cleaned.split("```", 1)
-        if len(parts) > 1:
-            cleaned = parts[1]
-        if "```" in cleaned:
-            cleaned = cleaned.split("```", 1)[0]
-
+    for fence in ["```json", "```"]:
+        if fence in cleaned:
+            parts = cleaned.split(fence, 1)
+            if len(parts) > 1:
+                cleaned = parts[1]
+            if "```" in cleaned:
+                cleaned = cleaned.split("```", 1)[0]
+            break
     cleaned = cleaned.strip()
 
-    # 3) Fallback: first {...} block
+    # 3) Try cleaned version
     try:
         return json.loads(cleaned)
     except Exception:
         pass
 
+    # 4) Find first {...} block
+    match = re.search(r"\{[\s\S]*\}", cleaned or response_text)
+    if match:
+        candidate = match.group(0)
+        # 4a) direct parse of extracted block
+        try:
+            return json.loads(candidate)
+        except Exception:
+            pass
+        # 4b) repair + parse
+        try:
+            return json.loads(_repair_json(candidate))
+        except Exception:
+            pass
+        # 4c) greedy shrink — try progressively shorter closing
+        for end in range(len(candidate), max(len(candidate)-200, 0), -1):
+            try:
+                return json.loads(candidate[:end] + "}")
+            except Exception:
+                continue
+
+    # 5) Repair full cleaned string
+    try:
+        return json.loads(_repair_json(cleaned))
+    except Exception:
+        pass
+
+    # 6) Give up — return None so caller can show a friendly error
+    return None
+
+    # --- legacy continuation kept for structural parity ---
     match = re.search(r"\{[\s\S]*\}", response_text)
     if match:
         try:
@@ -1832,17 +2025,17 @@ def get_farmer_bot_response(user_question, diagnosis_context=None):
         "disease control, and sustainable farming practices.\n\n"
         f"{context_text}\n"
         f"Farmer question: {user_question}\n\n"
-        "Provide a comprehensive, detailed response (5-8 sentences) covering: "
-        "1. Direct answer to the question 2. Practical, cost-effective solutions for Indian farming conditions "
+        "Provide a comprehensive response (5-8 sentences) covering: "
+        "1. Direct answer 2. Practical, cost-effective solutions for Indian farming conditions "
         "3. Seasonal timing and weather considerations 4. Resource availability and sourcing "
         "5. Long-term sustainability recommendations.\n"
         "Use clear, professional English. Focus on actionable solutions."
     )
     try:
-        answer, model_used = gemini_text_with_fallback(prompt)
+        answer, _ = gemini_text_with_fallback(prompt)
         return answer
     except Exception as e:
-        return f"⚠️ All AI models are temporarily unavailable. Please try again in a minute. ({str(e)[:60]})"
+        return f"⚠️ All AI models are temporarily unavailable. Please try again in a minute."
 
 
 # ============ MAIN UI HEADER ============
@@ -1884,22 +2077,39 @@ with st.sidebar:
 
     st.header("🤖 Model Status")
     st.markdown("""
-    **🔭 Vision (Image Analysis)**
-    Auto-fallback chain:
-    1. Gemini 2.5 Flash *(250 req/day)*
-    2. Gemini 1.5 Flash *(1,500 req/day)*
-    3. Gemini 1.5 Flash-8B *(1,500 req/day)*
+**🔭 Vision (Plant Diagnosis)**
+Auto-fallback chain:
+1. `gemini-2.5-flash` *(Primary — best quality)*
+2. `gemini-1.5-flash` *(Fallback — 1,500/day)*
+3. `gemini-1.5-flash-8b` *(Last-resort Gemini)*
+4. `Qwen2.5-VL` via OpenRouter *(free emergency)*
+
+⚡ **Response cache** active — same image
+is never analyzed twice (saves API calls)
     """)
     if _groq_client:
-        st.success("✅ **Groq Connected**\nKisanAI chatbot & text tasks\nLlama 3.3-70B → 14,400 req/day free")
+        st.success("✅ **Groq Connected**\nText tasks use Llama 3.1-8B\n→ 14,400 free requests/day")
     else:
-        st.warning("⚠️ **Groq not configured**\nAdd `GROQ_API_KEY` to secrets for\n14,400 free text req/day via Groq")
-        st.caption("Get free key at console.groq.com")
+        st.warning(
+            "⚠️ **Groq not connected**\n"
+            "Add `GROQ_API_KEY` to secrets\n"
+            "for 14,400 free text req/day\n"
+            "[Get free key → console.groq.com]"
+        )
+    if _openrouter_client:
+        st.success("✅ **OpenRouter Connected**\nQwen vision + Llama text\nfallbacks active")
+    else:
+        st.info(
+            "ℹ️ **OpenRouter optional**\n"
+            "Add `OPENROUTER_API_KEY` for\n"
+            "unlimited Qwen vision fallback\n"
+            "[Get free key → openrouter.ai]"
+        )
     st.markdown("---")
-    st.markdown("**💡 Model Preference**")
-    model_pref_choice = st.selectbox(
-        "Vision quality",
-        ["Auto (Best Available)", "Prefer Pro (Slower, Best)", "Flash Only (Fastest)"],
+    st.markdown("**⚙️ Vision Quality**")
+    model_pref_ui = st.selectbox(
+        "Vision model preference",
+        ["Auto (Best Available)", "Prefer Pro (Best Quality)", "Flash Only (Fastest)"],
         label_visibility="collapsed",
         key="model_choice"
     )
@@ -2013,7 +2223,7 @@ if page == "AI Plant Doctor":
             try:
                 progress_placeholder.info("🔍 Step 1: Identifying plant species..." if plant_type == "AUTO_DETECT" else f"Processing {plant_type} leaf...")
 
-                model_pref = "pro" if "Pro" in str(st.session_state.get("model_choice", "")) else "auto"
+                prefer_pro = "Pro" in str(st.session_state.get("model_choice", ""))
                 enhanced_images = [
                     enhance_image_for_analysis(img.copy()) for img in images
                 ]
@@ -2021,25 +2231,31 @@ if page == "AI Plant Doctor":
                 # ── TWO-PASS for AUTO_DETECT ──────────────────────────
                 identified_plant = None
                 plant_id_result = None
-                _model_used = "unknown"
+                _vision_model_used = "unknown"
                 if plant_type == "AUTO_DETECT":
-                    id_raw, _model_used = gemini_vision_with_fallback(
-                        [PLANT_ID_PROMPT_TEMPLATE] + enhanced_images, model_pref
+                    id_raw, _vision_model_used = gemini_vision_with_fallback(
+                        [PLANT_ID_PROMPT_TEMPLATE] + enhanced_images, prefer_pro
                     )
                     plant_id_result = extract_json_robust(id_raw)
                     if plant_id_result and plant_id_result.get("is_plant_image", True):
                         identified_plant = plant_id_result.get("common_name", "Unknown Plant")
                         id_confidence = plant_id_result.get("identification_confidence", 0)
                         id_reason = plant_id_result.get("identification_reason", "")
-                        progress_placeholder.info(f"🌿 Plant identified: {identified_plant} ({id_confidence}% confidence) — via {_model_used}")
+                        progress_placeholder.info(
+                            f"🌿 Plant identified: {identified_plant} ({id_confidence}% confidence) "
+                            f"via {_vision_model_used}"
+                        )
                         effective_plant = identified_plant
                     else:
-                        effective_plant = None if (plant_id_result and not plant_id_result.get("is_plant_image", True)) else "Unknown Plant"
+                        effective_plant = (
+                            None if (plant_id_result and not plant_id_result.get("is_plant_image", True))
+                            else "Unknown Plant"
+                        )
                 else:
                     effective_plant = plant_type
 
                 if st.session_state.debug_mode:
-                    st.info(f"Vision model used: {_model_used}")
+                    st.info(f"🔭 Vision model: {_vision_model_used}")
 
                 # ── DISEASE DIAGNOSIS PASS ────────────────────────────
                 if effective_plant is None:
@@ -2050,18 +2266,30 @@ if page == "AI Plant Doctor":
                               "differential_diagnosis": [], "plant_specific_notes": "", "similar_conditions": ""}
                     raw_response = ""
                 else:
-                    progress_placeholder.info(f"🧬 Step 2: Diagnosing disease in {effective_plant}..." if plant_type == "AUTO_DETECT" else f"Processing {effective_plant} leaf...")
+                    progress_placeholder.info(
+                        f"🧬 Step 2: Diagnosing disease in {effective_plant}..."
+                        if plant_type == "AUTO_DETECT"
+                        else f"Processing {effective_plant} leaf..."
+                    )
                     common_diseases = PLANT_COMMON_DISEASES.get(effective_plant, "various plant diseases")
                     prompt = EXPERT_PROMPT_TEMPLATE.format(
                         plant_type=effective_plant, common_diseases=common_diseases
                     )
-                    raw_response, _model_used = gemini_vision_with_fallback(
-                        [prompt] + enhanced_images, model_pref
-                    )
+                    diag_parts = [prompt] + enhanced_images
+                    _ck = _make_cache_key(diag_parts, effective_plant)
+                    _cached = _cache_get(_ck)
+                    if _cached:
+                        raw_response, _vision_model_used = _cached[1], "cache"
+                        if st.session_state.debug_mode:
+                            st.info("⚡ Loaded from cache — no API call used")
+                    else:
+                        raw_response, _vision_model_used = gemini_vision_with_fallback(
+                            diag_parts, prefer_pro
+                        )
                     if plant_type == "AUTO_DETECT":
                         plant_type = effective_plant
                     if st.session_state.debug_mode:
-                        st.info(f"Diagnosis model: {_model_used}")
+                        st.info(f"🧬 Diagnosis model: {_vision_model_used}")
 
                 if st.session_state.debug_mode:
                     with st.expander("Raw Response"):
@@ -2152,6 +2380,12 @@ if page == "AI Plant Doctor":
                             </div>
                             """, unsafe_allow_html=True)
 
+                        # Preserve infected_count from widget if user already set it
+                        _prev_infected = st.session_state.get("farm_infected_plants", 50)
+                        # Save result to cache to avoid repeat API calls
+                        if "_ck" in dir() and _ck and _vision_model_used != "cache":
+                            _cache_set(_ck, (result, raw_response))
+
                         st.session_state.last_diagnosis = {
                             "plant_type": plant_type,
                             "disease_name": disease_name,
@@ -2160,42 +2394,52 @@ if page == "AI Plant Doctor":
                             "confidence": confidence,
                             "organic_cost": 0,
                             "chemical_cost": 0,
-                            "infected_count": 50,
+                            "infected_count": int(_prev_infected),
                             "timestamp": datetime.now().isoformat(),
                             "result": result,
+                            "model_used": _vision_model_used,
                         }
 
             except Exception as e:
-                if "429" in str(e) or "quota" in str(e).lower() or "rate" in str(e).lower():
+                err_str = str(e)
+                if _is_quota_err(e):
                     st.markdown("""
                     <div class="warning-box">
-                        ⏳ <b>Too many requests!</b> The AI is taking a short break.<br>
-                        Please wait <b>60 seconds</b> and try again. This is temporary.
+                        ⏳ <b>All AI models are temporarily at capacity.</b><br>
+                        The app tried Gemini 2.5 Flash → 1.5 Flash → 1.5 Flash-8B → OpenRouter automatically.<br>
+                        Please wait <b>60 seconds</b> and try again — this is a temporary API limit.
+                    </div>
+                    """, unsafe_allow_html=True)
+                elif "RuntimeError" in type(e).__name__:
+                    st.markdown(f"""
+                    <div class="warning-box">
+                        ⏳ <b>{err_str}</b>
                     </div>
                     """, unsafe_allow_html=True)
                 else:
                     st.markdown(f"""
                     <div class="error-box">
-                        ❌ <b>Analysis Failed.</b> Please try again.<br>
-                        <span style="font-size:0.8rem; color:#aaa;">{str(e)}</span>
+                        ❌ <b>Analysis Failed.</b> Please try again with a different image.<br>
+                        <span style="font-size:0.8rem; color:#aaa;">{err_str[:120]}</span>
                     </div>
                     """, unsafe_allow_html=True)
             progress_placeholder.empty()
 
-            st.markdown("<div class='result-container'>", unsafe_allow_html=True)
-
-        diag = st.session_state.last_diagnosis
-        if diag and diag.get("result"):
-            organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
-                result=diag.get("result", {}),
-                plant_type=diag.get("plant_type", "Unknown"),
-                infected_count=diag.get("infected_count", 50),
-            )
-
-            diag["organic_cost"] = organic_total_cost
-            diag["chemical_cost"] = chemical_total_cost
-            st.session_state.last_diagnosis = diag
-
+    # ── Always render stored diagnosis (persists across page switches & re-runs) ──
+    diag = st.session_state.last_diagnosis
+    if diag and diag.get("result"):
+        st.markdown("<div class='result-container'>", unsafe_allow_html=True)
+        # Sync infected_count from cost-calc widget if user changed it
+        if "farm_infected_plants" in st.session_state:
+            diag["infected_count"] = int(st.session_state["farm_infected_plants"])
+        organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
+            result=diag.get("result", {}),
+            plant_type=diag.get("plant_type", "Unknown"),
+            infected_count=diag.get("infected_count", 50),
+        )
+        diag["organic_cost"] = organic_total_cost
+        diag["chemical_cost"] = chemical_total_cost
+        st.session_state.last_diagnosis = diag
         st.markdown("</div>", unsafe_allow_html=True)
 
 # --- KisanAI Assistant ---
@@ -2661,7 +2905,7 @@ else:
                     unsafe_allow_html=True,
                 )
             # --- Walk Away Warning ---
-           selection = st.session_state.get("treatment_selection")
+            selection = st.session_state.get("treatment_selection")
             selected_type = selection.get("treatment_type") if selection else None
 
             organic_net = potential_loss_value - organic_cost_total
