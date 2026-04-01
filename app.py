@@ -2136,7 +2136,6 @@ with st.sidebar:
     page = st.radio(
         "📂 Pages",
         ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"],
-        label_visibility="collapsed",
     )
     st.markdown("---")
 
@@ -2167,121 +2166,13 @@ with st.sidebar:
     st.markdown("---")
 
     # ── 🔭 Vision Model selector ──────────────────────────────────
-    st.markdown(
-        "<p style='font-size:0.72rem;font-weight:800;color:#8fbf9a;"
-        "letter-spacing:0.14em;text-transform:uppercase;margin-bottom:6px'>🔭 Vision Model</p>",
-        unsafe_allow_html=True
-    )
-    st.markdown(
-        "<p style='font-size:0.75rem;color:#3f5c47;margin-bottom:6px'>"
-        "Primary model for plant diagnosis. Falls back automatically if quota is hit.</p>",
-        unsafe_allow_html=True
-    )
-    vision_primary = st.selectbox(
-        "vision_model",
-        [
-            "gemini-2.5-flash ✦ Best Quality (250/day)",
-            "gemini-1.5-flash ⚡ High Quota (1,500/day)",
-            "gemini-1.5-flash-8b 🪶 Lightest (1,500/day)",
-            "Qwen2.5-VL via OpenRouter ∞ Free",
-        ],
-        index=0,
-        label_visibility="collapsed",
-        key="vision_primary_choice",
-    )
-    _vision_primary_map = {
-        "gemini-2.5-flash ✦ Best Quality (250/day)":    "gemini-2.5-flash",
-        "gemini-1.5-flash ⚡ High Quota (1,500/day)":    "gemini-1.5-flash",
-        "gemini-1.5-flash-8b 🪶 Lightest (1,500/day)":  "gemini-1.5-flash-8b",
-        "Qwen2.5-VL via OpenRouter ∞ Free":              "qwen",
-    }
-    _chosen_primary = _vision_primary_map[vision_primary]
+    # Vision model defaults — gemini-2.5-flash primary, fallback chain fixed
+    VISION_MODEL_CHAIN[:] = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"]
+    st.session_state["force_qwen_vision"] = False
+    prefer_pro_toggle = st.session_state.get("model_choice", False)
 
-    _openrouter_client_v = _get_openrouter_client()
-    if _chosen_primary == "qwen":
-        if _openrouter_client_v:
-            st.markdown("<span style='font-size:0.72rem;color:#2ecc6e'>✅ OpenRouter connected — Qwen ready</span>", unsafe_allow_html=True)
-        else:
-            st.markdown("<span style='font-size:0.72rem;color:#f05c5c'>⚠️ OpenRouter not connected — add OPENROUTER_API_KEY to secrets</span>", unsafe_allow_html=True)
-        VISION_MODEL_CHAIN[:] = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"]
-        st.session_state["force_qwen_vision"] = True
-    else:
-        st.session_state["force_qwen_vision"] = False
-        _default_remaining = [m for m in ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"]
-                              if m != _chosen_primary]
-        VISION_MODEL_CHAIN[:] = [_chosen_primary] + _default_remaining
-
-    prefer_pro_toggle = st.checkbox(
-        "Use gemini-2.5-pro (best accuracy, slower)",
-        value=False,
-        key="model_choice",
-        help="Prepends gemini-2.5-pro to the vision chain for maximum accuracy. Uses more quota.",
-    )
-    st.markdown("---")
-
-    # ── 💬 Text Model selector ─────────────────────────────────────
-    st.markdown(
-        "<p style='font-size:0.72rem;font-weight:800;color:#8fbf9a;"
-        "letter-spacing:0.14em;text-transform:uppercase;margin-bottom:6px'>💬 Text Model</p>",
-        unsafe_allow_html=True
-    )
-    st.markdown(
-        "<p style='font-size:0.75rem;color:#3f5c47;margin-bottom:6px'>"
-        "Used for KisanAI chat, crop rotation & translation. Groq is fastest.</p>",
-        unsafe_allow_html=True
-    )
-
-    # Re-resolve clients each render (cache_resource keeps them alive)
-    _groq_client_live       = _get_groq_client()
-    _openrouter_client_live = _get_openrouter_client()
-
-    # ALWAYS show ALL text model options — never hide behind client check
-    _text_options = [
-        "Groq — Llama 3.1-8B  (14,400/day) ⚡ Fastest",
-        "Groq — Llama 3.3-70B  (1,000/day) 🧠 Best Quality",
-        "Gemini 2.5 Flash  (250/day) ✦ Primary",
-        "Gemini 1.5 Flash  (1,500/day) ⚡ High Quota",
-    ]
-
-    text_model_choice = st.selectbox(
-        "text_model",
-        _text_options,
-        index=0,
-        label_visibility="collapsed",
-        key="text_model_choice",
-    )
-
-    # Show status pill under the selector
-    if "Groq" in text_model_choice:
-        if _groq_client_live:
-            st.markdown(
-                "<span style='font-size:0.72rem;color:#2ecc6e'>✅ Groq connected</span>",
-                unsafe_allow_html=True
-            )
-        else:
-            st.markdown(
-                "<span style='font-size:0.72rem;color:#f05c5c'>"
-                "⚠️ Groq not connected — check GROQ_API_KEY in secrets</span>",
-                unsafe_allow_html=True
-            )
-
-    # Wire the text model choice into the live chains
-    if "Llama 3.3-70B" in text_model_choice:
-        GROQ_TEXT_MODELS[:] = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
-    elif "Llama 3.1-8B" in text_model_choice:
-        GROQ_TEXT_MODELS[:] = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]
-    # If Gemini is selected as text, Groq chain stays intact as fallback
-
-    # Package availability hint
-    if not GROQ_AVAILABLE:
-        st.markdown(
-            "<p style='font-size:0.72rem;color:#f0b040;margin-top:4px'>"
-            "⚠️ <code>groq</code> package not installed. "
-            "Add <code>groq</code> to <code>requirements.txt</code> and redeploy.</p>",
-            unsafe_allow_html=True
-        )
-
-    st.markdown("---")
+    # Text model defaults — gemini-2.5-flash via Groq/Gemini fallback chain
+    GROQ_TEXT_MODELS[:] = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]
 
     # ── ⚙️ Settings ───────────────────────────────────────────────
     st.markdown(
@@ -2295,13 +2186,7 @@ with st.sidebar:
     st.session_state.show_tips = st.checkbox(
         "Show tips", value=st.session_state.get("show_tips", True)
     )
-    st.session_state.confidence_min = st.slider(
-        "Min confidence threshold",
-        min_value=30, max_value=90,
-        value=st.session_state.get("confidence_min", 65),
-        step=5,
-        help="Diagnoses below this confidence will show a low-confidence warning"
-    )
+
 
 # ============ SESSION STATE DEFAULTS ============
 if "last_diagnosis" not in st.session_state:
