@@ -1,5 +1,10 @@
 import streamlit as st
 import google.generativeai as genai
+try:
+    from groq import Groq as GroqClient
+    GROQ_AVAILABLE = True
+except ImportError:
+    GROQ_AVAILABLE = False
 from PIL import Image
 import os
 import json
@@ -278,6 +283,7 @@ REGIONS = ["North India", "South India", "East India", "West India", "Central In
 SOIL_TYPES = ["Black Soil", "Red Soil", "Laterite Soil", "Alluvial Soil", "Clay Soil"]
 MARKET_FOCUS = ["Stable essentials", "High-value cash crops", "Low input / low risk"]
 
+# ============ GLOBAL STYLES ============
 # ============ GLOBAL STYLES ============
 st.markdown(
     """
@@ -1043,14 +1049,87 @@ h2, h3, h4 {
 """,
     unsafe_allow_html=True,
 )
+# ============ MULTI-MODEL CONFIG ============
+# VISION FALLBACK CHAIN (all same Gemini key, separate quota pools)
+# Free limits: 2.5 Flash 250 RPD → 1.5 Flash 1500 RPD → 1.5 Flash-8B 1500 RPD
+VISION_MODEL_CHAIN = [
+    "gemini-2.5-flash",       # Best quality, 250 RPD free
+    "gemini-1.5-flash",       # Great quality, 1500 RPD free (6x more!)
+    "gemini-1.5-flash-8b",    # Lighter, 1500 RPD free (last resort)
+]
 
+# TEXT FALLBACK CHAIN (Groq is completely free, 14400 RPD)
+# Used for: KisanAI chatbot, crop rotation, translation
+TEXT_MODEL_CHAIN = {
+    "groq_primary":   "llama-3.3-70b-versatile",  # 30 RPM, 1000 RPD free
+    "groq_fast":      "llama-3.1-8b-instant",      # 30 RPM, 14400 RPD free
+    "gemini_fallback":"gemini-1.5-flash",           # Fallback if Groq unavailable
+}
 
-# ============ GEMINI CONFIG ============
 try:
     genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 except Exception:
     st.error("GEMINI_API_KEY not found in environment variables!")
     st.stop()
+
+# Setup Groq client (optional — only for text tasks)
+_groq_key = os.environ.get("GROQ_API_KEY", "")
+_groq_client = None
+if GROQ_AVAILABLE and _groq_key:
+    try:
+        _groq_client = GroqClient(api_key=_groq_key)
+    except Exception:
+        _groq_client = None
+
+def _is_quota_error(e):
+    s = str(e).lower()
+    return any(x in s for x in ["429", "quota", "rate limit", "resource_exhausted", "too many"])
+
+def gemini_vision_with_fallback(parts: list, model_preference: str = "auto"):
+    """Try vision models in fallback order. Returns (response_text, model_used)."""
+    chain = VISION_MODEL_CHAIN.copy()
+    # If user explicitly chose Pro, try it first
+    if model_preference == "pro":
+        chain = ["gemini-2.5-pro"] + chain
+    for model_id in chain:
+        try:
+            m = genai.GenerativeModel(model_id)
+            resp = m.generate_content(parts)
+            return resp.text, model_id
+        except Exception as e:
+            if _is_quota_error(e):
+                continue   # try next model
+            raise          # non-quota error → re-raise
+    raise RuntimeError("All Gemini vision models exhausted quota. Please wait and try again.")
+
+def gemini_text_with_fallback(prompt: str):
+    """Try Groq first (free, fast), fall back to Gemini for text-only tasks."""
+    # 1. Try Groq primary (best quality, free)
+    if _groq_client:
+        for groq_model in [TEXT_MODEL_CHAIN["groq_primary"], TEXT_MODEL_CHAIN["groq_fast"]]:
+            try:
+                resp = _groq_client.chat.completions.create(
+                    model=groq_model,
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=2048,
+                    temperature=0.3,
+                )
+                return resp.choices[0].message.content.strip(), f"Groq/{groq_model.split('-')[1]}"
+            except Exception as e:
+                if _is_quota_error(e):
+                    continue
+                break
+    # 2. Fall back to Gemini text models
+    for model_id in ["gemini-1.5-flash", "gemini-2.5-flash", "gemini-1.5-flash-8b"]:
+        try:
+            m = genai.GenerativeModel(model_id)
+            resp = m.generate_content(prompt)
+            return resp.text.strip(), model_id
+        except Exception as e:
+            if _is_quota_error(e):
+                continue
+            raise
+    raise RuntimeError("All text models exhausted quota. Please wait a moment and try again.")
 
 EXPERT_PROMPT_TEMPLATE = """You are a world-class plant pathologist and image analyst with 40 years of field experience diagnosing diseases in {plant_type}.
 
@@ -1581,27 +1660,18 @@ def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_coun
 def translate_report(report_text, language):
     if language == "English":
         return report_text
+    prompt = (
+        f"Translate this farm report to {language}. "
+        f"Keep all numbers, Rs symbols, % signs, and colons exactly as they are. "
+        f"Only translate the English words and labels:\n\n{report_text}"
+    )
     try:
-        model = genai.GenerativeModel("gemini-2.5-flash")
-        response = model.generate_content(
-            f"Translate this farm report to {language}. "
-            f"Keep all numbers, Rs symbols, % signs, and colons exactly as they are. "
-            f"Only translate the English words and labels:\n\n{report_text}"
-        )
-        return response.text
+        result, _ = gemini_text_with_fallback(prompt)
+        return result
     except Exception as e:
-        try:
-            model = genai.GenerativeModel("gemini-2.5-pro")
-            response = model.generate_content(
-                f"Translate this farm report to {language}. "
-                f"Keep all numbers, Rs symbols, % signs, and colons exactly as they are. "
-                f"Only translate the English words and labels:\n\n{report_text}"
-            )
-            return response.text
-        except Exception as e2:
-            if "429" in str(e2) or "quota" in str(e2).lower():
-                return report_text + "\n\n⏳ Translation unavailable right now — rate limit hit. Try again in 60 seconds."
-        return report_text + f"\n\n❌ Translation failed: {str(e2)}"
+        if _is_quota_error(e):
+            return report_text + "\n\n⏳ Translation unavailable right now — all models at capacity. Try again in 60 seconds."
+        return report_text + f"\n\n❌ Translation failed: {str(e)[:80]}"
         
 def calculate_loss_percentage(severity, infected_count, total_plants):
     """
@@ -1726,16 +1796,12 @@ def generate_crop_rotation_plan(plant_type, region, soil_type, market_focus):
 
 
 def get_manual_rotation_plan(plant_name):
-    try:
-        model = genai.GenerativeModel("gemini-2.5-flash")
-    except Exception:
-        return None
     prompt = f"""You are an agricultural expert with deep knowledge of crop rotation and soil health. For the plant: {plant_name}
 Provide ONLY a valid JSON response in this exact format (no markdown, no explanations, no code blocks):
 {{"rotations": ["Crop1", "Crop2", "Crop3"], "info": {{"{plant_name}": "Detailed info about {plant_name}", "Crop1": "Why good after {plant_name}", "Crop2": "Why follows Crop1", "Crop3": "Why completes cycle"}}}}"""
     try:
-        response = model.generate_content(prompt)
-        result = extract_json_robust(response.text)
+        raw, _ = gemini_text_with_fallback(prompt)
+        result = extract_json_robust(raw)
         if result and "rotations" in result and "info" in result:
             return result
     except Exception:
@@ -1752,10 +1818,6 @@ Provide ONLY a valid JSON response in this exact format (no markdown, no explana
 
 
 def get_farmer_bot_response(user_question, diagnosis_context=None):
-    try:
-        model = genai.GenerativeModel("gemini-2.5-flash")
-    except Exception:
-        return "Model not available. Please try again later."
     context_text = ""
     if diagnosis_context:
         context_text = (
@@ -1770,17 +1832,17 @@ def get_farmer_bot_response(user_question, diagnosis_context=None):
         "disease control, and sustainable farming practices.\n\n"
         f"{context_text}\n"
         f"Farmer question: {user_question}\n\n"
-        "IMPORTANT: Provide a comprehensive, detailed response (5-8 sentences) that includes: "
-        "1. Direct answer to the question 2. Practical, cost-effective solutions suitable for farming conditions "
-        "3. Seasonal timing and weather considerations if applicable 4. Resource availability and sourcing information "
-        "5. Long-term sustainability and soil health recommendations\n\n"
-        "Use clear, professional English. Focus on actionable, readily available solutions with proven effectiveness."
+        "Provide a comprehensive, detailed response (5-8 sentences) covering: "
+        "1. Direct answer to the question 2. Practical, cost-effective solutions for Indian farming conditions "
+        "3. Seasonal timing and weather considerations 4. Resource availability and sourcing "
+        "5. Long-term sustainability recommendations.\n"
+        "Use clear, professional English. Focus on actionable solutions."
     )
     try:
-        response = model.generate_content(prompt)
-        return response.text.strip()
-    except Exception:
-        return "Server error. Please try again."
+        answer, model_used = gemini_text_with_fallback(prompt)
+        return answer
+    except Exception as e:
+        return f"⚠️ All AI models are temporarily unavailable. Please try again in a minute. ({str(e)[:60]})"
 
 
 # ============ MAIN UI HEADER ============
@@ -1820,8 +1882,27 @@ with st.sidebar:
         ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"],
     )
 
-    st.header("Model Info")
-    st.info("**Gemini Mode**\nAdvanced reasoning\nHigh accuracy\nAPI required")
+    st.header("🤖 Model Status")
+    st.markdown("""
+    **🔭 Vision (Image Analysis)**
+    Auto-fallback chain:
+    1. Gemini 2.5 Flash *(250 req/day)*
+    2. Gemini 1.5 Flash *(1,500 req/day)*
+    3. Gemini 1.5 Flash-8B *(1,500 req/day)*
+    """)
+    if _groq_client:
+        st.success("✅ **Groq Connected**\nKisanAI chatbot & text tasks\nLlama 3.3-70B → 14,400 req/day free")
+    else:
+        st.warning("⚠️ **Groq not configured**\nAdd `GROQ_API_KEY` to secrets for\n14,400 free text req/day via Groq")
+        st.caption("Get free key at console.groq.com")
+    st.markdown("---")
+    st.markdown("**💡 Model Preference**")
+    model_pref_choice = st.selectbox(
+        "Vision quality",
+        ["Auto (Best Available)", "Prefer Pro (Slower, Best)", "Flash Only (Fastest)"],
+        label_visibility="collapsed",
+        key="model_choice"
+    )
     st.markdown("---")
     st.header("Supported Plants")
     for plant in sorted(PLANT_COMMON_DISEASES.keys()):
@@ -1932,20 +2013,7 @@ if page == "AI Plant Doctor":
             try:
                 progress_placeholder.info("🔍 Step 1: Identifying plant species..." if plant_type == "AUTO_DETECT" else f"Processing {plant_type} leaf...")
 
-                model_name = (
-                    "Gemini 2.5 Pro"
-                    if "Pro" in st.session_state.model_choice
-                    else "Gemini 2.5 Flash"
-                )
-                model_id = (
-                    "gemini-2.5-pro"
-                    if "Pro" in st.session_state.model_choice
-                    else "gemini-2.5-flash"
-                )
-                model = genai.GenerativeModel(model_id)
-                if st.session_state.debug_mode:
-                    st.info(f"Using: {model_name}")
-
+                model_pref = "pro" if "Pro" in str(st.session_state.get("model_choice", "")) else "auto"
                 enhanced_images = [
                     enhance_image_for_analysis(img.copy()) for img in images
                 ]
@@ -1953,23 +2021,25 @@ if page == "AI Plant Doctor":
                 # ── TWO-PASS for AUTO_DETECT ──────────────────────────
                 identified_plant = None
                 plant_id_result = None
+                _model_used = "unknown"
                 if plant_type == "AUTO_DETECT":
-                    id_response = model.generate_content([PLANT_ID_PROMPT_TEMPLATE] + enhanced_images)
-                    plant_id_result = extract_json_robust(id_response.text)
+                    id_raw, _model_used = gemini_vision_with_fallback(
+                        [PLANT_ID_PROMPT_TEMPLATE] + enhanced_images, model_pref
+                    )
+                    plant_id_result = extract_json_robust(id_raw)
                     if plant_id_result and plant_id_result.get("is_plant_image", True):
                         identified_plant = plant_id_result.get("common_name", "Unknown Plant")
                         id_confidence = plant_id_result.get("identification_confidence", 0)
                         id_reason = plant_id_result.get("identification_reason", "")
-                        # Show identification result
-                        progress_placeholder.info(f"🌿 Plant identified: {identified_plant} ({id_confidence}% confidence) — {id_reason}")
+                        progress_placeholder.info(f"🌿 Plant identified: {identified_plant} ({id_confidence}% confidence) — via {_model_used}")
                         effective_plant = identified_plant
                     else:
-                        if plant_id_result and not plant_id_result.get("is_plant_image", True):
-                            effective_plant = None  # not a plant image, skip diagnosis
-                        else:
-                            effective_plant = "Unknown Plant"
+                        effective_plant = None if (plant_id_result and not plant_id_result.get("is_plant_image", True)) else "Unknown Plant"
                 else:
                     effective_plant = plant_type
+
+                if st.session_state.debug_mode:
+                    st.info(f"Vision model used: {_model_used}")
 
                 # ── DISEASE DIAGNOSIS PASS ────────────────────────────
                 if effective_plant is None:
@@ -1985,11 +2055,13 @@ if page == "AI Plant Doctor":
                     prompt = EXPERT_PROMPT_TEMPLATE.format(
                         plant_type=effective_plant, common_diseases=common_diseases
                     )
-                    response = model.generate_content([prompt] + enhanced_images)
-                    raw_response = response.text
-                    # Patch plant_type to identified value for display
+                    raw_response, _model_used = gemini_vision_with_fallback(
+                        [prompt] + enhanced_images, model_pref
+                    )
                     if plant_type == "AUTO_DETECT":
                         plant_type = effective_plant
+                    if st.session_state.debug_mode:
+                        st.info(f"Diagnosis model: {_model_used}")
 
                 if st.session_state.debug_mode:
                     with st.expander("Raw Response"):
@@ -2080,8 +2152,6 @@ if page == "AI Plant Doctor":
                             </div>
                             """, unsafe_allow_html=True)
 
-                        # Preserve infected_count from widget if user already set it
-                        _prev_infected = st.session_state.get("farm_infected_plants", 50)
                         st.session_state.last_diagnosis = {
                             "plant_type": plant_type,
                             "disease_name": disease_name,
@@ -2090,7 +2160,7 @@ if page == "AI Plant Doctor":
                             "confidence": confidence,
                             "organic_cost": 0,
                             "chemical_cost": 0,
-                            "infected_count": int(_prev_infected),
+                            "infected_count": 50,
                             "timestamp": datetime.now().isoformat(),
                             "result": result,
                         }
@@ -2112,21 +2182,20 @@ if page == "AI Plant Doctor":
                     """, unsafe_allow_html=True)
             progress_placeholder.empty()
 
-    # ── Always render stored diagnosis (persists across page switches & re-runs) ──
-    diag = st.session_state.last_diagnosis
-    if diag and diag.get("result"):
-        st.markdown("<div class='result-container'>", unsafe_allow_html=True)
-        # Sync infected_count from cost-calc widget if user changed it
-        if "farm_infected_plants" in st.session_state:
-            diag["infected_count"] = int(st.session_state["farm_infected_plants"])
-        organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
-            result=diag.get("result", {}),
-            plant_type=diag.get("plant_type", "Unknown"),
-            infected_count=diag.get("infected_count", 50),
-        )
-        diag["organic_cost"] = organic_total_cost
-        diag["chemical_cost"] = chemical_total_cost
-        st.session_state.last_diagnosis = diag
+            st.markdown("<div class='result-container'>", unsafe_allow_html=True)
+
+        diag = st.session_state.last_diagnosis
+        if diag and diag.get("result"):
+            organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
+                result=diag.get("result", {}),
+                plant_type=diag.get("plant_type", "Unknown"),
+                infected_count=diag.get("infected_count", 50),
+            )
+
+            diag["organic_cost"] = organic_total_cost
+            diag["chemical_cost"] = chemical_total_cost
+            st.session_state.last_diagnosis = diag
+
         st.markdown("</div>", unsafe_allow_html=True)
 
 # --- KisanAI Assistant ---
@@ -2592,7 +2661,7 @@ else:
                     unsafe_allow_html=True,
                 )
             # --- Walk Away Warning ---
-            selection = st.session_state.get("treatment_selection")
+           selection = st.session_state.get("treatment_selection")
             selected_type = selection.get("treatment_type") if selection else None
 
             organic_net = potential_loss_value - organic_cost_total
