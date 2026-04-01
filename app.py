@@ -279,81 +279,39 @@ SOIL_TYPES = ["Black Soil", "Red Soil", "Laterite Soil", "Alluvial Soil", "Clay 
 MARKET_FOCUS = ["Stable essentials", "High-value cash crops", "Low input / low risk"]
 
 # ============ GLOBAL STYLES ============
-# ============ GLOBAL STYLES ============
 st.markdown(
     """
 <style>
 /* ─── Google Fonts ─── */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-
-/* ─── Keyframe Animations ─── */
-@keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 18px rgba(58,220,110,0.18), 0 0 40px rgba(58,173,94,0.10); }
-  50%       { box-shadow: 0 0 32px rgba(58,220,110,0.38), 0 0 70px rgba(58,173,94,0.22); }
-}
-@keyframes orbitGlow {
-  0%   { transform: translateX(-50%) scale(1);   opacity: 0.55; }
-  50%  { transform: translateX(-50%) scale(1.18); opacity: 0.85; }
-  100% { transform: translateX(-50%) scale(1);   opacity: 0.55; }
-}
-@keyframes scanLine {
-  0%   { transform: translateY(-100%); opacity: 0; }
-  10%  { opacity: 0.35; }
-  90%  { opacity: 0.35; }
-  100% { transform: translateY(100%);  opacity: 0; }
-}
-@keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes borderPulse {
-  0%, 100% { border-color: rgba(74,163,84,0.28); }
-  50%       { border-color: rgba(74,220,110,0.70); }
-}
-@keyframes shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position:  200% center; }
-}
-@keyframes dotDrift {
-  0%, 100% { background-position: 0px 0px; }
-  50%       { background-position: 14px 14px; }
-}
-@keyframes badgePop {
-  0%   { transform: scale(0.92); opacity: 0; }
-  70%  { transform: scale(1.04); }
-  100% { transform: scale(1);    opacity: 1; }
-}
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
 /* ─── CSS Variables ─── */
 :root {
-  --bg-base:       #04090605;
-  --bg-surface:    #080f0a;
-  --bg-card:       #0c1610;
-  --bg-raised:     #121e15;
-  --border-dim:    rgba(74, 200, 95, 0.15);
-  --border-mid:    rgba(74, 200, 95, 0.32);
-  --border-bright: rgba(74, 200, 95, 0.72);
-  --green-main:    #2ecc6e;
-  --green-light:   #55f08a;
-  --green-dark:    #1a8048;
-  --green-glow:    rgba(46, 204, 110, 0.28);
-  --green-glow2:   rgba(46, 204, 110, 0.08);
-  --gold:          #f0c040;
-  --gold-dim:      rgba(240, 192, 64, 0.15);
-  --gold-glow:     rgba(240, 192, 64, 0.35);
-  --text-primary:  #ecf5ee;
-  --text-secondary:#8fbf9a;
-  --text-muted:    #3f5c47;
-  --red-accent:    #f05c5c;
-  --blue-accent:   #5ca8f0;
-  --amber:         #f0b040;
-  --purple-accent: #b07cf0;
-  --shadow-green:  0 8px 36px rgba(46,204,110,0.22);
-  --shadow-deep:   0 20px 60px rgba(0,0,0,0.75);
+  --bg-base:       #070d09;
+  --bg-surface:    #0d1610;
+  --bg-card:       #111a13;
+  --bg-raised:     #162019;
+  --border-dim:    rgba(74, 163, 84, 0.18);
+  --border-mid:    rgba(74, 163, 84, 0.32);
+  --border-bright: rgba(74, 163, 84, 0.6);
+  --green-main:    #3aad5e;
+  --green-light:   #5dd87e;
+  --green-glow:    rgba(58, 173, 94, 0.22);
+  --gold:          #d4a847;
+  --gold-dim:      rgba(212, 168, 71, 0.18);
+  --text-primary:  #e8f0ea;
+  --text-secondary:#8fa893;
+  --text-muted:    #4d6454;
+  --red-accent:    #e05c5c;
+  --blue-accent:   #5c9fe0;
+  --amber:         #e0a045;
+  --purple-accent: #a07be0;
+  --shadow-green:  0 8px 32px rgba(58,173,94,0.14);
+  --shadow-deep:   0 16px 48px rgba(0,0,0,0.7);
   --radius-sm:     8px;
   --radius-md:     14px;
-  --radius-lg:     22px;
-  --radius-xl:     30px;
+  --radius-lg:     20px;
+  --radius-xl:     28px;
 }
 
 /* ─── Base Reset ─── */
@@ -364,7 +322,7 @@ html, body,
 [data-testid="stAppViewContainer"],
 [data-testid="stHeader"],
 [data-testid="block-container"] {
-  background: radial-gradient(ellipse at 20% 0%, #051409 0%, #020804 60%) !important;
+  background-color: var(--bg-base) !important;
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
@@ -372,23 +330,19 @@ p, span, div, label {
   color: var(--text-primary);
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.97rem;
-  line-height: 1.65;
+  line-height: 1.6;
 }
 
 /* ─── Scrollbar ─── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg-base); }
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--green-main), var(--green-dark));
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover { background: var(--green-light); }
+::-webkit-scrollbar-thumb { background: rgba(58,173,94,0.35); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--green-main); }
 
 /* ─── Sidebar ─── */
 [data-testid="stSidebar"] {
-  background: linear-gradient(180deg, #080f0a 0%, #040807 100%) !important;
+  background: var(--bg-surface) !important;
   border-right: 1px solid var(--border-dim) !important;
-  box-shadow: 4px 0 30px rgba(0,0,0,0.5) !important;
 }
 [data-testid="stSidebar"] * { color: var(--text-secondary) !important; }
 [data-testid="stSidebar"] h1,
@@ -399,215 +353,163 @@ p, span, div, label {
 .header-container {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(160deg, #0b2212 0%, #071410 50%, #030d06 100%);
-  padding: 60px 40px 52px;
+  background: linear-gradient(160deg, #0d2214 0%, #071209 60%, #050e07 100%);
+  padding: 52px 36px 44px;
   border-radius: var(--radius-xl);
-  margin-bottom: 30px;
+  margin-bottom: 28px;
   border: 1px solid var(--border-mid);
-  box-shadow:
-    0 0 0 1px rgba(46,204,110,0.08) inset,
-    0 0 100px rgba(46,204,110,0.12),
-    var(--shadow-deep);
-  animation: pulseGlow 5s ease-in-out infinite;
+  box-shadow: 0 0 80px rgba(58,173,94,0.1), var(--shadow-deep);
 }
-/* animated dot-grid overlay */
+/* dot-grid overlay */
 .header-container::before {
   content: '';
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(rgba(46,204,110,0.14) 1px, transparent 1px);
-  background-size: 26px 26px;
+  background-image: radial-gradient(rgba(58,173,94,0.12) 1px, transparent 1px);
+  background-size: 28px 28px;
   pointer-events: none;
-  animation: dotDrift 8s ease-in-out infinite;
 }
 /* ambient glow orb */
 .header-container::after {
   content: '';
   position: absolute;
-  top: -100px; left: 50%;
+  top: -80px; left: 50%;
   transform: translateX(-50%);
-  width: 600px; height: 320px;
-  background: radial-gradient(ellipse, rgba(46,204,110,0.28) 0%, transparent 68%);
-  pointer-events: none;
-  animation: orbitGlow 6s ease-in-out infinite;
-}
-
-/* scan-line streak across header */
-.header-container .scan-line {
-  position: absolute;
-  left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(46,204,110,0.4), transparent);
-  animation: scanLine 7s linear infinite;
+  width: 480px; height: 260px;
+  background: radial-gradient(ellipse, rgba(58,173,94,0.22) 0%, transparent 70%);
   pointer-events: none;
 }
-
 .header-badge {
   display: inline-block;
-  background: linear-gradient(135deg, var(--gold-dim), rgba(240,192,64,0.08));
-  border: 1px solid rgba(240,192,64,0.55);
+  background: var(--gold-dim);
+  border: 1px solid rgba(212,168,71,0.45);
   color: var(--gold);
   font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.22em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  padding: 6px 18px;
+  padding: 5px 16px;
   border-radius: 100px;
-  margin-bottom: 22px;
-  box-shadow: 0 0 18px var(--gold-glow);
-  animation: badgePop 0.6s ease forwards;
+  margin-bottom: 20px;
 }
 .header-title {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 3.4rem;
+  font-size: 3.2rem;
   font-weight: 900;
   color: #ffffff;
   text-align: center;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   line-height: 1.05;
-  margin-bottom: 16px;
-  text-shadow:
-    0 0 40px rgba(46,204,110,0.55),
-    0 2px 20px rgba(0,0,0,0.6);
-  background: linear-gradient(180deg, #ffffff 60%, rgba(255,255,255,0.7) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  margin-bottom: 14px;
+  text-shadow: 0 0 60px rgba(58,173,94,0.4);
 }
-.header-title .hl {
-  background: linear-gradient(135deg, var(--green-light) 0%, #a8ffca 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+.header-title .hl { color: var(--green-light); }
 .header-subtitle {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 1.08rem;
+  font-size: 1.05rem;
   color: var(--text-secondary);
   text-align: center;
   font-weight: 400;
-  max-width: 580px;
+  max-width: 560px;
   margin: 0 auto;
-  opacity: 0.88;
 }
 
 /* ─── Feature Pills ─── */
 .feature-card {
-  background: linear-gradient(135deg, var(--bg-card) 0%, #0e1c12 100%);
+  background: var(--bg-card);
   border: 1px solid var(--border-dim);
   color: var(--text-secondary);
-  padding: 14px 18px;
+  padding: 12px 16px;
   border-radius: var(--radius-md);
   text-align: center;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.88rem;
-  letter-spacing: 0.03em;
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-  cursor: default;
+  letter-spacing: 0.02em;
+  transition: all 0.22s ease;
 }
 .feature-card:hover {
-  background: linear-gradient(135deg, #1a2e1e 0%, #142219 100%);
+  background: var(--bg-raised);
   border-color: var(--border-bright);
   color: var(--green-light);
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 10px 30px var(--green-glow), 0 0 0 1px rgba(46,204,110,0.15) inset;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 24px var(--green-glow);
 }
 
 /* ─── Upload & Result Containers ─── */
 .upload-container {
   background: var(--bg-card);
-  padding: 30px 28px;
+  padding: 28px 26px;
   border-radius: var(--radius-lg);
   border: 1.5px dashed var(--border-mid);
   box-shadow: var(--shadow-deep);
   margin: 18px 0;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  animation: fadeSlideUp 0.5s ease forwards;
+  transition: border-color 0.25s ease;
 }
-.upload-container:hover {
-  border-color: var(--green-main);
-  box-shadow: 0 0 0 4px rgba(46,204,110,0.06), var(--shadow-deep);
-}
+.upload-container:hover { border-color: var(--border-bright); }
 .result-container {
   background: var(--bg-card);
   border-radius: var(--radius-lg);
-  padding: 30px;
+  padding: 28px;
   box-shadow: var(--shadow-deep);
   margin: 20px 0;
   border: 1px solid var(--border-dim);
-  animation: fadeSlideUp 0.4s ease forwards;
 }
 
 /* ─── Disease Hero Card ─── */
 .disease-header {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #0a2010 0%, #0d2918 50%, #122e1c 100%);
-  border: 1px solid rgba(46,204,110,0.38);
+  background: linear-gradient(135deg, #0d2214 0%, #122b18 100%);
+  border: 1px solid rgba(58,173,94,0.4);
   color: white;
-  padding: 32px 30px;
+  padding: 30px 28px;
   border-radius: var(--radius-lg);
   margin-bottom: 24px;
-  box-shadow: 0 4px 40px rgba(46,204,110,0.20), var(--shadow-deep);
-  animation: borderPulse 3.5s ease-in-out infinite;
+  box-shadow: 0 4px 30px rgba(58,173,94,0.18);
 }
 .disease-header::before {
   content: '';
   position: absolute;
-  top: -50px; right: -50px;
-  width: 260px; height: 260px;
-  background: radial-gradient(circle, rgba(46,204,110,0.22) 0%, transparent 65%);
-  border-radius: 50%;
-  animation: orbitGlow 5s ease-in-out infinite;
-}
-.disease-header::after {
-  content: '';
-  position: absolute;
-  bottom: -30px; left: -30px;
-  width: 180px; height: 180px;
-  background: radial-gradient(circle, rgba(240,192,64,0.10) 0%, transparent 65%);
+  top: -40px; right: -40px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(58,173,94,0.2) 0%, transparent 70%);
   border-radius: 50%;
 }
 .disease-name {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 2.5rem;
+  font-size: 2.4rem;
   font-weight: 900;
-  margin-bottom: 18px;
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #ffffff 0%, rgba(200,255,220,0.9) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: none;
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.4);
 }
 .disease-meta { font-size: 0.93rem; display: flex; gap: 10px; flex-wrap: wrap; }
 
 /* ─── Info Sections ─── */
 .info-section {
-  background: linear-gradient(135deg, var(--bg-card) 0%, #0e1c12 100%);
+  background: var(--bg-card);
   border-left: 3px solid var(--green-main);
-  padding: 18px 22px;
+  padding: 18px 20px;
   border-radius: var(--radius-md);
   margin: 14px 0;
   border: 1px solid var(--border-dim);
   border-left-width: 3px;
   border-left-color: var(--green-main);
-  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
-  animation: fadeSlideUp 0.4s ease forwards;
+  transition: border-color 0.22s ease, transform 0.22s ease;
 }
 .info-section:hover {
   border-left-color: var(--green-light);
-  transform: translateX(3px);
-  box-shadow: -4px 0 20px rgba(46,204,110,0.12);
+  transform: translateX(2px);
 }
 .info-title {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.70rem;
-  font-weight: 800;
+  font-size: 0.72rem;
+  font-weight: 700;
   color: var(--green-main);
   margin-bottom: 12px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   display: flex;
   align-items: center;
@@ -616,147 +518,113 @@ p, span, div, label {
 
 /* ─── Cost Info ─── */
 .cost-info {
-  background: linear-gradient(135deg, rgba(46,204,110,0.07) 0%, rgba(46,204,110,0.03) 100%);
+  background: rgba(58,173,94,0.06);
   border-left: 3px solid var(--green-main);
-  padding: 11px 16px;
+  padding: 10px 15px;
   border-radius: var(--radius-sm);
   margin: 10px 0;
   font-size: 0.93rem;
   color: var(--text-secondary);
   font-weight: 500;
-  border: 1px solid rgba(46,204,110,0.12);
-  border-left-width: 3px;
-  border-left-color: var(--green-main);
 }
 
 /* ─── Treatment Items ─── */
 .treatment-item {
-  background: linear-gradient(135deg, var(--bg-raised) 0%, #111a14 100%);
+  background: var(--bg-raised);
   border: 1px solid var(--border-dim);
   border-left: 3px solid var(--green-main);
-  padding: 16px 18px;
+  padding: 14px 16px;
   border-radius: var(--radius-md);
   margin: 10px 0;
-  transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 .treatment-item:hover {
-  background: linear-gradient(135deg, #1a2f1e 0%, #162819 100%);
+  background: #1a2b1e;
   border-color: var(--border-mid);
   border-left-color: var(--green-light);
-  transform: translateX(4px);
-  box-shadow: 0 6px 24px rgba(46,204,110,0.12);
 }
 .treatment-name {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 6px;
-  font-size: 0.97rem;
+  font-size: 0.96rem;
 }
-.treatment-quantity { color: var(--green-light); font-weight: 600; margin: 4px 0; font-size: 0.88rem; }
-.treatment-dilution { color: var(--amber); font-size: 0.85rem; margin: 4px 0; font-weight: 500; }
+.treatment-quantity { color: #5dd87e; font-weight: 500; margin: 4px 0; font-size: 0.88rem; }
+.treatment-dilution { color: var(--amber); font-size: 0.84rem; margin: 4px 0; }
 
 /* ─── Severity Badges ─── */
 .severity-badge {
   display: inline-flex;
   align-items: center;
-  padding: 6px 16px;
+  padding: 5px 14px;
   border-radius: 100px;
-  font-weight: 800;
-  font-size: 0.73rem;
-  letter-spacing: 0.12em;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  animation: badgePop 0.5s ease forwards;
 }
-.severity-healthy  {
-  background: rgba(46,204,110,0.14);
-  color: var(--green-light);
-  border: 1px solid rgba(46,204,110,0.5);
-  box-shadow: 0 0 14px rgba(46,204,110,0.18);
-}
-.severity-mild     {
-  background: rgba(92,168,240,0.14);
-  color: #7ec8f8;
-  border: 1px solid rgba(92,168,240,0.45);
-  box-shadow: 0 0 14px rgba(92,168,240,0.14);
-}
-.severity-moderate {
-  background: rgba(240,176,64,0.14);
-  color: #f8d06e;
-  border: 1px solid rgba(240,176,64,0.45);
-  box-shadow: 0 0 14px rgba(240,176,64,0.14);
-}
-.severity-severe   {
-  background: rgba(240,92,92,0.14);
-  color: #f89090;
-  border: 1px solid rgba(240,92,92,0.45);
-  box-shadow: 0 0 14px rgba(240,92,92,0.14);
-}
+.severity-healthy  { background: rgba(58,173,94,0.15);  color: #5dd87e;  border: 1px solid rgba(58,173,94,0.4);  }
+.severity-mild     { background: rgba(92,159,224,0.15); color: #7eb8f0;  border: 1px solid rgba(92,159,224,0.4); }
+.severity-moderate { background: rgba(224,160,69,0.15); color: #f0c06e;  border: 1px solid rgba(224,160,69,0.4); }
+.severity-severe   { background: rgba(224,92,92,0.15);  color: #f08080;  border: 1px solid rgba(224,92,92,0.4);  }
 
 /* ─── Type Badges ─── */
 .type-badge {
   display: inline-flex;
   align-items: center;
-  padding: 5px 14px;
+  padding: 4px 12px;
   border-radius: 100px;
-  font-weight: 800;
-  font-size: 0.70rem;
-  letter-spacing: 0.12em;
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   margin: 3px 4px 3px 0;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.type-badge:hover { transform: scale(1.05); }
-.type-fungal    { background: rgba(176,123,240,0.14); color: #d0a8ff; border: 1px solid rgba(176,123,240,0.40); box-shadow: 0 0 10px rgba(176,123,240,0.10); }
-.type-bacterial { background: rgba(92,168,240,0.14);  color: #9ac8ff; border: 1px solid rgba(92,168,240,0.40);  box-shadow: 0 0 10px rgba(92,168,240,0.10); }
-.type-viral     { background: rgba(240,92,92,0.14);   color: #ff9898; border: 1px solid rgba(240,92,92,0.40);   box-shadow: 0 0 10px rgba(240,92,92,0.10); }
-.type-pest      { background: rgba(240,176,64,0.14);  color: #ffd07a; border: 1px solid rgba(240,176,64,0.40);  box-shadow: 0 0 10px rgba(240,176,64,0.10); }
+.type-fungal    { background: rgba(160,123,224,0.14); color: #c5a8f5; border: 1px solid rgba(160,123,224,0.35); }
+.type-bacterial { background: rgba(92,159,224,0.14);  color: #8fbef5; border: 1px solid rgba(92,159,224,0.35); }
+.type-viral     { background: rgba(224,92,92,0.14);   color: #f59393; border: 1px solid rgba(224,92,92,0.35);  }
+.type-pest      { background: rgba(224,160,69,0.14);  color: #f5c878; border: 1px solid rgba(224,160,69,0.35); }
 .type-nutrient,
-.type-healthy   { background: rgba(46,204,110,0.14);  color: #7af0a0; border: 1px solid rgba(46,204,110,0.40);  box-shadow: 0 0 10px rgba(46,204,110,0.10); }
+.type-healthy   { background: rgba(58,173,94,0.14);   color: #7de09a; border: 1px solid rgba(58,173,94,0.35);  }
 
 /* ─── Alert Boxes ─── */
 .warning-box {
-  background: linear-gradient(135deg, rgba(240,176,64,0.08) 0%, rgba(240,176,64,0.04) 100%);
-  border: 1px solid rgba(240,176,64,0.38);
+  background: rgba(224,160,69,0.07);
+  border: 1px solid rgba(224,160,69,0.35);
   border-left: 4px solid var(--amber);
   border-radius: var(--radius-md);
-  padding: 16px 22px;
-  margin: 14px 0;
-  color: #ffd07a;
+  padding: 15px 20px;
+  margin: 12px 0;
+  color: #f5c878;
   font-size: 0.95rem;
-  box-shadow: 0 4px 20px rgba(240,176,64,0.08);
-  animation: fadeSlideUp 0.4s ease forwards;
 }
 .success-box {
-  background: linear-gradient(135deg, rgba(46,204,110,0.08) 0%, rgba(46,204,110,0.04) 100%);
-  border: 1px solid rgba(46,204,110,0.38);
+  background: rgba(58,173,94,0.07);
+  border: 1px solid rgba(58,173,94,0.35);
   border-left: 4px solid var(--green-main);
   border-radius: var(--radius-md);
-  padding: 16px 22px;
-  margin: 14px 0;
-  color: #7af0a0;
+  padding: 15px 20px;
+  margin: 12px 0;
+  color: #7de09a;
   font-size: 0.95rem;
-  box-shadow: 0 4px 20px rgba(46,204,110,0.08);
-  animation: fadeSlideUp 0.4s ease forwards;
 }
 .error-box {
-  background: linear-gradient(135deg, rgba(240,92,92,0.08) 0%, rgba(240,92,92,0.04) 100%);
-  border: 1px solid rgba(240,92,92,0.38);
+  background: rgba(224,92,92,0.07);
+  border: 1px solid rgba(224,92,92,0.35);
   border-left: 4px solid var(--red-accent);
   border-radius: var(--radius-md);
-  padding: 16px 22px;
-  margin: 14px 0;
-  color: #ff9898;
+  padding: 15px 20px;
+  margin: 12px 0;
+  color: #f5a0a0;
   font-size: 0.95rem;
-  box-shadow: 0 4px 20px rgba(240,92,92,0.08);
-  animation: fadeSlideUp 0.4s ease forwards;
 }
 
 /* ─── Debug Box ─── */
 .debug-box {
-  background: #020504;
+  background: #040806;
   border: 1px solid var(--border-dim);
   border-radius: var(--radius-md);
   padding: 14px;
@@ -771,102 +639,69 @@ p, span, div, label {
 
 /* ─── Buttons ─── */
 .stButton > button {
-  background: linear-gradient(135deg, #1a7a40 0%, #11542b 100%) !important;
-  color: #e0f5e8 !important;
-  border: 1px solid rgba(46,204,110,0.55) !important;
-  padding: 12px 30px !important;
-  font-weight: 800 !important;
-  font-size: 0.90rem !important;
-  border-radius: 12px !important;
-  box-shadow:
-    0 4px 24px rgba(46,204,110,0.30),
-    0 0 0 0 rgba(46,204,110,0) !important;
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  background: linear-gradient(135deg, #1e6b38 0%, #155228 100%) !important;
+  color: #e8f5ec !important;
+  border: 1px solid rgba(58,173,94,0.5) !important;
+  padding: 11px 28px !important;
+  font-weight: 700 !important;
+  font-size: 0.92rem !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(58,173,94,0.25) !important;
+  transition: all 0.22s ease !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
-  letter-spacing: 0.06em !important;
+  letter-spacing: 0.04em !important;
   text-transform: uppercase !important;
-  position: relative !important;
-  overflow: hidden !important;
-}
-.stButton > button::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 60%);
-  pointer-events: none;
 }
 .stButton > button:hover {
-  transform: translateY(-3px) scale(1.02) !important;
-  box-shadow:
-    0 10px 38px rgba(46,204,110,0.50),
-    0 0 0 2px rgba(46,204,110,0.25) !important;
-  background: linear-gradient(135deg, #22a050 0%, #177038 100%) !important;
-  border-color: var(--green-light) !important;
-}
-.stButton > button:active {
-  transform: translateY(-1px) scale(0.99) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 32px rgba(58,173,94,0.45) !important;
+  background: linear-gradient(135deg, #25874a 0%, #1c6334 100%) !important;
+  border-color: var(--green-main) !important;
 }
 
 /* ─── Image Container ─── */
 .image-container {
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: var(--shadow-deep), 0 0 0 1px var(--border-dim);
-  transition: box-shadow 0.3s ease;
-}
-.image-container:hover {
-  box-shadow: var(--shadow-deep), 0 0 0 1px var(--border-mid), 0 0 30px var(--green-glow);
+  box-shadow: var(--shadow-deep);
+  border: 1px solid var(--border-dim);
 }
 
 /* ─── Tips Card ─── */
 .tips-card {
-  background: linear-gradient(135deg, var(--bg-card) 0%, #0f1c12 100%);
+  background: var(--bg-card);
   border: 1px solid var(--border-dim);
   border-top: 2px solid var(--gold);
   border-radius: var(--radius-md);
-  padding: 18px 22px;
+  padding: 16px 20px;
   margin: 10px 0;
-  box-shadow: 0 0 20px var(--gold-dim);
-  transition: box-shadow 0.3s ease;
 }
-.tips-card:hover { box-shadow: 0 0 30px rgba(240,192,64,0.15); }
 .tips-card-title {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--gold);
   margin-bottom: 8px;
-  font-size: 0.73rem;
-  letter-spacing: 0.16em;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  text-shadow: 0 0 12px var(--gold-glow);
 }
 
 /* ─── Metric Containers ─── */
 [data-testid="metric-container"] {
-  background: linear-gradient(135deg, var(--bg-card) 0%, #0e1c12 100%) !important;
+  background: var(--bg-card) !important;
   border: 1px solid var(--border-dim) !important;
   border-radius: var(--radius-md) !important;
-  padding: 16px !important;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease !important;
-}
-[data-testid="metric-container"]:hover {
-  border-color: var(--border-mid) !important;
-  box-shadow: var(--shadow-green) !important;
+  padding: 14px !important;
 }
 [data-testid="stExpander"] {
   background: var(--bg-card) !important;
   border: 1px solid var(--border-dim) !important;
   border-radius: var(--radius-md) !important;
-  transition: border-color 0.25s ease !important;
-}
-[data-testid="stExpander"]:hover {
-  border-color: var(--border-mid) !important;
 }
 .streamlit-expanderHeader {
   color: var(--text-secondary) !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
   font-size: 0.95rem !important;
-  font-weight: 600 !important;
 }
 
 /* ─── Inputs ─── */
@@ -877,11 +712,10 @@ input, textarea, select {
   font-size: 0.95rem !important;
   border-radius: var(--radius-sm) !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease !important;
 }
 input:focus, textarea:focus, select:focus {
   border-color: var(--green-main) !important;
-  box-shadow: 0 0 0 3px rgba(46,204,110,0.16) !important;
+  box-shadow: 0 0 0 2px var(--green-glow) !important;
 }
 
 /* ─── Headings ─── */
@@ -894,99 +728,87 @@ h2, h3, h4 {
 
 /* ─── Stat Boxes ─── */
 .stat-box {
-  background: linear-gradient(135deg, var(--bg-card) 0%, #0f1e13 100%);
+  background: var(--bg-card);
   border: 1px solid var(--border-dim);
   border-top: 2px solid var(--green-main);
   border-radius: var(--radius-md);
-  padding: 24px 20px;
+  padding: 22px 18px;
   margin: 10px 0;
   text-align: center;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-  animation: fadeSlideUp 0.4s ease forwards;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
 }
 .stat-box:hover {
   border-color: var(--border-bright);
-  box-shadow: var(--shadow-green), 0 0 0 1px rgba(46,204,110,0.12) inset;
-  transform: translateY(-4px);
+  box-shadow: var(--shadow-green);
+  transform: translateY(-2px);
 }
 .stat-value {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 2.1rem;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--green-main);
   margin: 8px 0;
-  letter-spacing: -0.03em;
-  text-shadow: 0 0 20px rgba(46,204,110,0.35);
-  background: linear-gradient(135deg, var(--green-main) 0%, var(--green-light) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  letter-spacing: -0.02em;
 }
 .stat-label {
-  font-size: 0.66rem;
+  font-size: 0.68rem;
   color: var(--text-muted);
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
 }
 
 /* ─── Page Headers (sub-pages) ─── */
 .page-header {
-  background: linear-gradient(160deg, #0a2010 0%, #061208 100%);
-  padding: 34px 30px;
+  background: linear-gradient(160deg, #0d2214 0%, #071209 100%);
+  padding: 30px 28px;
   border-radius: var(--radius-xl);
-  margin-bottom: 26px;
-  box-shadow: var(--shadow-deep), 0 0 60px rgba(46,204,110,0.08);
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-deep);
   border: 1px solid var(--border-mid);
-  animation: pulseGlow 5s ease-in-out infinite;
 }
 .page-title {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 2.5rem;
+  font-size: 2.4rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #ffffff 0%, rgba(200,255,218,0.85) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #ffffff;
   text-align: center;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 .page-subtitle {
   font-size: 1rem;
   color: var(--text-secondary);
   text-align: center;
-  margin-top: 10px;
+  margin-top: 8px;
   font-weight: 400;
 }
 
 /* ─── Rotation Cards ─── */
 .rotation-card {
-  background: linear-gradient(135deg, var(--bg-card) 0%, #0f1e13 100%);
+  background: var(--bg-card);
   border: 1px solid var(--border-dim);
   border-radius: var(--radius-lg);
-  padding: 24px 22px;
+  padding: 22px 20px;
   margin: 14px 0;
-  transition: border-color 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
-  animation: fadeSlideUp 0.4s ease forwards;
+  transition: border-color 0.22s ease, transform 0.22s ease;
 }
 .rotation-card:hover {
   border-color: var(--border-bright);
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-green), 0 0 0 1px rgba(46,204,110,0.10) inset;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-green);
 }
 .rotation-year {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.66rem;
-  font-weight: 900;
+  font-size: 0.68rem;
+  font-weight: 800;
   color: var(--gold);
   margin-bottom: 10px;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  text-shadow: 0 0 12px var(--gold-glow);
 }
 .crop-name {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.45rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--text-primary);
   margin: 8px 0;
@@ -995,7 +817,7 @@ h2, h3, h4 {
   font-size: 0.88rem;
   color: var(--text-secondary);
   margin-top: 8px;
-  line-height: 1.70;
+  line-height: 1.65;
 }
 
 /* ─── KisanAI Chatbot ─── */
@@ -1003,42 +825,35 @@ h2, h3, h4 {
   background: var(--bg-card);
   border: 1px solid var(--border-dim);
   border-radius: var(--radius-lg);
-  padding: 18px;
+  padding: 16px;
   margin: 16px 0;
   max-height: 480px;
   overflow-y: auto;
-  box-shadow: var(--shadow-deep);
 }
 .chat-message {
-  background: linear-gradient(135deg, var(--bg-raised) 0%, #131f16 100%);
+  background: var(--bg-raised);
   border-left: 3px solid var(--green-main);
-  padding: 14px 18px;
+  padding: 12px 16px;
   margin: 8px 0;
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   font-size: 0.92rem;
   color: var(--text-primary);
-  transition: background 0.25s ease, border-left-color 0.25s ease;
-  animation: fadeSlideUp 0.3s ease forwards;
+  transition: background 0.2s ease;
 }
-.chat-message:hover {
-  background: linear-gradient(135deg, #1a2f1e 0%, #162819 100%);
-  border-left-color: var(--green-light);
-}
+.chat-message:hover { background: #1a2b1e; }
 
 /* ─── Kisan Response ─── */
 .kisan-response-box {
-  background: linear-gradient(135deg, rgba(46,204,110,0.07) 0%, var(--bg-card) 60%, #0c1610 100%);
+  background: linear-gradient(135deg, rgba(58,173,94,0.06) 0%, var(--bg-card) 100%);
   border: 1px solid var(--border-mid);
   border-left: 4px solid var(--green-main);
   border-radius: var(--radius-lg);
-  padding: 28px;
+  padding: 26px;
   margin: 20px 0;
   font-size: 1.02rem;
-  line-height: 1.88;
+  line-height: 1.85;
   color: var(--text-primary);
   font-weight: 400;
-  box-shadow: 0 4px 30px rgba(46,204,110,0.08);
-  animation: fadeSlideUp 0.45s ease forwards;
 }
 </style>
 """,
@@ -1052,57 +867,154 @@ except Exception:
     st.error("GEMINI_API_KEY not found in environment variables!")
     st.stop()
 
-EXPERT_PROMPT_TEMPLATE = """You are an elite plant pathologist with 40 years of specialized experience diagnosing diseases in {plant_type}.
-You are an expert specifically in {plant_type} diseases and health issues.
+EXPERT_PROMPT_TEMPLATE = """You are a world-class plant pathologist and image analyst with 40 years of field experience diagnosing diseases in {plant_type}.
 
-SPECIALIZED ANALYSIS FOR: {plant_type}
-Common diseases in {plant_type}: {common_diseases}
+STEP 1 — IMAGE VALIDITY CHECK (do this FIRST, before any diagnosis):
+Carefully examine what is shown in the image(s).
+- If the image does NOT contain any plant, leaf, stem, root, or fruit at all (e.g. it shows a person, animal, object, sky, food on a plate, etc.):
+  → Set "is_plant_image": false, "disease_name": "Unable to diagnose", "confidence": 0, "severity": "healthy"
+- If the image contains a plant but it does NOT look like {plant_type}:
+  → Set "is_correct_plant": false, "disease_name": "Unable to diagnose — Image does not appear to be {plant_type}", "confidence": 0
+- If the image is too blurry, too dark, too distant, or otherwise unanalyzable:
+  → Set "image_quality": "Poor", "disease_name": "Unable to diagnose — Image quality too low for analysis", "confidence": 0
+- Only proceed to Step 2 if is_plant_image=true AND is_correct_plant=true AND image_quality is not "Poor"
 
-Your task is to provide the MOST ACCURATE diagnosis specifically for {plant_type}.
+STEP 2 — DEEP DISEASE DIAGNOSIS (only if Step 1 passes):
+Analyze every visible detail with expert precision:
+• Lesion shape, color zones, margins (sharp vs. fuzzy), distribution pattern (scattered/zonal/systemic)
+• Necrosis, chlorosis, water-soaking, wilting, cankers, pustules, mold, powder, streaks
+• Insect frass, webbing, stippling, galleries, egg masses
+• Nutrient deficiency patterns (interveinal, tip, margin)
+• Compare findings against known {plant_type} disease profiles: {common_diseases}
 
-CRITICAL RULES:
-1. RESPOND ONLY WITH VALID JSON - NO markdown, NO explanations
-2. Use your specialized knowledge of {plant_type}
-3. Consider {plant_type}-specific diseases and conditions
-4. Cross-reference against known {plant_type} pathologies
-5. Be extremely confident ONLY if symptoms match {plant_type} disease profiles
-6. Discount diseases that don't typically affect {plant_type}
+SEVERITY MUST BE DETERMINED FROM THE IMAGE VISUALLY — NOT FROM DISEASE NAME:
+- "healthy"  → No visible abnormalities, fully normal leaf/plant appearance
+- "mild"     → <20% leaf/plant area affected; small isolated spots or early lesions; plant mostly normal
+- "moderate" → 20–50% area affected; multiple lesions merging; visible wilting or discoloration across sections
+- "severe"   → >50% area affected; extensive necrosis/wilting/rot; plant structure visibly compromised
 
-RESPOND WITH EXACTLY THIS JSON:
+ACCURACY RULES:
+1. RESPOND ONLY WITH VALID JSON — zero markdown, zero text outside the JSON
+2. If the plant looks fully healthy with no abnormalities → "disease_name": "Healthy Plant", "severity": "healthy"
+3. "Unable to diagnose" ONLY for invalid images or genuinely ambiguous cases after full analysis
+4. Confidence scale: 0-49 = ambiguous/invalid, 50-70 = probable, 71-89 = likely, 90-100 = certain
+5. Never hallucinate symptoms — only report what is actually visible in the image
+6. Severity is based on the VISIBLE DAMAGE in the image only — not on what the disease typically does
+7. If multiple diseases are equally possible, pick the most statistically common one for {plant_type} and list others in differential_diagnosis
+
+RESPOND WITH EXACTLY THIS JSON (all keys required, no extras):
 {{
+  "is_plant_image": true,
+  "is_correct_plant": true,
   "plant_species": "{plant_type}",
-  "disease_name": "Specific disease name or Unable to diagnose",
+  "disease_name": "Exact disease name / Healthy Plant / Unable to diagnose",
   "disease_type": "fungal/bacterial/viral/pest/nutrient/environmental/healthy",
-  "severity": "healthy/mild/moderate/severe",
+  "severity": "healthy/mild/moderate/severe — based ONLY on visible image damage percentage",
   "confidence": 85,
-  "confidence_reason": "Detailed explanation specific to {plant_type}",
-  "image_quality": "Excellent/Good/Fair/Poor - explanation",
-  "symptoms": ["Specific symptom seen in {plant_type}", "Secondary symptom", "Tertiary symptom if present"],
-  "differential_diagnosis": ["Disease A (common in {plant_type}): Why it might be this", "Disease B (common in {plant_type}): Why it might be this", "Disease C: Why this is unlikely for {plant_type}"],
-  "probable_causes": ["Primary cause relevant to {plant_type}", "Secondary cause", "Environmental factor"],
-  "immediate_action": ["Action 1: Specific to {plant_type}", "Action 2: Specific to {plant_type}", "Action 3: Specific to {plant_type}"],
-  "organic_treatments": ["Treatment 1: Product and application for {plant_type}", "Treatment 2: Alternative for {plant_type}"],
-    "chemical_treatments": [
-    "Chemical 1: Safe for {plant_type} with dilution",
-    "Chemical 2: Alternative safe for {plant_type}"
+  "confidence_reason": "Exact visual evidence that drives this confidence level for {plant_type}",
+  "image_quality": "Excellent/Good/Fair/Poor — brief reason",
+  "symptoms": ["Specific visible symptom 1 with location", "Symptom 2", "Symptom 3 if present"],
+  "differential_diagnosis": [
+    "Most likely: Disease A — key matching visual features",
+    "Possible: Disease B — why considered but less likely",
+    "Ruled out: Disease C — why this does NOT match"
   ],
-  
-   "prevention_long_term": ["Prevention strategy 1 for {plant_type}", "Prevention strategy 2 for {plant_type}", "Resistant varieties: If available for {plant_type}"],
-  "plant_specific_notes": "Important notes specific to {plant_type} care and disease management",
-  "similar_conditions": "Other {plant_type} conditions that look similar"
+  "probable_causes": ["Primary pathogen/cause with reasoning", "Contributing environmental factor", "Secondary cause if any"],
+  "immediate_action": ["Urgent action 1 specific to {plant_type}", "Action 2", "Action 3"],
+  "organic_treatments": ["Organic product 1 with dosage/rate for {plant_type}", "Organic product 2"],
+  "chemical_treatments": ["Chemical 1 with exact dilution rate for {plant_type}", "Chemical 2 with dilution"],
+  "prevention_long_term": ["Prevention strategy 1 for {plant_type}", "Prevention strategy 2", "Resistant variety if known"],
+  "plant_specific_notes": "Critical management notes unique to {plant_type}",
+  "similar_conditions": "Other {plant_type} diseases easily confused with this diagnosis"
 }}"""
 
+PLANT_ID_PROMPT_TEMPLATE = """You are a world-class botanist and plant taxonomist with expertise in identifying plant species from images.
+
+YOUR TASK: Identify the exact plant species shown in this image with the highest possible accuracy.
+
+IDENTIFICATION RULES:
+1. Examine leaf shape, venation pattern, leaf margins, texture, color, stem structure, fruit/flower if visible
+2. RESPOND ONLY WITH VALID JSON — no markdown, no explanations
+3. If the image is not a plant at all → set "is_plant_image": false
+4. If you can identify the plant with >70% confidence → provide the common name and scientific name
+5. If you cannot identify it confidently → say "Unknown Plant" but still describe what you see
+6. Never guess blindly — partial identification is better than a wrong one
+
+RESPOND WITH EXACTLY THIS JSON:
+{
+  "is_plant_image": true,
+  "common_name": "Tomato / Unknown Plant / Not a plant",
+  "scientific_name": "Solanum lycopersicum or Unknown",
+  "plant_family": "Solanaceae or Unknown",
+  "identification_confidence": 88,
+  "identification_reason": "Key visual features that led to this identification",
+  "visible_features": ["Feature 1 used for ID", "Feature 2", "Feature 3"],
+  "possible_alternatives": ["Other plant this could be", "Second alternative"],
+  "image_quality": "Excellent/Good/Fair/Poor — reason"
+}"""
+
+
 PLANT_COMMON_DISEASES = {
-    "Tomato": "Early blight, Late blight, Septoria leaf spot, Fusarium wilt, Bacterial wilt, Spider mites, Powdery mildew",
-    "Rose": "Black spot, Powdery mildew, Rose rosette virus, Rose slugs, Rust, Botrytis",
-    "Apple": "Apple scab, Fire blight, Powdery mildew, Cedar apple rust, Sooty blotch, Apple maggot",
-    "Lettuce": "Lettuce mosaic virus, Downy mildew, Septoria leaf spot, Bottom rot, Tip burn",
-    "Grape": "Powdery mildew, Downy mildew, Black rot, Phomopsis cane and leaf spot, Grape phylloxera",
-    "Pepper": "Anthracnose, Bacterial wilt, Phytophthora blight, Cercospora leaf spot, Pepper weevil",
-    "Cucumber": "Powdery mildew, Downy mildew, Angular leaf spot, Anthracnose, Cucumber beetles",
-    "Strawberry": "Leaf scorch, Powdery mildew, Red stele root rot, Angular leaf spot, Slugs",
-    "Corn": "Leaf blotch, Rust, Stewart's wilt, Fusarium ear rot, Corn borer",
-    "Potato": "Late blight, Early blight, Verticillium wilt, Potato scab, Rhizoctonia",
+    # ── Vegetables ──────────────────────────────────────────────────────────────
+    "Tomato": "Early blight (Alternaria solani), Late blight (Phytophthora infestans), Septoria leaf spot, Fusarium wilt, Bacterial wilt (Ralstonia), Powdery mildew, Gray mold (Botrytis), Leaf curl virus, Spider mites, Bacterial speck, Buckeye rot, Blossom end rot",
+    "Potato": "Late blight (Phytophthora infestans), Early blight (Alternaria solani), Verticillium wilt, Potato scab (Streptomyces), Rhizoctonia canker, Blackleg (Pectobacterium), Potato virus Y, Leafroll virus, Silver scurf, Fusarium dry rot",
+    "Pepper": "Anthracnose (Colletotrichum), Bacterial wilt, Phytophthora blight, Cercospora leaf spot, Pepper weevil, Powdery mildew, Leaf curl virus, Fusarium wilt, Bacterial leaf spot (Xanthomonas), Botrytis gray mold",
+    "Cucumber": "Powdery mildew, Downy mildew, Angular leaf spot (Pseudomonas), Anthracnose, Gummy stem blight, Cucumber mosaic virus, Fusarium crown rot, Phytophthora blight, Bacterial wilt (Erwinia), Cucumber beetles",
+    "Eggplant": "Verticillium wilt, Phomopsis blight, Cercospora leaf spot, Fusarium wilt, Little leaf disease (phytoplasma), Bacterial wilt, Phytophthora blight, Mites, Shoot and fruit borer",
+    "Lettuce": "Lettuce mosaic virus, Downy mildew, Septoria leaf spot, Bottom rot (Rhizoctonia), Tip burn, Big vein disease, Corky root, Powdery mildew, Sclerotinia drop, Bacterial leaf spot",
+    "Spinach": "Downy mildew (Peronospora), White rust (Albugo), Cercospora leaf spot, Anthracnose, Fusarium wilt, Spinach mosaic virus, Phytophthora crown rot, Damping off",
+    "Cabbage": "Black rot (Xanthomonas), Clubroot (Plasmodiophora), Downy mildew, Alternaria leaf spot, Sclerotinia stem rot, Fusarium yellows, Blackleg, Cabbage looper, Aphids, White mold",
+    "Onion": "Purple blotch (Alternaria porri), Downy mildew, Fusarium basal rot, Pink root, Botrytis neck rot, Bacterial soft rot, White rot (Sclerotium), Smut, Iris yellow spot virus, Stemphylium blight",
+    "Garlic": "White rot (Sclerotium cepivorum), Fusarium basal rot, Downy mildew, Rust (Puccinia), Botrytis neck rot, Purple blotch, Bacterial soft rot, Garlic mosaic virus, Stemphylium leaf blight",
+    "Carrot": "Alternaria leaf blight, Cercospora leaf blight, Aster yellows phytoplasma, Bacterial leaf blight (Xanthomonas), Cavity spot (Pythium), Carrot rust fly, Powdery mildew, Sclerotinia rot, Fusarium dry rot",
+    "Okra": "Yellow vein mosaic virus (YVMV), Fusarium wilt, Powdery mildew, Cercospora leaf spot, Root-knot nematode, Damping off, Alternaria leaf spot, Bacterial wilt, Shoot and fruit borer",
+    "Brinjal": "Phomopsis fruit and stem blight, Verticillium wilt, Bacterial wilt, Little leaf phytoplasma, Fusarium wilt, Cercospora leaf spot, Alternaria leaf spot, Shoot and fruit borer",
+    "Bitter Gourd": "Powdery mildew, Downy mildew, Mosaic virus (CMV), Alternaria leaf spot, Fusarium wilt, Anthracnose, Fruit fly, Gummy stem blight",
+    "Bottle Gourd": "Downy mildew, Powdery mildew, Mosaic virus, Alternaria leaf spot, Anthracnose, Fruit fly, Fusarium wilt, Angular leaf spot",
+    "Pumpkin": "Powdery mildew, Downy mildew, Phytophthora blight, Mosaic virus, Fusarium wilt, Anthracnose, Bacterial wilt, Gummy stem blight, Squash vine borer",
+    "Cauliflower": "Black rot, Downy mildew, Alternaria leaf spot, Clubroot, Sclerotinia stem rot, Fusarium yellows, Blackleg, Hollowstem, Ring spot virus",
+    # ── Fruits ──────────────────────────────────────────────────────────────────
+    "Tomato": "Early blight, Late blight, Septoria leaf spot, Fusarium wilt, Bacterial wilt, Powdery mildew, Gray mold, Leaf curl virus, Spider mites, Bacterial speck",
+    "Mango": "Powdery mildew (Oidium mangiferae), Anthracnose (Colletotrichum gloeosporioides), Bacterial canker (Xanthomonas), Mango malformation, Sooty mold, Phoma blight, Stem end rot, Gummosis, Mango hoppers, Red rust algae",
+    "Banana": "Panama wilt (Fusarium oxysporum), Black Sigatoka (Mycosphaerella fijiensis), Yellow Sigatoka, Bunchy top virus (BBTV), Bacterial wilt (Xanthomonas), Moko disease, Anthracnose, Cigar end rot, Banana weevil, Nematodes",
+    "Grape": "Powdery mildew (Uncinula necator), Downy mildew (Plasmopara viticola), Black rot (Guignardia), Botrytis gray mold, Anthracnose, Phomopsis cane and leaf spot, Pierce's disease, Fanleaf virus, Grape phylloxera, Crown gall",
+    "Apple": "Apple scab (Venturia inaequalis), Fire blight (Erwinia amylovora), Powdery mildew, Cedar apple rust, Sooty blotch, Flyspeck, Bitter rot, Brown rot, Collar rot, Apple mosaic virus",
+    "Strawberry": "Gray mold (Botrytis cinerea), Powdery mildew, Angular leaf spot, Leaf scorch, Leaf blight, Red stele root rot, Phytophthora crown rot, Verticillium wilt, Strawberry mosaic virus, Two-spotted spider mite",
+    "Citrus": "Citrus canker (Xanthomonas), Greening/HLB (Candidatus Liberibacter), Melanose (Diaporthe), Phytophthora gummosis, Alternaria brown spot, Citrus scab, Sooty mold, Tristeza virus (CTV), Citrus nematode, Anthracnose",
+    "Papaya": "Papaya ringspot virus (PRSV), Anthracnose (Colletotrichum), Phytophthora root rot, Powdery mildew, Black spot (Asperisporium), Bacterial canker, Damping off, Root-knot nematode, Papaya mealy bug",
+    "Guava": "Anthracnose, Fruit canker (Pestalotiopsis), Stylar end rot, Wilt (Fusarium), Algal leaf spot (Cephaleuros), Root-knot nematode, Red rust, Phytophthora blight",
+    "Pomegranate": "Cercospora leaf and fruit spot, Alternaria fruit rot, Bacterial blight (Xanthomonas), Anthracnose, Fruit cracking, Phomopsis blight, Heart rot (Aspergillus), Butterfly (Deudorix isocrates)",
+    "Litchi": "Anthracnose, Downy blight (Peronophythora), Leaf blight (Alternaria), Witch's broom (phytoplasma), Erinose mite, Bark eating caterpillar, Fruit borer",
+    "Coconut": "Lethal yellowing phytoplasma, Bud rot (Phytophthora), Leaf blight (Pestalotiopsis), Crown choke (Thielaviopsis), Red ring nematode, Rhinoceros beetle, Stem bleeding, Root wilt disease",
+    "Watermelon": "Anthracnose, Fusarium wilt, Gummy stem blight (Didymella), Downy mildew, Powdery mildew, Bacterial fruit blotch, Phytophthora fruit rot, Mosaic virus, Cercospora leaf spot",
+    "Melon": "Powdery mildew, Downy mildew, Anthracnose, Fusarium wilt, Gummy stem blight, Angular leaf spot, Cucumber mosaic virus, Phytophthora crown rot, Belly rot",
+    # ── Grains & Cereals ────────────────────────────────────────────────────────
+    "Wheat": "Stripe rust (Puccinia striiformis), Leaf rust (Puccinia triticina), Stem rust (Puccinia graminis), Powdery mildew, Septoria leaf blotch, Tan spot (Pyrenophora), Fusarium head blight, Karnal bunt, Loose smut, Wheat blast",
+    "Rice": "Blast (Magnaporthe oryzae), Brown spot (Bipolaris oryzae), Bacterial leaf blight (Xanthomonas), Sheath blight (Rhizoctonia solani), False smut (Ustilaginoidea), Narrow brown leaf spot, Tungro virus, Bacterial leaf streak, Bakanae (Gibberella), Stem rot",
+    "Corn": "Northern leaf blight (Exserohilum turcicum), Southern leaf blight (Bipolaris maydis), Gray leaf spot (Cercospora), Common rust (Puccinia sorghi), Southern rust, Stewart's bacterial wilt, Goss's wilt, Smut (Ustilago), Fusarium ear rot, Aflatoxin (Aspergillus)",
+    "Sorghum": "Grain mold (Fusarium/Curvularia), Anthracnose, Covered kernel smut, Downy mildew, Bacterial stripe, Sooty stripe, Rust, Charcoal rot, Ergot (Claviceps), Stem borer",
+    "Barley": "Powdery mildew, Scald (Rhynchosporium), Net blotch (Pyrenophora teres), Loose smut, Covered smut, Barley stripe mosaic virus, Leaf rust, Stem rust, Fusarium crown rot",
+    # ── Cash Crops & Others ─────────────────────────────────────────────────────
+    "Cotton": "Bacterial blight (Xanthomonas), Verticillium wilt, Fusarium wilt, Boll rot (Sclerotinia), Alternaria leaf spot, Gray mildew (Ramularia), Anthracnose, Angular leaf spot, Root rot (Phytophthora), Leaf curl virus",
+    "Sugarcane": "Red rot (Glomerella tucumanensis), Smut (Sporisorium scitamineum), Ratoon stunting disease, Grassy shoot (phytoplasma), Pineapple disease (Ceratocystis), Wilt, Pokkah boeng (Fusarium), Leaf scald (Xanthomonas), Ring spot, Top rot",
+    "Soybean": "Sudden death syndrome (Fusarium), Soybean rust (Phakopsora pachyrhizi), Phytophthora root rot, Bacterial pustule (Xanthomonas), Brown stem rot, Pod and stem blight, Downy mildew, Bean pod mottle virus, Charcoal rot, Frogeye leaf spot",
+    "Groundnut": "Tikka disease (Cercospora), Rust (Puccinia arachidis), Collar rot (Sclerotium), Stem rot (Sclerotium rolfsii), Bud necrosis virus (TSWV), Early leaf spot, Late leaf spot, Aflatoxin (Aspergillus flavus), Root-knot nematode, Crown rot",
+    "Sunflower": "Alternaria leaf spot and blight, Downy mildew (Plasmopara halstedii), Sclerotinia stem rot, Powdery mildew, Rust (Puccinia helianthi), Phoma black stem, Charcoal rot, Verticillium wilt, Apion stem weevil",
+    "Mustard": "Alternaria blight, White rust (Albugo candida), Sclerotinia stem rot, Downy mildew, Powdery mildew, Black rot, Phoma stem canker, Turnip mosaic virus, Aphids",
+    # ── Plantation Crops ───────────────────────────────────────────────────────
+    "Tea": "Blister blight (Exobasidium vexans), Red rust algae (Cephaleuros), Gray blight (Pestalotiopsis), Black rot, Charcoal stump rot (Ustulina), Die-back (Phomopsis), Thorny stem blight, Tea mosquito bug, Red spider mite, Looper caterpillar",
+    "Coffee": "Coffee leaf rust (Hemileia vastatrix), Coffee berry disease (Colletotrichum), Black rot (Phytophthora), Brown eye spot (Cercospora), Wilt (Gibberella), Leaf scorch (Cercospora coffeicola), Root-knot nematode, Mealy bug, White stem borer",
+    "Rubber": "Abnormal leaf fall (Phytophthora), Pink disease (Corticium salmonicolor), White root disease (Rigidoporus), Black stripe (Phytophthora), Colletotrichum leaf disease, Oidium leaf fall (powdery mildew), Brown bast, Corynespora leaf fall",
+    "Cardamom": "Capsule rot (Phytophthora), Katte (mosaic) virus, Azhukal (clump rot), Leaf blotch (Pestalotiopsis), Damping off, Root-knot nematode, Thrips, Shoot fly",
+    # ── Ornamentals ─────────────────────────────────────────────────────────────
+    "Rose": "Black spot (Diplocarpon rosae), Powdery mildew (Podosphaera), Rust (Phragmidium), Botrytis blight, Rose rosette virus, Downy mildew, Crown gall (Agrobacterium), Stem canker, Cercospora leaf spot, Rose slug sawfly, Aphids, Spider mites",
+    "Marigold": "Alternaria leaf spot, Powdery mildew, Phytophthora blight, Botrytis blight, Fusarium wilt, Damping off, Root-knot nematode, Leaf curl, Spotted wilt virus, Bud borer",
+    "Chrysanthemum": "Powdery mildew, Rust (Puccinia horiana), Botrytis blight, Verticillium wilt, Leafy gall (Rhodococcus), Chrysanthemum mosaic virus, Leaf miner, Aphids, Red spider mite",
+    "Jasmine": "Leaf spot (Cercospora), Leaf blight (Alternaria), Rust (Prospodium), Bud borer, Mites, Powdery mildew, Die back, Root-knot nematode",
+    # ── Trees ───────────────────────────────────────────────────────────────────
+    "Neem": "Leaf spot (Cercospora), Die back, Powdery mildew, Twig canker, Root rot, Leaf webber caterpillar, Scale insects",
+    "Eucalyptus": "Stem canker (Botryosphaeria), Leaf spot (Cylindrocladium), Pink disease (Corticium), Die back, Cyst nematode, Chrysomelid beetles",
+    "Bamboo": "Witches broom (Aciculosporium), Culm blight (Sarocladium), Leaf rust, Powdery mildew, Mealybug, Termites, Bamboo mite",
 }
 
 # ============ HELPER FUNCTIONS ============
@@ -1209,7 +1121,7 @@ def render_treatment_selection_ui(
         min_value=1,
         step=1,
         value=st.session_state["farm_infected_plants"],
-        key=f"costcalc_infected_plants_{plant_type}_{disease_name}"
+        key="costcalc_infected_plants"
     )
     st.session_state["farm_infected_plants"] = infected_plants
 
@@ -1218,7 +1130,7 @@ def render_treatment_selection_ui(
         min_value=1,
         step=100,
         value=st.session_state["farm_total_plants"],
-        key=f"costcalc_total_plants_{plant_type}_{disease_name}"
+        key="costcalc_total_plants"
     )
     st.session_state["farm_total_plants"] = total_plants    
     organic_names = [
@@ -1504,7 +1416,7 @@ def translate_report(report_text, language):
         except Exception as e2:
             if "429" in str(e2) or "quota" in str(e2).lower():
                 return report_text + "\n\n⏳ Translation unavailable right now — rate limit hit. Try again in 60 seconds."
-            return report_text + f"\n\n❌ Translation failed: {str(e2)}"
+        return report_text + f"\n\n❌ Translation failed: {str(e2)}"
         
 def calculate_loss_percentage(severity, infected_count, total_plants):
     """
@@ -1760,7 +1672,7 @@ if page == "AI Plant Doctor":
     with col_plant:
         st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
         st.subheader("Select Plant Type")
-        plant_options = ["Select a plant..."] + sorted(list(PLANT_COMMON_DISEASES.keys())) + [
+        plant_options = ["Select a plant...", "🔍 Auto-detect (Unknown Plant)"] + sorted(list(PLANT_COMMON_DISEASES.keys())) + [
             "Other (Manual Entry)"
         ]
         selected_plant = st.selectbox(
@@ -1769,10 +1681,18 @@ if page == "AI Plant Doctor":
         if selected_plant == "Other (Manual Entry)":
             custom_plant = st.text_input("Enter plant name", placeholder="e.g., Banana, Orange")
             plant_type = custom_plant if custom_plant else "Unknown Plant"
+        elif selected_plant == "🔍 Auto-detect (Unknown Plant)":
+            plant_type = "AUTO_DETECT"
         else:
             plant_type = selected_plant if selected_plant != "Select a plant..." else None
 
-        if plant_type and plant_type in PLANT_COMMON_DISEASES:
+        if plant_type == "AUTO_DETECT":
+            st.markdown(
+                """<div class="tips-card"><div class="tips-card-title">🔍 Auto-detect Mode</div>
+                Upload any plant image — the AI will first identify the plant species, then diagnose any disease.</div>""",
+                unsafe_allow_html=True,
+            )
+        elif plant_type and plant_type in PLANT_COMMON_DISEASES:
             st.markdown(
                 f"""<div class="success-box">Common diseases in {plant_type}:\n\n{PLANT_COMMON_DISEASES[plant_type]}</div>""",
                 unsafe_allow_html=True,
@@ -1818,14 +1738,14 @@ if page == "AI Plant Doctor":
         col_b1, col_b2, col_b3 = st.columns(3)
         with col_b2:
             analyze_btn = st.button(
-                f"Analyze {plant_type}", use_container_width=True, type="primary"
+                f"{"🔍 Auto-detect & Analyze" if plant_type == "AUTO_DETECT" else f'Analyze {plant_type}'}", use_container_width=True, type="primary"
             )
 
     if analyze_btn and images is not None and plant_type:
         progress_placeholder = st.empty()
-        with st.spinner(f"Analyzing {plant_type}..."):
+        with st.spinner("🔍 Identifying & Analyzing plant..." if plant_type == "AUTO_DETECT" else f"Analyzing {plant_type}..."):
             try:
-                progress_placeholder.info(f"Processing {plant_type} leaf...")
+                progress_placeholder.info("🔍 Step 1: Identifying plant species..." if plant_type == "AUTO_DETECT" else f"Processing {plant_type} leaf...")
 
                 model_name = (
                     "Gemini 2.5 Pro"
@@ -1841,18 +1761,50 @@ if page == "AI Plant Doctor":
                 if st.session_state.debug_mode:
                     st.info(f"Using: {model_name}")
 
-                common_diseases = PLANT_COMMON_DISEASES.get(
-                    plant_type, "various plant diseases"
-                )
-                prompt = EXPERT_PROMPT_TEMPLATE.format(
-                    plant_type=plant_type, common_diseases=common_diseases
-                )
-
                 enhanced_images = [
                     enhance_image_for_analysis(img.copy()) for img in images
                 ]
-                response = model.generate_content([prompt] + enhanced_images)
-                raw_response = response.text
+
+                # ── TWO-PASS for AUTO_DETECT ──────────────────────────
+                identified_plant = None
+                plant_id_result = None
+                if plant_type == "AUTO_DETECT":
+                    id_response = model.generate_content([PLANT_ID_PROMPT_TEMPLATE] + enhanced_images)
+                    plant_id_result = extract_json_robust(id_response.text)
+                    if plant_id_result and plant_id_result.get("is_plant_image", True):
+                        identified_plant = plant_id_result.get("common_name", "Unknown Plant")
+                        id_confidence = plant_id_result.get("identification_confidence", 0)
+                        id_reason = plant_id_result.get("identification_reason", "")
+                        # Show identification result
+                        progress_placeholder.info(f"🌿 Plant identified: {identified_plant} ({id_confidence}% confidence) — {id_reason}")
+                        effective_plant = identified_plant
+                    else:
+                        if plant_id_result and not plant_id_result.get("is_plant_image", True):
+                            effective_plant = None  # not a plant image, skip diagnosis
+                        else:
+                            effective_plant = "Unknown Plant"
+                else:
+                    effective_plant = plant_type
+
+                # ── DISEASE DIAGNOSIS PASS ────────────────────────────
+                if effective_plant is None:
+                    result = {"is_plant_image": False, "disease_name": "Unable to diagnose", "confidence": 0, "severity": "healthy",
+                              "disease_type": "healthy", "symptoms": [], "probable_causes": [], "immediate_action": [],
+                              "organic_treatments": [], "chemical_treatments": [], "prevention_long_term": [],
+                              "confidence_reason": "Image does not contain a plant.", "image_quality": "N/A",
+                              "differential_diagnosis": [], "plant_specific_notes": "", "similar_conditions": ""}
+                    raw_response = ""
+                else:
+                    progress_placeholder.info(f"🧬 Step 2: Diagnosing disease in {effective_plant}..." if plant_type == "AUTO_DETECT" else f"Processing {effective_plant} leaf...")
+                    common_diseases = PLANT_COMMON_DISEASES.get(effective_plant, "various plant diseases")
+                    prompt = EXPERT_PROMPT_TEMPLATE.format(
+                        plant_type=effective_plant, common_diseases=common_diseases
+                    )
+                    response = model.generate_content([prompt] + enhanced_images)
+                    raw_response = response.text
+                    # Patch plant_type to identified value for display
+                    if plant_type == "AUTO_DETECT":
+                        plant_type = effective_plant
 
                 if st.session_state.debug_mode:
                     with st.expander("Raw Response"):
@@ -1865,30 +1817,96 @@ if page == "AI Plant Doctor":
                         st.text(displayed)
                         st.markdown("</div>", unsafe_allow_html=True)
 
-                result = extract_json_robust(raw_response)
+                if raw_response:
+                    result = extract_json_robust(raw_response)
+                else:
+                    result = result  # already set as error dict above
                 if result is None:
-                    st.error("Could not parse AI response")
+                    st.markdown("""
+                    <div class="error-box">
+                        ❌ <b>Could not parse AI response.</b> Please try again with a clearer image.
+                    </div>
+                    """, unsafe_allow_html=True)
 
                 progress_placeholder.empty()
 
                 if result:
-                    is_valid, validation_msg = validate_json_result(result)
+                    # ── Image validity guards ──
+                    is_plant_image = result.get("is_plant_image", True)
+                    is_correct_plant = result.get("is_correct_plant", True)
                     confidence = result.get("confidence", 0)
-                    if confidence < st.session_state.confidence_min:
-                        st.warning(f"Low Confidence ({confidence}%)")
+                    disease_name = result.get("disease_name", "Unknown")
+                    image_quality = result.get("image_quality", "")
 
-                    st.session_state.last_diagnosis = {
-                        "plant_type": plant_type,
-                        "disease_name": result.get("disease_name", "Unknown"),
-                        "disease_type": result.get("disease_type", "unknown"),
-                        "severity": result.get("severity", "unknown"),
-                        "confidence": confidence,
-                        "organic_cost": 0,
-                        "chemical_cost": 0,
-                        "infected_count": 50,
-                        "timestamp": datetime.now().isoformat(),
-                        "result": result,
-                    }
+                    if not is_plant_image:
+                        st.markdown("""
+                        <div class="error-box">
+                            🚫 <b>Unable to diagnose</b> — The uploaded image does not appear to contain a plant.<br>
+                            Please upload a clear photo of a <b>leaf, stem, or fruit</b> of the plant.
+                        </div>
+                        """, unsafe_allow_html=True)
+                    elif not is_correct_plant:
+                        st.markdown(f"""
+                        <div class="warning-box">
+                            ⚠️ <b>Wrong plant detected</b> — The image does not look like <b>{plant_type}</b>.<br>
+                            Please upload the correct plant image or change the plant selection.
+                        </div>
+                        """, unsafe_allow_html=True)
+                    elif "Poor" in str(image_quality) or confidence == 0:
+                        st.markdown(f"""
+                        <div class="warning-box">
+                            📷 <b>Unable to diagnose</b> — Image quality is too low for accurate analysis.<br>
+                            <b>Image Quality:</b> {image_quality}<br><br>
+                            Please upload a <b>clear, well-lit, close-up</b> photo of the affected leaf or plant part.
+                        </div>
+                        """, unsafe_allow_html=True)
+                    elif "Unable to diagnose" in str(disease_name):
+                        st.markdown(f"""
+                        <div class="warning-box">
+                            🔍 <b>{disease_name}</b><br>
+                            The AI could not make a confident diagnosis from this image.<br>
+                            Try uploading a <b>closer, clearer photo</b> showing the affected area directly.
+                        </div>
+                        """, unsafe_allow_html=True)
+                    else:
+                        is_valid, validation_msg = validate_json_result(result)
+                        if confidence < st.session_state.confidence_min:
+                            st.markdown(f"""
+                            <div class="warning-box">
+                                ⚠️ <b>Low Confidence ({confidence}%)</b> — Results may not be fully accurate.<br>
+                                Consider uploading additional images for a more reliable diagnosis.
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        # Show plant identification card if AUTO_DETECT was used
+                        if plant_id_result and identified_plant:
+                            sci_name = plant_id_result.get("scientific_name", "")
+                            id_conf = plant_id_result.get("identification_confidence", 0)
+                            visible = plant_id_result.get("visible_features", [])
+                            alt = plant_id_result.get("possible_alternatives", [])
+                            st.markdown(f"""
+                            <div class="info-section">
+                                <div class="info-title">🔍 Plant Identification Result</div>
+                                <b>Identified as:</b> {identified_plant}
+                                {f'<br><b>Scientific Name:</b> <i>{sci_name}</i>' if sci_name and sci_name != "Unknown" else ""}
+                                <br><b>Identification Confidence:</b> {id_conf}%
+                                <br><b>Key Visual Features:</b> {", ".join(visible) if visible else "—"}
+                                {f'<br><b>Possible Alternatives:</b> {", ".join(alt)}' if alt else ""}
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        st.session_state.last_diagnosis = {
+                            "plant_type": plant_type,
+                            "disease_name": disease_name,
+                            "disease_type": result.get("disease_type", "unknown"),
+                            "severity": result.get("severity", "unknown"),
+                            "confidence": confidence,
+                            "organic_cost": 0,
+                            "chemical_cost": 0,
+                            "infected_count": 50,
+                            "timestamp": datetime.now().isoformat(),
+                            "result": result,
+                        }
 
             except Exception as e:
                 if "429" in str(e) or "quota" in str(e).lower() or "rate" in str(e).lower():
@@ -1909,20 +1927,17 @@ if page == "AI Plant Doctor":
 
             st.markdown("<div class='result-container'>", unsafe_allow_html=True)
 
-
-
-    diag = st.session_state.get("last_diagnosis") or {}
-    if diag.get("result"):
         organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
             result=diag.get("result", {}),
             plant_type=diag.get("plant_type", "Unknown"),
             infected_count=diag.get("infected_count", 50),
         )
+
         diag["organic_cost"] = organic_total_cost
         diag["chemical_cost"] = chemical_total_cost
         st.session_state.last_diagnosis = diag
 
-    st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # --- KisanAI Assistant ---
 elif page == "KisanAI Assistant":
@@ -2387,85 +2402,20 @@ else:
                     unsafe_allow_html=True,
                 )
             # --- Walk Away Warning ---
-            selection = st.session_state.get("treatment_selection")
-            selected_type = selection.get("treatment_type") if selection else None
-
-            organic_net = potential_loss_value - organic_cost_total
-            chemical_net = potential_loss_value - chemical_cost_total
-
-            if selected_type == "organic":
-                if organic_net < 0:
-                    if chemical_net >= 0:
-                        st.markdown(
-                            f"""
-                            <div class="warning-box">
-                                ⚠️ <b>Organic treatment is not profitable.</b><br>
-                                Organic net return: <b>₹{organic_net:,}</b><br>
-                                🧪 Chemical treatment net return: <b>₹{chemical_net:,}</b><br><br>
-                                <b>Recommendation:</b> Use chemical treatment instead.
-                            </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
-                    else:
-                        st.markdown(
-                            f"""
-                            <div class="warning-box">
-                                ⚠️ <b>Both treatment options are unprofitable.</b><br>
-                                Organic net return: <b>₹{organic_net:,}</b><br>
-                                Chemical net return: <b>₹{chemical_net:,}</b><br><br>
-                                <b>Recommendation:</b> Not treating is more profitable than either option.
-                            </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
-                elif chemical_net > organic_net:
-                    st.markdown(
-                        f"""
-                        <div class="success-box">
-                            🌿 Organic treatment is profitable at <b>₹{organic_net:,}</b> net,<br>
-                            but 🧪 chemical treatment is even better at <b>₹{chemical_net:,}</b> net.
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
-            elif selected_type == "chemical":
-                if chemical_net < 0:
-                    if organic_net >= 0:
-                        st.markdown(
-                            f"""
-                            <div class="warning-box">
-                                ⚠️ <b>Chemical treatment is not profitable.</b><br>
-                                Chemical net return: <b>₹{chemical_net:,}</b><br>
-                                🌿 Organic treatment net return: <b>₹{organic_net:,}</b><br><br>
-                                <b>Recommendation:</b> Use organic treatment instead.
-                            </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
-                    else:
-                        st.markdown(
-                            f"""
-                            <div class="warning-box">
-                                ⚠️ <b>Both treatment options are unprofitable.</b><br>
-                                Organic net return: <b>₹{organic_net:,}</b><br>
-                                Chemical net return: <b>₹{chemical_net:,}</b><br><br>
-                                <b>Recommendation:</b> Not treating is more profitable than either options.
-                            </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
-                elif organic_net > chemical_net:
-                    st.markdown(
-                        f"""
-                        <div class="success-box">
-                            🧪 Chemical treatment is profitable at <b>₹{chemical_net:,}</b> net,<br>
-                            but 🌿 organic treatment is even better at <b>₹{organic_net:,}</b> net.
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
+            do_nothing = analysis["do_nothing_loss"]
+            walk_org   = analysis["walk_away_org"]
+            walk_chem  = analysis["walk_away_chem"]
+            
+            if do_nothing > organic_cost_total or do_nothing > chemical_cost_total:
+                st.markdown(f"""
+                <div class="warning-box">
+                    ⚠️ <b>URGENT: Cost of Doing Nothing = ₹{do_nothing:,}</b><br>
+                    If you walk away without treating, your projected crop loss is 
+                    <b>₹{do_nothing:,}</b> — far more than the cost of treatment.<br><br>
+                    🌿 Treating with <b>Organic</b> saves you <b>₹{walk_org:,}</b> net.<br>
+                    🧪 Treating with <b>Chemical</b> saves you <b>₹{walk_chem:,}</b> net.
+                </div>
+                """, unsafe_allow_html=True)
 
             st.markdown("<br>", unsafe_allow_html=True)
             report_language = st.selectbox(
