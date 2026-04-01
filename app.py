@@ -2592,20 +2592,86 @@ else:
                     unsafe_allow_html=True,
                 )
             # --- Walk Away Warning ---
-            do_nothing = analysis["do_nothing_loss"]
-            walk_org   = analysis["walk_away_org"]
-            walk_chem  = analysis["walk_away_chem"]
-            
-            if do_nothing > organic_cost_total or do_nothing > chemical_cost_total:
-                st.markdown(f"""
-                <div class="warning-box">
-                    ⚠️ <b>URGENT: Cost of Doing Nothing = ₹{do_nothing:,}</b><br>
-                    If you walk away without treating, your projected crop loss is 
-                    <b>₹{do_nothing:,}</b> — far more than the cost of treatment.<br><br>
-                    🌿 Treating with <b>Organic</b> saves you <b>₹{walk_org:,}</b> net.<br>
-                    🧪 Treating with <b>Chemical</b> saves you <b>₹{walk_chem:,}</b> net.
-                </div>
-                """, unsafe_allow_html=True)
+            selection = st.session_state.get("treatment_selection")
+            selected_type = selection.get("treatment_type") if selection else None
+
+            organic_net = potential_loss_value - organic_cost_total
+            chemical_net = potential_loss_value - chemical_cost_total
+
+            if selected_type == "organic":
+                if organic_net < 0:
+                    if chemical_net >= 0:
+                        st.markdown(
+                            f"""
+                            <div class="warning-box">
+                                ⚠️ <b>Organic treatment is not profitable.</b><br>
+                                Organic net return: <b>₹{organic_net:,}</b><br>
+                                🧪 Chemical treatment net return: <b>₹{chemical_net:,}</b><br><br>
+                                <b>Recommendation:</b> Use chemical treatment instead.
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                    else:
+                        st.markdown(
+                            f"""
+                            <div class="warning-box">
+                                ⚠️ <b>Both treatment options are unprofitable.</b><br>
+                                Organic net return: <b>₹{organic_net:,}</b><br>
+                                Chemical net return: <b>₹{chemical_net:,}</b><br><br>
+                                <b>Recommendation:</b> Not treating is more profitable than either option.
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                elif chemical_net > organic_net:
+                    st.markdown(
+                        f"""
+                        <div class="success-box">
+                            🌿 Organic treatment is profitable at <b>₹{organic_net:,}</b> net,<br>
+                            but 🧪 chemical treatment is even better at <b>₹{chemical_net:,}</b> net.
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+            elif selected_type == "chemical":
+                if chemical_net < 0:
+                    if organic_net >= 0:
+                        st.markdown(
+                            f"""
+                            <div class="warning-box">
+                                ⚠️ <b>Chemical treatment is not profitable.</b><br>
+                                Chemical net return: <b>₹{chemical_net:,}</b><br>
+                                🌿 Organic treatment net return: <b>₹{organic_net:,}</b><br><br>
+                                <b>Recommendation:</b> Use organic treatment instead.
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                    else:
+                        st.markdown(
+                            f"""
+                            <div class="warning-box">
+                                ⚠️ <b>Both treatment options are unprofitable.</b><br>
+                                Organic net return: <b>₹{organic_net:,}</b><br>
+                                Chemical net return: <b>₹{chemical_net:,}</b><br><br>
+                                <b>Recommendation:</b> Not treating is more profitable than either options.
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                elif organic_net > chemical_net:
+                    st.markdown(
+                        f"""
+                        <div class="success-box">
+                            🧪 Chemical treatment is profitable at <b>₹{chemical_net:,}</b> net,<br>
+                            but 🌿 organic treatment is even better at <b>₹{organic_net:,}</b> net.
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
 
             st.markdown("<br>", unsafe_allow_html=True)
             report_language = st.selectbox(
