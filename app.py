@@ -1110,26 +1110,42 @@ def _get_secret(name: str) -> str:
     val = os.environ.get(name, "")
     return val.strip() if val else ""
 
-_groq_key       = _get_secret("GROQ_API_KEY")
-_openrouter_key = _get_secret("OPENROUTER_API_KEY")
+# ── Lazy client initialisation via @st.cache_resource ────────────
+# Using cache_resource ensures this runs AFTER Streamlit fully boots,
+# so st.secrets is 100% accessible (unlike bare module-level code).
 
-_groq_client = None
-_openrouter_client = None
-
-if GROQ_AVAILABLE and _groq_key:
+@st.cache_resource(show_spinner=False)
+def _get_groq_client():
+    """Return an authenticated Groq client, or None if unavailable."""
+    if not GROQ_AVAILABLE:
+        return None
+    key = _get_secret("GROQ_API_KEY")
+    if not key:
+        return None
     try:
-        _groq_client = GroqClient(api_key=_groq_key)
+        return GroqClient(api_key=key)
     except Exception:
-        _groq_client = None
+        return None
 
-if OPENAI_SDK_AVAILABLE and _openrouter_key:
+@st.cache_resource(show_spinner=False)
+def _get_openrouter_client():
+    """Return an authenticated OpenRouter client, or None if unavailable."""
+    if not OPENAI_SDK_AVAILABLE:
+        return None
+    key = _get_secret("OPENROUTER_API_KEY")
+    if not key:
+        return None
     try:
-        _openrouter_client = OpenAIClient(
+        return OpenAIClient(
             base_url="https://openrouter.ai/api/v1",
-            api_key=_openrouter_key,
+            api_key=key,
         )
     except Exception:
-        _openrouter_client = None
+        return None
+
+# These are resolved after Streamlit is fully loaded (first sidebar render)
+_groq_client       = _get_groq_client()
+_openrouter_client = _get_openrouter_client()
 
 # ─── Response cache (avoid re-calling API for same image+plant) ──────────────
 import hashlib as _hashlib
@@ -1217,8 +1233,10 @@ def gemini_vision_with_fallback(parts: list, prefer_pro: bool = False):
             continue
 
     # All Gemini models exhausted → OpenRouter Qwen vision (if enabled in sidebar)
-    _or_enabled = st.session_state.get("use_openrouter_vision", True) if hasattr(st, "session_state") else True
-    if _openrouter_client and _or_enabled:
+    _or_client_live = _openrouter_client or _get_openrouter_client()
+    _force_qwen = st.session_state.get("force_qwen_vision", False) if hasattr(st, "session_state") else False
+    _or_enabled = _force_qwen or st.session_state.get("use_openrouter_vision", True) if hasattr(st, "session_state") else True
+    if _or_client_live and _or_enabled:
         try:
             import base64 as _b64, io as _io
             content_parts = []
@@ -1233,7 +1251,7 @@ def gemini_vision_with_fallback(parts: list, prefer_pro: bool = False):
                         "type": "image_url",
                         "image_url": {"url": f"data:image/png;base64,{b64}"}
                     })
-            resp = _openrouter_client.chat.completions.create(
+            resp = _or_client_live.chat.completions.create(
                 model=OPENROUTER_VISION_MODEL,
                 messages=[{"role": "user", "content": content_parts}],
                 max_tokens=3000,
@@ -1263,11 +1281,13 @@ def gemini_text_with_fallback(prompt: str):
     import time as _time
 
     # 1. Groq — fastest + highest free quota
-    if _groq_client:
+    # Re-resolve Groq client each call (handles post-boot secret loading)
+    _gc = _groq_client or _get_groq_client()
+    if _gc:
         for gm in GROQ_TEXT_MODELS:
             for attempt in range(3):
                 try:
-                    resp = _groq_client.chat.completions.create(
+                    resp = _gc.chat.completions.create(
                         model=gm,
                         messages=[{"role": "user", "content": prompt}],
                         max_tokens=2048,
@@ -1284,10 +1304,11 @@ def gemini_text_with_fallback(prompt: str):
                     break
 
     # 2. OpenRouter text
-    if _openrouter_client:
+    _or_text_live = _openrouter_client or _get_openrouter_client()
+    if _or_text_live:
         for attempt in range(2):
             try:
-                resp = _openrouter_client.chat.completions.create(
+                resp = _or_text_live.chat.completions.create(
                     model=OPENROUTER_TEXT_MODEL,
                     messages=[{"role": "user", "content": prompt}],
                     max_tokens=2048,
@@ -2113,7 +2134,7 @@ if "confidence_min" not in st.session_state:
 with st.sidebar:
     # ── Navigation ────────────────────────────────────────────────
     page = st.radio(
-        "📂 Navigation",
+        "📂 Pages",
         ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"],
         label_visibility="collapsed",
     )
@@ -2125,10 +2146,13 @@ with st.sidebar:
         "letter-spacing:0.14em;text-transform:uppercase;margin-bottom:8px'>API Status</p>",
         unsafe_allow_html=True
     )
+    # Always re-resolve from cache_resource on each render
+    _groq_live   = _get_groq_client()
+    _or_live     = _get_openrouter_client()
     _status_items = [
         ("Gemini", True, "#2ecc6e"),
-        ("Groq", bool(_groq_client), "#2ecc6e" if _groq_client else "#f05c5c"),
-        ("OpenRouter", bool(_openrouter_client), "#2ecc6e" if _openrouter_client else "#f0b040"),
+        ("Groq",        bool(_groq_live), "#2ecc6e" if _groq_live else "#f05c5c"),
+        ("OpenRouter",  bool(_or_live),   "#2ecc6e" if _or_live   else "#f0b040"),
     ]
     _status_html = "<div style='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px'>"
     for _name, _ok, _col in _status_items:
@@ -2156,23 +2180,36 @@ with st.sidebar:
     vision_primary = st.selectbox(
         "vision_model",
         [
-            "gemini-2.5-flash — Best Quality (250/day)",
-            "gemini-1.5-flash — High Quota (1,500/day)",
-            "gemini-1.5-flash-8b — Lightest (1,500/day)",
+            "gemini-2.5-flash ✦ Best Quality (250/day)",
+            "gemini-1.5-flash ⚡ High Quota (1,500/day)",
+            "gemini-1.5-flash-8b 🪶 Lightest (1,500/day)",
+            "Qwen2.5-VL via OpenRouter ∞ Free",
         ],
         index=0,
         label_visibility="collapsed",
         key="vision_primary_choice",
     )
     _vision_primary_map = {
-        "gemini-2.5-flash — Best Quality (250/day)":   "gemini-2.5-flash",
-        "gemini-1.5-flash — High Quota (1,500/day)":   "gemini-1.5-flash",
-        "gemini-1.5-flash-8b — Lightest (1,500/day)":  "gemini-1.5-flash-8b",
+        "gemini-2.5-flash ✦ Best Quality (250/day)":    "gemini-2.5-flash",
+        "gemini-1.5-flash ⚡ High Quota (1,500/day)":    "gemini-1.5-flash",
+        "gemini-1.5-flash-8b 🪶 Lightest (1,500/day)":  "gemini-1.5-flash-8b",
+        "Qwen2.5-VL via OpenRouter ∞ Free":              "qwen",
     }
     _chosen_primary = _vision_primary_map[vision_primary]
-    _default_remaining = [m for m in ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"]
-                          if m != _chosen_primary]
-    VISION_MODEL_CHAIN[:] = [_chosen_primary] + _default_remaining
+
+    _openrouter_client_v = _get_openrouter_client()
+    if _chosen_primary == "qwen":
+        if _openrouter_client_v:
+            st.markdown("<span style='font-size:0.72rem;color:#2ecc6e'>✅ OpenRouter connected — Qwen ready</span>", unsafe_allow_html=True)
+        else:
+            st.markdown("<span style='font-size:0.72rem;color:#f05c5c'>⚠️ OpenRouter not connected — add OPENROUTER_API_KEY to secrets</span>", unsafe_allow_html=True)
+        VISION_MODEL_CHAIN[:] = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"]
+        st.session_state["force_qwen_vision"] = True
+    else:
+        st.session_state["force_qwen_vision"] = False
+        _default_remaining = [m for m in ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"]
+                              if m != _chosen_primary]
+        VISION_MODEL_CHAIN[:] = [_chosen_primary] + _default_remaining
 
     prefer_pro_toggle = st.checkbox(
         "Use gemini-2.5-pro (best accuracy, slower)",
@@ -2180,9 +2217,6 @@ with st.sidebar:
         key="model_choice",
         help="Prepends gemini-2.5-pro to the vision chain for maximum accuracy. Uses more quota.",
     )
-
-    # OpenRouter vision fallback — silently wired in, no toggle needed
-    # (auto-enabled if key present, ignored otherwise)
     st.markdown("---")
 
     # ── 💬 Text Model selector ─────────────────────────────────────
@@ -2197,18 +2231,17 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-    # Always show text model selector — Groq options if connected, Gemini if not
-    if _groq_client:
-        _text_options = [
-            "Groq — Llama 3.1-8B  (14,400/day, Fastest)",
-            "Groq — Llama 3.3-70B  (1,000/day, Best Quality)",
-            "Gemini 1.5 Flash  (fallback only)",
-        ]
-    else:
-        _text_options = [
-            "Gemini 1.5 Flash  (1,500/day)",
-            "Gemini 2.5 Flash  (250/day)",
-        ]
+    # Re-resolve clients each render (cache_resource keeps them alive)
+    _groq_client_live       = _get_groq_client()
+    _openrouter_client_live = _get_openrouter_client()
+
+    # ALWAYS show ALL text model options — never hide behind client check
+    _text_options = [
+        "Groq — Llama 3.1-8B  (14,400/day) ⚡ Fastest",
+        "Groq — Llama 3.3-70B  (1,000/day) 🧠 Best Quality",
+        "Gemini 2.5 Flash  (250/day) ✦ Primary",
+        "Gemini 1.5 Flash  (1,500/day) ⚡ High Quota",
+    ]
 
     text_model_choice = st.selectbox(
         "text_model",
@@ -2218,17 +2251,33 @@ with st.sidebar:
         key="text_model_choice",
     )
 
-    # Wire the text model choice into the live Groq chain
-    if _groq_client:
-        if "Llama 3.3-70B" in text_model_choice:
-            GROQ_TEXT_MODELS[:] = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+    # Show status pill under the selector
+    if "Groq" in text_model_choice:
+        if _groq_client_live:
+            st.markdown(
+                "<span style='font-size:0.72rem;color:#2ecc6e'>✅ Groq connected</span>",
+                unsafe_allow_html=True
+            )
         else:
-            GROQ_TEXT_MODELS[:] = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]
+            st.markdown(
+                "<span style='font-size:0.72rem;color:#f05c5c'>"
+                "⚠️ Groq not connected — check GROQ_API_KEY in secrets</span>",
+                unsafe_allow_html=True
+            )
 
-    if not _groq_client:
+    # Wire the text model choice into the live chains
+    if "Llama 3.3-70B" in text_model_choice:
+        GROQ_TEXT_MODELS[:] = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+    elif "Llama 3.1-8B" in text_model_choice:
+        GROQ_TEXT_MODELS[:] = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]
+    # If Gemini is selected as text, Groq chain stays intact as fallback
+
+    # Package availability hint
+    if not GROQ_AVAILABLE:
         st.markdown(
-            "<p style='font-size:0.73rem;color:#f0b040;margin-top:4px'>"
-            "💡 Add <code>GROQ_API_KEY</code> in Streamlit secrets for 14,400 free req/day</p>",
+            "<p style='font-size:0.72rem;color:#f0b040;margin-top:4px'>"
+            "⚠️ <code>groq</code> package not installed. "
+            "Add <code>groq</code> to <code>requirements.txt</code> and redeploy.</p>",
             unsafe_allow_html=True
         )
 
