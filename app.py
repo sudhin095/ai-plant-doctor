@@ -1082,8 +1082,18 @@ except Exception:
     st.stop()
 
 # ─── Optional clients (won't crash if keys missing) ────────────────────────
-_groq_key        = os.environ.get("GROQ_API_KEY", "")
-_openrouter_key  = os.environ.get("OPENROUTER_API_KEY", "")
+def _get_secret(name: str) -> str:
+    """Read from st.secrets first (Streamlit Cloud), fallback to os.environ (local)."""
+    try:
+        v = st.secrets.get(name, "")
+        if v:
+            return v
+    except Exception:
+        pass
+    return os.environ.get(name, "")
+
+_groq_key       = _get_secret("GROQ_API_KEY")
+_openrouter_key = _get_secret("OPENROUTER_API_KEY")
 
 _groq_client = None
 _openrouter_client = None
@@ -1188,8 +1198,9 @@ def gemini_vision_with_fallback(parts: list, prefer_pro: bool = False):
             # Non-quota hard error on primary → still try fallbacks
             continue
 
-    # All Gemini models exhausted → OpenRouter Qwen vision
-    if _openrouter_client:
+    # All Gemini models exhausted → OpenRouter Qwen vision (if enabled in sidebar)
+    _or_enabled = st.session_state.get("use_openrouter_vision", True) if hasattr(st, "session_state") else True
+    if _openrouter_client and _or_enabled:
         try:
             import base64 as _b64, io as _io
             content_parts = []
@@ -1664,13 +1675,17 @@ def render_diagnosis_and_treatments(result: dict, plant_type: str, infected_coun
         unsafe_allow_html=True,
     )
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Plant", plant_type)
     with col2:
         st.metric("Confidence", f"{confidence}%")
     with col3:
         st.metric("Severity", severity.title())
+    with col4:
+        _mused_disp = result.get("model_used", "—") if isinstance(result, dict) else "—"
+        _mshort = str(_mused_disp).replace("gemini-2.5-flash","2.5Flash").replace("gemini-1.5-flash-8b","1.5-8B").replace("gemini-1.5-flash","1.5Flash").replace("cache","⚡Cached")
+        st.metric("AI Engine", _mshort[:12])
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -2074,49 +2089,146 @@ with st.sidebar:
         "📂 Pages",
         ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"],
     )
-
-    st.header("🤖 Model Status")
-    st.markdown("""
-**🔭 Vision (Plant Diagnosis)**
-Auto-fallback chain:
-1. `gemini-2.5-flash` *(Primary — best quality)*
-2. `gemini-1.5-flash` *(Fallback — 1,500/day)*
-3. `gemini-1.5-flash-8b` *(Last-resort Gemini)*
-4. `Qwen2.5-VL` via OpenRouter *(free emergency)*
-
-⚡ **Response cache** active — same image
-is never analyzed twice (saves API calls)
-    """)
-    if _groq_client:
-        st.success("✅ **Groq Connected**\nText tasks use Llama 3.1-8B\n→ 14,400 free requests/day")
-    else:
-        st.warning(
-            "⚠️ **Groq not connected**\n"
-            "Add `GROQ_API_KEY` to secrets\n"
-            "for 14,400 free text req/day\n"
-            "[Get free key → console.groq.com]"
-        )
-    if _openrouter_client:
-        st.success("✅ **OpenRouter Connected**\nQwen vision + Llama text\nfallbacks active")
-    else:
-        st.info(
-            "ℹ️ **OpenRouter optional**\n"
-            "Add `OPENROUTER_API_KEY` for\n"
-            "unlimited Qwen vision fallback\n"
-            "[Get free key → openrouter.ai]"
-        )
     st.markdown("---")
-    st.markdown("**⚙️ Vision Quality**")
-    model_pref_ui = st.selectbox(
-        "Vision model preference",
-        ["Auto (Best Available)", "Prefer Pro (Best Quality)", "Flash Only (Fastest)"],
+
+    # ── Connection badges ─────────────────────────────────────────
+    st.markdown("### 🤖 AI Engine Status")
+    col_g, col_gr = st.columns(2)
+    with col_g:
+        st.markdown(
+            "<div style='background:rgba(46,204,110,0.12);border:1px solid rgba(46,204,110,0.4);"
+            "border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;'>"
+            "<b style='color:#2ecc6e'>✅ Gemini</b><br><span style='color:#8fbf9a'>Active</span></div>",
+            unsafe_allow_html=True
+        )
+    with col_gr:
+        if _groq_client:
+            st.markdown(
+                "<div style='background:rgba(46,204,110,0.12);border:1px solid rgba(46,204,110,0.4);"
+                "border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;'>"
+                "<b style='color:#2ecc6e'>✅ Groq</b><br><span style='color:#8fbf9a'>Connected</span></div>",
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                "<div style='background:rgba(240,92,92,0.10);border:1px solid rgba(240,92,92,0.35);"
+                "border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;'>"
+                "<b style='color:#f05c5c'>⚠️ Groq</b><br><span style='color:#f05c5c'>No key</span></div>",
+                unsafe_allow_html=True
+            )
+
+    col_or, col_cache = st.columns(2)
+    with col_or:
+        if _openrouter_client:
+            st.markdown(
+                "<div style='background:rgba(46,204,110,0.12);border:1px solid rgba(46,204,110,0.4);"
+                "border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;'>"
+                "<b style='color:#2ecc6e'>✅ OpenRouter</b><br><span style='color:#8fbf9a'>Connected</span></div>",
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                "<div style='background:rgba(240,176,64,0.10);border:1px solid rgba(240,176,64,0.35);"
+                "border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;'>"
+                "<b style='color:#f0b040'>ℹ️ OpenRouter</b><br><span style='color:#f0b040'>Optional</span></div>",
+                unsafe_allow_html=True
+            )
+    with col_cache:
+        cache_count = len(_RESPONSE_CACHE)
+        st.markdown(
+            f"<div style='background:rgba(92,168,240,0.10);border:1px solid rgba(92,168,240,0.35);"
+            f"border-radius:8px;padding:8px;text-align:center;font-size:0.78rem;'>"
+            f"<b style='color:#5ca8f0'>⚡ Cache</b><br><span style='color:#5ca8f0'>{cache_count} saved</span></div>",
+            unsafe_allow_html=True
+        )
+
+    st.markdown("---")
+
+    # ── Vision model chooser ──────────────────────────────────────
+    st.markdown("### 🔭 Vision Model")
+    st.caption("Choose which Gemini model runs FIRST for plant diagnosis")
+
+    vision_primary = st.selectbox(
+        "Primary vision model",
+        [
+            "gemini-2.5-flash  ✦ Best Quality (250/day)",
+            "gemini-1.5-flash  ⚡ High Quota (1,500/day)",
+            "gemini-1.5-flash-8b  🪶 Lightest (1,500/day)",
+        ],
+        index=0,
         label_visibility="collapsed",
-        key="model_choice"
+        key="vision_primary_choice"
     )
+    # Map display → model id
+    _vision_primary_map = {
+        "gemini-2.5-flash  ✦ Best Quality (250/day)": "gemini-2.5-flash",
+        "gemini-1.5-flash  ⚡ High Quota (1,500/day)": "gemini-1.5-flash",
+        "gemini-1.5-flash-8b  🪶 Lightest (1,500/day)": "gemini-1.5-flash-8b",
+    }
+    _chosen_primary = _vision_primary_map[vision_primary]
+    # Rebuild chain: chosen first, then remaining two in default order
+    _default_remaining = [m for m in ["gemini-2.5-flash","gemini-1.5-flash","gemini-1.5-flash-8b"] if m != _chosen_primary]
+    VISION_MODEL_CHAIN[:] = [_chosen_primary] + _default_remaining
+
+    use_openrouter_vision = st.checkbox(
+        "🌐 Enable Qwen2.5-VL fallback (OpenRouter)",
+        value=bool(_openrouter_client),
+        disabled=not bool(_openrouter_client),
+        help="Uses Qwen2.5-VL-7B via OpenRouter as emergency vision fallback when all Gemini models are at capacity"
+    )
+
+    # Prefer Pro toggle
+    prefer_pro_toggle = st.checkbox(
+        "⭐ Try gemini-2.5-pro first (slower, most accurate)",
+        value=False,
+        key="model_choice",
+        help="Prepends gemini-2.5-pro to the chain. Uses more quota but gives best possible accuracy."
+    )
+
     st.markdown("---")
-    st.header("Supported Plants")
-    for plant in sorted(PLANT_COMMON_DISEASES.keys()):
-        st.write(f"✓ {plant}")
+
+    # ── Text model chooser ────────────────────────────────────────
+    st.markdown("### 💬 Text Model (Chatbot & Tools)")
+    st.caption("Groq handles chatbot, crop rotation & translation")
+
+    if _groq_client:
+        groq_primary = st.selectbox(
+            "Primary text model",
+            [
+                "llama-3.1-8b-instant  ⚡ 14,400/day (Fastest)",
+                "llama-3.3-70b-versatile  🧠 1,000/day (Best Quality)",
+            ],
+            index=0,
+            label_visibility="collapsed",
+            key="groq_primary_choice"
+        )
+        _groq_primary_map = {
+            "llama-3.1-8b-instant  ⚡ 14,400/day (Fastest)": "llama-3.1-8b-instant",
+            "llama-3.3-70b-versatile  🧠 1,000/day (Best Quality)": "llama-3.3-70b-versatile",
+        }
+        _chosen_groq = _groq_primary_map[groq_primary]
+        _groq_remaining = [m for m in ["llama-3.1-8b-instant","llama-3.3-70b-versatile"] if m != _chosen_groq]
+        GROQ_TEXT_MODELS[:] = [_chosen_groq] + _groq_remaining
+    else:
+        st.caption("⚠️ Add `GROQ_API_KEY` to Streamlit secrets for 14,400 free text req/day")
+
+    st.markdown("---")
+
+    # ── Daily quota summary ───────────────────────────────────────
+    st.markdown("### 📊 Daily Free Quota")
+    total_vision = 250 + 1500 + 1500
+    total_text   = (14400 if _groq_client else 0) + 1500
+    st.markdown(
+        f"<div style='font-size:0.82rem;color:#8fbf9a;line-height:1.8'>"
+        f"🔭 Vision: <b style='color:#2ecc6e'>~{total_vision:,} req/day</b><br>"
+        f"💬 Text: <b style='color:#2ecc6e'>~{total_text:,} req/day</b>"
+        + (" + ∞ OpenRouter" if _openrouter_client else "")
+        + "</div>",
+        unsafe_allow_html=True
+    )
+
+    st.markdown("---")
+    st.caption("🔒 All API keys loaded from Streamlit Secrets")
 
 # ============ SESSION STATE DEFAULTS ============
 if "last_diagnosis" not in st.session_state:
@@ -2132,7 +2244,7 @@ if "cost_roi_result" not in st.session_state:
 if "kisan_response" not in st.session_state:
     st.session_state.kisan_response = None
 if "model_choice" not in st.session_state:
-    st.session_state.model_choice = "Gemini 2.5 Flash"
+    st.session_state.model_choice = False  # prefer_pro_toggle default
 if "debug_mode" not in st.session_state:
     st.session_state.debug_mode = False
 if "show_tips" not in st.session_state:
@@ -2223,7 +2335,7 @@ if page == "AI Plant Doctor":
             try:
                 progress_placeholder.info("🔍 Step 1: Identifying plant species..." if plant_type == "AUTO_DETECT" else f"Processing {plant_type} leaf...")
 
-                prefer_pro = "Pro" in str(st.session_state.get("model_choice", ""))
+                prefer_pro = st.session_state.get("model_choice", False)  # prefer_pro_toggle
                 enhanced_images = [
                     enhance_image_for_analysis(img.copy()) for img in images
                 ]
@@ -2432,8 +2544,10 @@ if page == "AI Plant Doctor":
         # Sync infected_count from cost-calc widget if user changed it
         if "farm_infected_plants" in st.session_state:
             diag["infected_count"] = int(st.session_state["farm_infected_plants"])
+        _render_result = diag.get("result", {}) or {}
+        _render_result["model_used"] = diag.get("model_used", "—")
         organic_total_cost, chemical_total_cost = render_diagnosis_and_treatments(
-            result=diag.get("result", {}),
+            result=_render_result,
             plant_type=diag.get("plant_type", "Unknown"),
             infected_count=diag.get("infected_count", 50),
         )
