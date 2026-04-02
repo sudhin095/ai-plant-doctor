@@ -15,6 +15,7 @@ import os
 import json
 from datetime import datetime
 import re
+import socket
 
 st.set_page_config(
     page_title="🌿 AI Plant Doctor - Smart Edition",
@@ -1181,7 +1182,57 @@ def _is_quota_err(e):
     s = str(e).lower()
     return any(x in s for x in ["429", "quota", "rate limit", "resource_exhausted",
                                   "too many", "overloaded", "capacity"])
+# ============ OFFLINE MODE: INTERNET + OLLAMA DETECTION ============
 
+def _has_internet(timeout: int = 3) -> bool:
+    try:
+        socket.setdefaulttimeout(timeout)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(("8.8.8.8", 53))
+        s.close()
+        return True
+    except OSError:
+        return False
+
+def _is_ollama_running() -> bool:
+    try:
+        import urllib.request as _ur
+        _ur.urlopen("http://localhost:11434/api/tags", timeout=2)
+        return True
+    except Exception:
+        return False
+
+def _ollama_vision(parts: list) -> str:
+    import base64 as _b64, io as _io, json as _json, urllib.request as _ur
+    images_b64, prompt_text = [], ""
+    for part in parts:
+        if isinstance(part, str):
+            prompt_text += part + "\n"
+        else:
+            buf = _io.BytesIO()
+            part.save(buf, format="PNG")
+            images_b64.append(_b64.b64encode(buf.getvalue()).decode())
+    payload = _json.dumps({
+        "model": "qwen2.5vl", "prompt": prompt_text,
+        "images": images_b64, "stream": False,
+        "options": {"temperature": 0.1, "num_predict": 3000}
+    }).encode()
+    req = _ur.Request("http://localhost:11434/api/generate", data=payload,
+                      headers={"Content-Type": "application/json"}, method="POST")
+    with _ur.urlopen(req, timeout=120) as resp:
+        return _json.loads(resp.read()).get("response", "")
+
+def _ollama_text(prompt: str) -> str:
+    import json as _json, urllib.request as _ur
+    payload = _json.dumps({
+        "model": "qwen2.5:7b", "prompt": prompt, "stream": False,
+        "options": {"temperature": 0.3, "num_predict": 2048}
+    }).encode()
+    req = _ur.Request("http://localhost:11434/api/generate", data=payload,
+                      headers={"Content-Type": "application/json"}, method="POST")
+    with _ur.urlopen(req, timeout=90) as resp:
+        return _json.loads(resp.read()).get("response", "")
+        
 def _retry_generate(model_id: str, parts: list, max_retries: int = 3):
     """Single model call with exponential back-off on transient/quota errors."""
     import time as _time
@@ -1216,6 +1267,21 @@ def gemini_vision_with_fallback(parts: list, prefer_pro: bool = False):
       4. OpenRouter Qwen2.5-VL (free, no key required beyond OR key)
     Each model gets up to 3 auto-retries with exponential back-off.
     """
+        # ── OFFLINE CHECK: if no internet, route to local Ollama ─────────────
+    if not _has_internet():
+        if _is_ollama_running():
+            try:
+                text = _ollama_vision(parts)
+                if text.strip():
+                    return text, "Ollama/qwen2.5vl [OFFLINE]"
+            except Exception as _oe:
+                raise RuntimeError(f"📴 Offline mode — Ollama error: {_oe}\nRun: ollama serve")
+        else:
+            raise RuntimeError(
+                "📴 No internet and Ollama not running.\n"
+                "Run: ollama serve  (setup: ollama pull qwen2.5vl)"
+            )
+    # ── ONLINE MODE: original chain unchanged ─────────────────────────────
     chain = VISION_MODEL_CHAIN.copy()
     if prefer_pro:
         chain = ["gemini-2.5-pro"] + chain
@@ -1278,6 +1344,21 @@ def gemini_text_with_fallback(prompt: str):
       4. Gemini 2.5 Flash → 1.5 Flash → 1.5 Flash-8B
     Each provider gets auto-retries with back-off.
     """
+        # ── OFFLINE CHECK: if no internet, route to local Ollama ─────────────
+    if not _has_internet():
+        if _is_ollama_running():
+            try:
+                text = _ollama_text(prompt)
+                if text.strip():
+                    return text, "Ollama/qwen2.5:7b [OFFLINE]"
+            except Exception as _oe:
+                raise RuntimeError(f"📴 Offline mode — Ollama error: {_oe}\nRun: ollama serve")
+        else:
+            raise RuntimeError(
+                "📴 No internet and Ollama not running.\n"
+                "Run: ollama serve  (setup: ollama pull qwen2.5:7b)"
+            )
+    # ── ONLINE MODE: original chain unchanged ─────────────────────────────
     import time as _time
 
     # 1. Groq — fastest + highest free quota
@@ -2138,6 +2219,28 @@ with st.sidebar:
         ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"],
     )
     st.markdown("---")
+        # ── Connection Status Badge ───────────────────────────────────
+    _inet_up = _has_internet()
+    _ollama_up = _is_ollama_running()
+    if _inet_up:
+        _conn_color, _conn_bg, _conn_border, _conn_msg = (
+            "#7af0a0", "#1a3a1e", "#2ecc6e", "🌐 ONLINE MODE — Cloud AI"
+        )
+    elif _ollama_up:
+        _conn_color, _conn_bg, _conn_border, _conn_msg = (
+            "#7af0a0", "#1a3010", "#2ecc6e", "📴 OFFLINE — Local AI Active"
+        )
+    else:
+        _conn_color, _conn_bg, _conn_border, _conn_msg = (
+            "#f89090", "#3a1010", "#f05c5c", "⚠️ OFFLINE — Run: ollama serve"
+        )
+    st.markdown(
+        f"<div style='background:{_conn_bg};border:1px solid {_conn_border};"
+        f"border-radius:8px;padding:8px 14px;color:{_conn_color};font-size:0.78rem;"
+        f"font-weight:800;letter-spacing:0.08em;text-align:center;margin-bottom:8px'>"
+        f"{_conn_msg}</div>",
+        unsafe_allow_html=True
+    )
 
     # ── API Status row ────────────────────────────────────────────
     st.markdown(
