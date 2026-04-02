@@ -2270,89 +2270,77 @@ if page == "📖 User Manual":
 "English": """
 <div class='manual-card'>
 <div class='manual-lang-badge'>🇬🇧 ENGLISH</div>
+
 <div class='manual-section-title'>🌿 What is AI Plant Doctor?</div>
-<p>AI Plant Doctor is a free tool that looks at a photo of your plant and tells you what disease it has and how to treat it. You do not need to know anything about computers or AI to use it.</p>
+<p>AI Plant Doctor is a free tool that looks at a photo of your plant and tells you what disease it has and how to treat it. No knowledge of computers or AI is needed.</p>
 
-<div class='manual-section-title'>📸 Step 1 — Take a Clear Photo</div>
-<div class='manual-step'><b>Take a close photo</b> of the sick leaf or plant part. Make sure the photo is clear and bright. Avoid blurry or dark photos.</div>
-<div class='manual-tip'>💡 Tip: Take the photo in sunlight for best results.</div>
+<div class='manual-section-title'>📱 The 4 Pages — What Each Does</div>
+<div class='manual-step'><b>🌿 AI Plant Doctor</b> — Upload a photo of a sick plant. Select your plant type. Get the disease name, severity, and full treatment plan in seconds.</div>
+<div class='manual-step'><b>🤖 KisanAI Assistant</b> — Ask any farming question in plain words. Example: "What fertilizer for tomato?" or "How to stop aphids?"</div>
+<div class='manual-step'><b>🌱 Crop Rotation Advisor</b> — Enter your current crop and field size. Get a 3-year rotation plan to keep your soil healthy and increase yield.</div>
+<div class='manual-step'><b>💰 Cost Calculator & ROI</b> — After diagnosis, see the exact cost of treatment and how much money you can save by treating early.</div>
 
-<div class='manual-section-title'>🔍 Step 2 — Open AI Plant Doctor</div>
-<div class='manual-step'>Click on <b>"AI Plant Doctor"</b> in the left side menu.</div>
+<div class='manual-section-title'>📸 How to Diagnose a Plant — Step by Step</div>
+<div class='manual-step'><b>Step 1:</b> Take a close, clear photo of the sick leaf in good light (sunlight is best).</div>
+<div class='manual-step'><b>Step 2:</b> Click <b>"AI Plant Doctor"</b> in the left menu.</div>
+<div class='manual-step'><b>Step 3:</b> Click <b>"Browse files"</b> and upload your photo.</div>
+<div class='manual-step'><b>Step 4:</b> Select your plant name from the list (e.g. Tomato, Wheat, Rose).</div>
+<div class='manual-step'><b>Step 5:</b> Click <b>"Diagnose Plant"</b> — results appear in a few seconds.</div>
+<div class='manual-step'><b>Step 6:</b> Scroll down to see medicine names, dosage, and how to apply.</div>
 
-<div class='manual-section-title'>📤 Step 3 — Upload the Photo</div>
-<div class='manual-step'>Click the <b>"Browse files"</b> button and select your photo from your phone or computer.</div>
-
-<div class='manual-section-title'>🌱 Step 4 — Select Your Plant</div>
-<div class='manual-step'>Choose your plant name from the dropdown list (e.g. Tomato, Wheat, Rose).</div>
-
-<div class='manual-section-title'>✅ Step 5 — Get Your Result</div>
-<div class='manual-step'>Click <b>"Diagnose Plant"</b>. In a few seconds you will see the disease name, how serious it is, and how to treat it with both organic and chemical options.</div>
-
-<div class='manual-section-title'>💊 Step 6 — Get Treatment Plan</div>
-<div class='manual-step'>Scroll down to see the full treatment. You will see medicine names, how much to use, and how to apply.</div>
-
-<div class='manual-tip'>💡 Use the <b>KisanAI Assistant</b> page to ask any farming question in your own words.</div>
-<div class='manual-warning'>⚠️ Always read the medicine label before use. Consult a local agronomist for severe cases.</div>
+<div class='manual-tip'>💡 Always run AI Plant Doctor first — KisanAI and Cost Calculator use those results.</div>
+<div class='manual-warning'>⚠️ Read medicine labels before use. Consult a local agronomist for severe cases.</div>
 </div>
 """,
 
 "हिंदी (Hindi)": """
 <div class='manual-card'>
 <div class='manual-lang-badge'>🇮🇳 हिंदी</div>
+
 <div class='manual-section-title'>🌿 AI Plant Doctor क्या है?</div>
-<p>AI Plant Doctor एक मुफ़्त उपकरण है जो आपके पौधे की फ़ोटो देखकर बताता है कि उसे कौन सी बीमारी है और उसका इलाज कैसे करें। आपको कंप्यूटर या AI के बारे में कुछ जानने की ज़रूरत नहीं है।</p>
+<p>AI Plant Doctor एक मुफ़्त उपकरण है जो पौधे की फ़ोटो देखकर बीमारी और इलाज बताता है। कंप्यूटर या AI की कोई जानकारी ज़रूरी नहीं।</p>
 
-<div class='manual-section-title'>📸 कदम 1 — साफ़ फ़ोटो लें</div>
-<div class='manual-step'><b>बीमार पत्ते या पौधे के हिस्से की पास से फ़ोटो लें।</b> फ़ोटो साफ़ और रोशनी में होनी चाहिए।</div>
-<div class='manual-tip'>💡 सुझाव: धूप में फ़ोटो लें — सबसे अच्छा परिणाम मिलेगा।</div>
+<div class='manual-section-title'>📱 चारों पेज — क्या काम करते हैं</div>
+<div class='manual-step'><b>🌿 AI Plant Doctor</b> — बीमार पौधे की फ़ोटो लगाएँ, पौधे का नाम चुनें, बीमारी और पूरा इलाज सेकंडों में पाएँ।</div>
+<div class='manual-step'><b>🤖 KisanAI Assistant</b> — खेती से जुड़ा कोई भी सवाल अपनी भाषा में पूछें। जैसे: "टमाटर में कौन सी खाद डालें?" या "कीड़े कैसे भगाएँ?"</div>
+<div class='manual-step'><b>🌱 Crop Rotation Advisor</b> — अपनी फसल और खेत का आकार डालें। 3 साल की फसल बदलाव योजना पाएँ जिससे मिट्टी अच्छी रहे।</div>
+<div class='manual-step'><b>💰 Cost Calculator & ROI</b> — इलाज की कुल लागत और समय पर इलाज करने से कितना पैसा बचेगा — सब देखें।</div>
 
-<div class='manual-section-title'>🔍 कदम 2 — AI Plant Doctor खोलें</div>
-<div class='manual-step'>बाईं तरफ़ के मेनू में <b>"AI Plant Doctor"</b> पर क्लिक करें।</div>
+<div class='manual-section-title'>📸 पौधे की जाँच कैसे करें — कदम दर कदम</div>
+<div class='manual-step'><b>कदम 1:</b> बीमार पत्ते की धूप में पास से साफ़ फ़ोटो लें।</div>
+<div class='manual-step'><b>कदम 2:</b> बाईं तरफ़ <b>"AI Plant Doctor"</b> पर क्लिक करें।</div>
+<div class='manual-step'><b>कदम 3:</b> <b>"Browse files"</b> से फ़ोटो अपलोड करें।</div>
+<div class='manual-step'><b>कदम 4:</b> पौधे का नाम चुनें (जैसे टमाटर, गेहूँ, गुलाब)।</div>
+<div class='manual-step'><b>कदम 5:</b> <b>"Diagnose Plant"</b> दबाएँ — कुछ सेकंड में परिणाम आएगा।</div>
+<div class='manual-step'><b>कदम 6:</b> नीचे स्क्रॉल करें — दवाई, मात्रा, और तरीका सब मिलेगा।</div>
 
-<div class='manual-section-title'>📤 कदम 3 — फ़ोटो अपलोड करें</div>
-<div class='manual-step'><b>"Browse files"</b> बटन पर क्लिक करें और अपनी फ़ोटो चुनें।</div>
-
-<div class='manual-section-title'>🌱 कदम 4 — पौधा चुनें</div>
-<div class='manual-step'>सूची में से अपने पौधे का नाम चुनें (जैसे टमाटर, गेहूँ, गुलाब)।</div>
-
-<div class='manual-section-title'>✅ कदम 5 — परिणाम देखें</div>
-<div class='manual-step'><b>"Diagnose Plant"</b> बटन दबाएँ। कुछ सेकंड में बीमारी का नाम, कितनी गंभीर है, और इलाज दिखेगा।</div>
-
-<div class='manual-section-title'>💊 कदम 6 — इलाज देखें</div>
-<div class='manual-step'>नीचे स्क्रॉल करें — दवाई का नाम, कितनी मात्रा लेनी है, और कैसे लगाएँ — सब दिखेगा।</div>
-
-<div class='manual-tip'>💡 किसी भी खेती के सवाल के लिए <b>KisanAI Assistant</b> पेज पर जाएँ।</div>
-<div class='manual-warning'>⚠️ दवाई इस्तेमाल करने से पहले लेबल ज़रूर पढ़ें। गंभीर मामलों में कृषि विशेषज्ञ से मिलें।</div>
+<div class='manual-tip'>💡 पहले AI Plant Doctor चलाएँ — KisanAI और Cost Calculator उसी के नतीजे इस्तेमाल करते हैं।</div>
+<div class='manual-warning'>⚠️ दवाई इस्तेमाल से पहले लेबल पढ़ें। गंभीर मामलों में कृषि विशेषज्ञ से मिलें।</div>
 </div>
 """,
 
 "ਪੰਜਾਬੀ (Punjabi)": """
 <div class='manual-card'>
 <div class='manual-lang-badge'>🌾 ਪੰਜਾਬੀ</div>
+
 <div class='manual-section-title'>🌿 AI Plant Doctor ਕੀ ਹੈ?</div>
-<p>AI Plant Doctor ਇੱਕ ਮੁਫ਼ਤ ਸੰਦ ਹੈ ਜੋ ਤੁਹਾਡੇ ਪੌਦੇ ਦੀ ਫ਼ੋਟੋ ਦੇਖ ਕੇ ਦੱਸਦਾ ਹੈ ਕਿ ਉਸਨੂੰ ਕਿਹੜੀ ਬਿਮਾਰੀ ਹੈ ਅਤੇ ਇਲਾਜ ਕਿਵੇਂ ਕਰਨਾ ਹੈ। ਤੁਹਾਨੂੰ ਕੰਪਿਊਟਰ ਬਾਰੇ ਕੁਝ ਜਾਣਨ ਦੀ ਲੋੜ ਨਹੀਂ।</p>
+<p>AI Plant Doctor ਇੱਕ ਮੁਫ਼ਤ ਸੰਦ ਹੈ ਜੋ ਪੌਦੇ ਦੀ ਫ਼ੋਟੋ ਦੇਖ ਕੇ ਬਿਮਾਰੀ ਅਤੇ ਇਲਾਜ ਦੱਸਦਾ ਹੈ। ਕੰਪਿਊਟਰ ਦੀ ਕੋਈ ਜਾਣਕਾਰੀ ਜ਼ਰੂਰੀ ਨਹੀਂ।</p>
 
-<div class='manual-section-title'>📸 ਕਦਮ 1 — ਸਾਫ਼ ਫ਼ੋਟੋ ਲਓ</div>
-<div class='manual-step'><b>ਬਿਮਾਰ ਪੱਤੇ ਦੀ ਨੇੜੇ ਤੋਂ ਫ਼ੋਟੋ ਲਓ।</b> ਫ਼ੋਟੋ ਸਾਫ਼ ਅਤੇ ਚਮਕਦਾਰ ਰੋਸ਼ਨੀ ਵਿੱਚ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ।</div>
-<div class='manual-tip'>💡 ਸੁਝਾਅ: ਧੁੱਪ ਵਿੱਚ ਫ਼ੋਟੋ ਲਓ — ਸਭ ਤੋਂ ਵਧੀਆ ਨਤੀਜਾ ਮਿਲੇਗਾ।</div>
+<div class='manual-section-title'>📱 ਚਾਰੇ ਪੇਜ — ਕੀ ਕੰਮ ਕਰਦੇ ਹਨ</div>
+<div class='manual-step'><b>🌿 AI Plant Doctor</b> — ਬਿਮਾਰ ਪੌਦੇ ਦੀ ਫ਼ੋਟੋ ਲਗਾਓ, ਪੌਦੇ ਦਾ ਨਾਮ ਚੁਣੋ, ਬਿਮਾਰੀ ਅਤੇ ਪੂਰਾ ਇਲਾਜ ਸਕਿੰਟਾਂ ਵਿੱਚ ਪਾਓ।</div>
+<div class='manual-step'><b>🤖 KisanAI Assistant</b> — ਖੇਤੀ ਦਾ ਕੋਈ ਵੀ ਸਵਾਲ ਆਪਣੀ ਭਾਸ਼ਾ ਵਿੱਚ ਪੁੱਛੋ। ਜਿਵੇਂ: "ਟਮਾਟਰ ਲਈ ਕਿਹੜੀ ਖਾਦ?" ਜਾਂ "ਕੀੜੇ ਕਿਵੇਂ ਭਜਾਈਏ?"</div>
+<div class='manual-step'><b>🌱 Crop Rotation Advisor</b> — ਆਪਣੀ ਫ਼ਸਲ ਅਤੇ ਖੇਤ ਦਾ ਆਕਾਰ ਦੱਸੋ। 3 ਸਾਲ ਦੀ ਫ਼ਸਲ ਬਦਲਾਅ ਯੋਜਨਾ ਪਾਓ।</div>
+<div class='manual-step'><b>💰 Cost Calculator & ROI</b> — ਇਲਾਜ ਦਾ ਖਰਚ ਅਤੇ ਸਮੇਂ ਸਿਰ ਇਲਾਜ ਨਾਲ ਕਿੰਨਾ ਪੈਸਾ ਬਚੇਗਾ — ਸਭ ਦੇਖੋ।</div>
 
-<div class='manual-section-title'>🔍 ਕਦਮ 2 — AI Plant Doctor ਖੋਲ੍ਹੋ</div>
-<div class='manual-step'>ਖੱਬੇ ਪਾਸੇ ਦੇ ਮੀਨੂ ਵਿੱਚ <b>"AI Plant Doctor"</b> ਤੇ ਕਲਿੱਕ ਕਰੋ।</div>
+<div class='manual-section-title'>📸 ਪੌਦੇ ਦੀ ਜਾਂਚ ਕਿਵੇਂ ਕਰੀਏ — ਕਦਮ ਦਰ ਕਦਮ</div>
+<div class='manual-step'><b>ਕਦਮ 1:</b> ਬਿਮਾਰ ਪੱਤੇ ਦੀ ਧੁੱਪ ਵਿੱਚ ਪਾਸ ਤੋਂ ਸਾਫ਼ ਫ਼ੋਟੋ ਲਓ।</div>
+<div class='manual-step'><b>ਕਦਮ 2:</b> ਖੱਬੇ ਮੇਨੂ ਵਿੱਚ <b>"AI Plant Doctor"</b> ਤੇ ਕਲਿੱਕ ਕਰੋ।</div>
+<div class='manual-step'><b>ਕਦਮ 3:</b> <b>"Browse files"</b> ਨਾਲ ਫ਼ੋਟੋ ਅਪਲੋਡ ਕਰੋ।</div>
+<div class='manual-step'><b>ਕਦਮ 4:</b> ਪੌਦੇ ਦਾ ਨਾਮ ਚੁਣੋ (ਜਿਵੇਂ ਟਮਾਟਰ, ਕਣਕ, ਗੁਲਾਬ)।</div>
+<div class='manual-step'><b>ਕਦਮ 5:</b> <b>"Diagnose Plant"</b> ਦਬਾਓ — ਕੁਝ ਸਕਿੰਟਾਂ ਵਿੱਚ ਨਤੀਜਾ ਆਵੇਗਾ।</div>
+<div class='manual-step'><b>ਕਦਮ 6:</b> ਹੇਠਾਂ ਸਕ੍ਰੋਲ ਕਰੋ — ਦਵਾਈ, ਮਾਤਰਾ, ਅਤੇ ਤਰੀਕਾ ਸਭ ਮਿਲੇਗਾ।</div>
 
-<div class='manual-section-title'>📤 ਕਦਮ 3 — ਫ਼ੋਟੋ ਅਪਲੋਡ ਕਰੋ</div>
-<div class='manual-step'><b>"Browse files"</b> ਬਟਨ ਤੇ ਕਲਿੱਕ ਕਰੋ ਅਤੇ ਆਪਣੀ ਫ਼ੋਟੋ ਚੁਣੋ।</div>
-
-<div class='manual-section-title'>🌱 ਕਦਮ 4 — ਪੌਦਾ ਚੁਣੋ</div>
-<div class='manual-step'>ਸੂਚੀ ਵਿੱਚੋਂ ਆਪਣੇ ਪੌਦੇ ਦਾ ਨਾਮ ਚੁਣੋ (ਜਿਵੇਂ ਟਮਾਟਰ, ਕਣਕ, ਗੁਲਾਬ)।</div>
-
-<div class='manual-section-title'>✅ ਕਦਮ 5 — ਨਤੀਜਾ ਦੇਖੋ</div>
-<div class='manual-step'><b>"Diagnose Plant"</b> ਬਟਨ ਦਬਾਓ। ਕੁਝ ਸਕਿੰਟਾਂ ਵਿੱਚ ਬਿਮਾਰੀ ਦਾ ਨਾਮ ਅਤੇ ਇਲਾਜ ਦਿਖੇਗਾ।</div>
-
-<div class='manual-section-title'>💊 ਕਦਮ 6 — ਇਲਾਜ ਦੇਖੋ</div>
-<div class='manual-step'>ਹੇਠਾਂ ਸਕ੍ਰੋਲ ਕਰੋ — ਦਵਾਈ ਦਾ ਨਾਮ, ਕਿੰਨੀ ਮਾਤਰਾ, ਅਤੇ ਕਿਵੇਂ ਲਗਾਉਣੀ ਹੈ — ਸਭ ਦਿਖੇਗਾ।</div>
-
-<div class='manual-tip'>💡 ਕਿਸੇ ਵੀ ਖੇਤੀ ਸਵਾਲ ਲਈ <b>KisanAI Assistant</b> ਪੇਜ ਤੇ ਜਾਓ।</div>
+<div class='manual-tip'>💡 ਪਹਿਲਾਂ AI Plant Doctor ਚਲਾਓ — KisanAI ਅਤੇ Cost Calculator ਉਸੇ ਦੇ ਨਤੀਜੇ ਵਰਤਦੇ ਹਨ।</div>
 <div class='manual-warning'>⚠️ ਦਵਾਈ ਵਰਤਣ ਤੋਂ ਪਹਿਲਾਂ ਲੇਬਲ ਜ਼ਰੂਰ ਪੜ੍ਹੋ। ਗੰਭੀਰ ਮਾਮਲਿਆਂ ਵਿੱਚ ਖੇਤੀ ਮਾਹਰ ਤੋਂ ਮਦਦ ਲਓ।</div>
 </div>
 """,
@@ -2360,29 +2348,25 @@ if page == "📖 User Manual":
 "मराठी (Marathi)": """
 <div class='manual-card'>
 <div class='manual-lang-badge'>🇮🇳 मराठी</div>
+
 <div class='manual-section-title'>🌿 AI Plant Doctor म्हणजे काय?</div>
-<p>AI Plant Doctor हे एक मोफत साधन आहे जे तुमच्या झाडाचा फोटो पाहून सांगते की त्याला कोणता रोग आहे आणि उपचार कसे करायचे. संगणक किंवा AI बद्दल काहीही माहित असणे गरजेचे नाही.</p>
+<p>AI Plant Doctor हे एक मोफत साधन आहे जे झाडाचा फोटो पाहून रोग आणि उपचार सांगते. संगणकाची कोणतीही माहिती लागत नाही.</p>
 
-<div class='manual-section-title'>📸 पायरी 1 — स्पष्ट फोटो काढा</div>
-<div class='manual-step'><b>आजारी पान किंवा झाडाच्या भागाचा जवळून फोटो काढा.</b> फोटो स्पष्ट आणि प्रकाशात असावा.</div>
-<div class='manual-tip'>💡 सूचना: उन्हात फोटो काढा — सर्वोत्तम परिणाम मिळेल.</div>
+<div class='manual-section-title'>📱 चार पाने — काय काम करतात</div>
+<div class='manual-step'><b>🌿 AI Plant Doctor</b> — आजारी झाडाचा फोटो टाका, झाडाचे नाव निवडा, रोग आणि संपूर्ण उपचार काही सेकंदात मिळवा.</div>
+<div class='manual-step'><b>🤖 KisanAI Assistant</b> — शेतीचा कोणताही प्रश्न सोप्या शब्दात विचारा. उदा: "टोमॅटोला कोणते खत द्यावे?" किंवा "कीड कशी घालवावी?"</div>
+<div class='manual-step'><b>🌱 Crop Rotation Advisor</b> — तुमचे पीक व शेताचा आकार सांगा. जमीन सुधारण्यासाठी ३ वर्षांची पीक बदलाची योजना मिळवा.</div>
+<div class='manual-step'><b>💰 Cost Calculator & ROI</b> — उपचाराचा एकूण खर्च आणि वेळीच उपचार केल्यास किती पैसे वाचतील ते पाहा.</div>
 
-<div class='manual-section-title'>🔍 पायरी 2 — AI Plant Doctor उघडा</div>
-<div class='manual-step'>डाव्या बाजूच्या मेनूमध्ये <b>"AI Plant Doctor"</b> वर क्लिक करा.</div>
+<div class='manual-section-title'>📸 झाडाची तपासणी कशी करावी — पायरी पायरी</div>
+<div class='manual-step'><b>पायरी 1:</b> आजारी पानाचा उन्हात जवळून स्पष्ट फोटो काढा.</div>
+<div class='manual-step'><b>पायरी 2:</b> डाव्या मेनूत <b>"AI Plant Doctor"</b> वर क्लिक करा.</div>
+<div class='manual-step'><b>पायरी 3:</b> <b>"Browse files"</b> ने फोटो अपलोड करा.</div>
+<div class='manual-step'><b>पायरी 4:</b> झाडाचे नाव निवडा (उदा. टोमॅटो, गहू, गुलाब).</div>
+<div class='manual-step'><b>पायरी 5:</b> <b>"Diagnose Plant"</b> दाबा — काही सेकंदात निकाल येईल.</div>
+<div class='manual-step'><b>पायरी 6:</b> खाली स्क्रोल करा — औषध, प्रमाण आणि वापर पद्धत सर्व दिसेल.</div>
 
-<div class='manual-section-title'>📤 पायरी 3 — फोटो अपलोड करा</div>
-<div class='manual-step'><b>"Browse files"</b> बटणावर क्लिक करा आणि तुमचा फोटो निवडा.</div>
-
-<div class='manual-section-title'>🌱 पायरी 4 — झाड निवडा</div>
-<div class='manual-step'>यादीतून तुमच्या झाडाचे नाव निवडा (उदा. टोमॅटो, गहू, गुलाब).</div>
-
-<div class='manual-section-title'>✅ पायरी 5 — निकाल पहा</div>
-<div class='manual-step'><b>"Diagnose Plant"</b> बटण दाबा. काही सेकंदात रोगाचे नाव आणि उपचार दिसेल.</div>
-
-<div class='manual-section-title'>💊 पायरी 6 — उपचार पहा</div>
-<div class='manual-step'>खाली स्क्रोल करा — औषधाचे नाव, किती प्रमाण, आणि कसे वापरायचे — सर्व दिसेल.</div>
-
-<div class='manual-tip'>💡 शेतीच्या कोणत्याही प्रश्नासाठी <b>KisanAI Assistant</b> पेजवर जा.</div>
+<div class='manual-tip'>💡 आधी AI Plant Doctor चालवा — KisanAI आणि Cost Calculator त्याचेच निकाल वापरतात.</div>
 <div class='manual-warning'>⚠️ औषध वापरण्यापूर्वी लेबल वाचा. गंभीर प्रकरणात कृषी तज्ञाचा सल्ला घ्या.</div>
 </div>
 """,
@@ -2390,59 +2374,51 @@ if page == "📖 User Manual":
 "தமிழ் (Tamil)": """
 <div class='manual-card'>
 <div class='manual-lang-badge'>🌿 தமிழ்</div>
+
 <div class='manual-section-title'>🌿 AI Plant Doctor என்றால் என்ன?</div>
-<p>AI Plant Doctor என்பது ஒரு இலவச கருவி. உங்கள் செடியின் புகைப்படத்தை பார்த்து, அதற்கு என்ன நோய் என்று கூறும், சிகிச்சை எப்படி செய்வது என்றும் சொல்லும். கணினி அல்லது AI பற்றி எதுவும் தெரியாமலும் பயன்படுத்தலாம்.</p>
+<p>AI Plant Doctor ஒரு இலவச கருவி. செடியின் படம் பார்த்து நோய் மற்றும் சிகிச்சை சொல்லும். கணினி அறிவு தேவையில்லை.</p>
 
-<div class='manual-section-title'>📸 படி 1 — தெளிவான புகைப்படம் எடுக்கவும்</div>
-<div class='manual-step'><b>நோய்வாய்ப்பட்ட இலை அல்லது செடியின் அருகில் இருந்து படம் எடுக்கவும்.</b> படம் தெளிவாகவும் நன்கு வெளிச்சத்திலும் இருக்க வேண்டும்.</div>
-<div class='manual-tip'>💡 குறிப்பு: வெயிலில் படம் எடுக்கவும் — சிறந்த முடிவு கிடைக்கும்.</div>
+<div class='manual-section-title'>📱 நான்கு பக்கங்கள் — என்ன செய்கின்றன</div>
+<div class='manual-step'><b>🌿 AI Plant Doctor</b> — நோய்வாய்ப்பட்ட செடியின் படம் பதிவேற்றவும், செடி வகை தேர்ந்தெடுக்கவும், சில நொடிகளில் நோய் மற்றும் சிகிச்சை பெறவும்.</div>
+<div class='manual-step'><b>🤖 KisanAI Assistant</b> — எளிய வார்த்தைகளில் எந்த விவசாய கேள்வியும் கேளுங்கள். எ.கா: "தக்காளிக்கு என்ன உரம்?" அல்லது "பூச்சி எப்படி ஒழிப்பது?"</div>
+<div class='manual-step'><b>🌱 Crop Rotation Advisor</b> — உங்கள் பயிர் மற்றும் நிலத்தின் அளவு கொடுங்கள். மண் வளம் காக்க 3 ஆண்டு சுழற்சி திட்டம் பெறுங்கள்.</div>
+<div class='manual-step'><b>💰 Cost Calculator & ROI</b> — சிகிச்சை செலவு மற்றும் சரியான நேரத்தில் சிகிச்சை செய்தால் எவ்வளவு பணம் மிச்சமாகும் என்று பாருங்கள்.</div>
 
-<div class='manual-section-title'>🔍 படி 2 — AI Plant Doctor திறக்கவும்</div>
-<div class='manual-step'>இடது பக்க மெனுவில் <b>"AI Plant Doctor"</b> என்பதை கிளிக் செய்யவும்.</div>
+<div class='manual-section-title'>📸 செடியை கண்டறிவது எப்படி — படி படியாக</div>
+<div class='manual-step'><b>படி 1:</b> நோய்வாய்ப்பட்ட இலையை வெயிலில் அருகில் இருந்து தெளிவான படம் எடுக்கவும்.</div>
+<div class='manual-step'><b>படி 2:</b> இடது மெனுவில் <b>"AI Plant Doctor"</b> கிளிக் செய்யவும்.</div>
+<div class='manual-step'><b>படி 3:</b> <b>"Browse files"</b> மூலம் படம் பதிவேற்றவும்.</div>
+<div class='manual-step'><b>படி 4:</b> செடியின் பெயர் தேர்ந்தெடுக்கவும் (எ.கா. தக்காளி, கோதுமை, ரோஜா).</div>
+<div class='manual-step'><b>படி 5:</b> <b>"Diagnose Plant"</b> அழுத்தவும் — சில நொடிகளில் முடிவு வரும்.</div>
+<div class='manual-step'><b>படி 6:</b> கீழே உருட்டவும் — மருந்து பெயர், அளவு, தெளிக்கும் முறை அனைத்தும் தெரியும்.</div>
 
-<div class='manual-section-title'>📤 படி 3 — புகைப்படம் பதிவேற்றவும்</div>
-<div class='manual-step'><b>"Browse files"</b> பொத்தானை கிளிக் செய்து உங்கள் படத்தை தேர்ந்தெடுக்கவும்.</div>
-
-<div class='manual-section-title'>🌱 படி 4 — செடியை தேர்ந்தெடுக்கவும்</div>
-<div class='manual-step'>பட்டியலில் இருந்து உங்கள் செடியின் பெயரை தேர்ந்தெடுக்கவும் (எ.கா. தக்காளி, கோதுமை, ரோஜா).</div>
-
-<div class='manual-section-title'>✅ படி 5 — முடிவைப் பார்க்கவும்</div>
-<div class='manual-step'><b>"Diagnose Plant"</b> பொத்தானை அழுத்தவும். சில நொடிகளில் நோயின் பெயரும் சிகிச்சையும் தெரியும்.</div>
-
-<div class='manual-section-title'>💊 படி 6 — சிகிச்சை பார்க்கவும்</div>
-<div class='manual-step'>கீழே உருட்டவும் — மருந்தின் பெயர், எவ்வளவு பயன்படுத்தவும், எப்படி தெளிக்கவும் — அனைத்தும் தெரியும்.</div>
-
-<div class='manual-tip'>💡 எந்த விவசாய கேள்விக்கும் <b>KisanAI Assistant</b> பக்கத்திற்கு செல்லவும்.</div>
-<div class='manual-warning'>⚠️ மருந்து உபயோகிக்கும் முன் லேபிளை படிக்கவும். தீவிர நிலையில் வேளாண் நிபுணரை அணுகவும்.</div>
+<div class='manual-tip'>💡 முதலில் AI Plant Doctor இயக்கவும் — KisanAI மற்றும் Cost Calculator அதன் முடிவுகளை பயன்படுத்துகின்றன.</div>
+<div class='manual-warning'>⚠️ மருந்து பயன்படுத்தும் முன் லேபிளை படிக்கவும். தீவிர நிலையில் வேளாண் நிபுணரை அணுகவும்.</div>
 </div>
 """,
 
 "తెలుగు (Telugu)": """
 <div class='manual-card'>
 <div class='manual-lang-badge'>🌾 తెలుగు</div>
+
 <div class='manual-section-title'>🌿 AI Plant Doctor అంటే ఏమిటి?</div>
-<p>AI Plant Doctor ఒక ఉచిత సాధనం. మీ మొక్క ఫోటో చూసి, దానికి ఏ వ్యాధి ఉందో చెప్పి, చికిత్స ఎలా చేయాలో కూడా చెప్తుంది. కంప్యూటర్ లేదా AI గురించి ఏమీ తెలియకపోయినా వాడవచ్చు.</p>
+<p>AI Plant Doctor ఒక ఉచిత సాధనం. మొక్క ఫోటో చూసి వ్యాధి మరియు చికిత్స చెప్తుంది. కంప్యూటర్ జ్ఞానం అవసరం లేదు.</p>
 
-<div class='manual-section-title'>📸 దశ 1 — స్పష్టమైన ఫోటో తీయండి</div>
-<div class='manual-step'><b>జబ్బుపడిన ఆకు లేదా మొక్క భాగాన్ని దగ్గరగా ఫోటో తీయండి.</b> ఫోటో స్పష్టంగా మరియు వెలుతురులో ఉండాలి.</div>
-<div class='manual-tip'>💡 సూచన: ఎండలో ఫోటో తీయండి — అత్యుత్తమ ఫలితం వస్తుంది.</div>
+<div class='manual-section-title'>📱 నాలుగు పేజీలు — ఏమి చేస్తాయి</div>
+<div class='manual-step'><b>🌿 AI Plant Doctor</b> — జబ్బుపడిన మొక్క ఫోటో అప్‌లోడ్ చేయండి, మొక్క పేరు ఎంచుకోండి, కొన్ని సెకన్లలో వ్యాధి మరియు పూర్తి చికిత్స పొందండి.</div>
+<div class='manual-step'><b>🤖 KisanAI Assistant</b> — ఏ వ్యవసాయ ప్రశ్నైనా సాధారణ మాటల్లో అడగండి. ఉదా: "టమోటాకు ఏ ఎరువు?" లేదా "పురుగులు ఎలా తొలగించాలి?"</div>
+<div class='manual-step'><b>🌱 Crop Rotation Advisor</b> — మీ పంట మరియు పొలం పరిమాణం నమోదు చేయండి. నేల ఆరోగ్యానికి 3 సంవత్సరాల పంట మార్పిడి ప్రణాళిక పొందండి.</div>
+<div class='manual-step'><b>💰 Cost Calculator & ROI</b> — చికిత్స ఖర్చు మరియు సకాలంలో చికిత్స చేస్తే ఎంత డబ్బు ఆదా అవుతుందో చూడండి.</div>
 
-<div class='manual-section-title'>🔍 దశ 2 — AI Plant Doctor తెరవండి</div>
-<div class='manual-step'>ఎడమ వైపు మెనూలో <b>"AI Plant Doctor"</b> క్లిక్ చేయండి.</div>
+<div class='manual-section-title'>📸 మొక్కను నిర్ధారించడం ఎలా — దశల వారీగా</div>
+<div class='manual-step'><b>దశ 1:</b> జబ్బుపడిన ఆకును ఎండలో దగ్గరగా స్పష్టంగా ఫోటో తీయండి.</div>
+<div class='manual-step'><b>దశ 2:</b> ఎడమ వైపు మెనూలో <b>"AI Plant Doctor"</b> క్లిక్ చేయండి.</div>
+<div class='manual-step'><b>దశ 3:</b> <b>"Browse files"</b> తో ఫోటో అప్‌లోడ్ చేయండి.</div>
+<div class='manual-step'><b>దశ 4:</b> జాబితా నుండి మొక్క పేరు ఎంచుకోండి (ఉదా. టమోటా, గోధుమ, గులాబి).</div>
+<div class='manual-step'><b>దశ 5:</b> <b>"Diagnose Plant"</b> నొక్కండి — కొన్ని సెకన్లలో ఫలితం వస్తుంది.</div>
+<div class='manual-step'><b>దశ 6:</b> కిందకు స్క్రోల్ చేయండి — మందు పేరు, మోతాదు, వాడకం విధానం అన్నీ కనిపిస్తాయి.</div>
 
-<div class='manual-section-title'>📤 దశ 3 — ఫోటో అప్‌లోడ్ చేయండి</div>
-<div class='manual-step'><b>"Browse files"</b> బటన్ నొక్కి మీ ఫోటో ఎంచుకోండి.</div>
-
-<div class='manual-section-title'>🌱 దశ 4 — మొక్క ఎంచుకోండి</div>
-<div class='manual-step'>జాబితా నుండి మీ మొక్క పేరు ఎంచుకోండి (ఉదా. టమోటా, గోధుమ, గులాబి).</div>
-
-<div class='manual-section-title'>✅ దశ 5 — ఫలితం చూడండి</div>
-<div class='manual-step'><b>"Diagnose Plant"</b> నొక్కండి. కొన్ని సెకన్లలో వ్యాధి పేరు మరియు చికిత్స కనిపిస్తుంది.</div>
-
-<div class='manual-section-title'>💊 దశ 6 — చికిత్స చూడండి</div>
-<div class='manual-step'>కిందకు స్క్రోల్ చేయండి — మందు పేరు, ఎంత వాడాలి, ఎలా వేయాలి — అన్నీ కనిపిస్తాయి.</div>
-
-<div class='manual-tip'>💡 ఏ వ్యవసాయ సందేహానికైనా <b>KisanAI Assistant</b> పేజీకి వెళ్ళండి.</div>
+<div class='manual-tip'>💡 ముందు AI Plant Doctor నడపండి — KisanAI మరియు Cost Calculator దాని ఫలితాలను ఉపయోగిస్తాయి.</div>
 <div class='manual-warning'>⚠️ మందు వాడే ముందు లేబుల్ చదవండి. తీవ్రమైన సందర్భాల్లో వ్యవసాయ నిపుణుడిని సంప్రదించండి.</div>
 </div>
 """,
@@ -2450,29 +2426,25 @@ if page == "📖 User Manual":
 "ಕನ್ನಡ (Kannada)": """
 <div class='manual-card'>
 <div class='manual-lang-badge'>🌿 ಕನ್ನಡ</div>
+
 <div class='manual-section-title'>🌿 AI Plant Doctor ಎಂದರೇನು?</div>
-<p>AI Plant Doctor ಒಂದು ಉಚಿತ ಸಾಧನ. ನಿಮ್ಮ ಗಿಡದ ಫೋಟೋ ನೋಡಿ ಅದಕ್ಕೆ ಯಾವ ರೋಗ ಇದೆ ಎಂದು ಹೇಳುತ್ತದೆ ಮತ್ತು ಚಿಕಿತ್ಸೆ ಹೇಗೆ ಮಾಡಬೇಕು ಎಂದೂ ತಿಳಿಸುತ್ತದೆ. ಕಂಪ್ಯೂಟರ್ ಬಗ್ಗೆ ಏನೂ ತಿಳಿಯದಿದ್ದರೂ ಬಳಸಬಹುದು.</p>
+<p>AI Plant Doctor ಒಂದು ಉಚಿತ ಸಾಧನ. ಗಿಡದ ಫೋಟೋ ನೋಡಿ ರೋಗ ಮತ್ತು ಚಿಕಿತ್ಸೆ ಹೇಳುತ್ತದೆ. ಕಂಪ್ಯೂಟರ್ ಜ್ಞಾನ ಅಗತ್ಯವಿಲ್ಲ.</p>
 
-<div class='manual-section-title'>📸 ಹಂತ 1 — ಸ್ಪಷ್ಟ ಫೋಟೋ ತೆಗೆಯಿರಿ</div>
-<div class='manual-step'><b>ರೋಗಿಷ್ಟ ಎಲೆ ಅಥವಾ ಗಿಡದ ಭಾಗವನ್ನು ಹತ್ತಿರದಿಂದ ಫೋಟೋ ತೆಗೆಯಿರಿ.</b> ಫೋಟೋ ಸ್ಪಷ್ಟ ಮತ್ತು ಬೆಳಕಿನಲ್ಲಿ ಇರಬೇಕು.</div>
-<div class='manual-tip'>💡 ಸಲಹೆ: ಬಿಸಿಲಿನಲ್ಲಿ ಫೋಟೋ ತೆಗೆಯಿರಿ — ಉತ್ತಮ ಫಲಿತಾಂಶ ಸಿಗುತ್ತದೆ.</div>
+<div class='manual-section-title'>📱 ನಾಲ್ಕು ಪುಟಗಳು — ಏನು ಮಾಡುತ್ತವೆ</div>
+<div class='manual-step'><b>🌿 AI Plant Doctor</b> — ರೋಗಿಷ್ಟ ಗಿಡದ ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ, ಗಿಡದ ಹೆಸರು ಆಯ್ಕೆ ಮಾಡಿ, ಕೆಲವೇ ಸೆಕೆಂಡುಗಳಲ್ಲಿ ರೋಗ ಮತ್ತು ಚಿಕಿತ್ಸೆ ಪಡೆಯಿರಿ.</div>
+<div class='manual-step'><b>🤖 KisanAI Assistant</b> — ಯಾವುದೇ ಕೃಷಿ ಪ್ರಶ್ನೆ ಸರಳ ಮಾತಿನಲ್ಲಿ ಕೇಳಿ. ಉದಾ: "ಟೊಮಾಟೊಗೆ ಯಾವ ಗೊಬ್ಬರ?" ಅಥವಾ "ಕೀಟಗಳನ್ನು ಹೇಗೆ ತೊಡೆಯಬೇಕು?"</div>
+<div class='manual-step'><b>🌱 Crop Rotation Advisor</b> — ನಿಮ್ಮ ಬೆಳೆ ಮತ್ತು ಹೊಲದ ಗಾತ್ರ ನಮೂದಿಸಿ. ಮಣ್ಣಿನ ಆರೋಗ್ಯಕ್ಕಾಗಿ 3 ವರ್ಷದ ಬೆಳೆ ಬದಲಾವಣೆ ಯೋಜನೆ ಪಡೆಯಿರಿ.</div>
+<div class='manual-step'><b>💰 Cost Calculator & ROI</b> — ಚಿಕಿತ್ಸೆಯ ಒಟ್ಟು ವೆಚ್ಚ ಮತ್ತು ಸಮಯಕ್ಕೆ ಚಿಕಿತ್ಸೆ ನೀಡಿದರೆ ಎಷ್ಟು ಹಣ ಉಳಿಯುತ್ತದೆ ಎಂದು ನೋಡಿ.</div>
 
-<div class='manual-section-title'>🔍 ಹಂತ 2 — AI Plant Doctor ತೆರೆಯಿರಿ</div>
-<div class='manual-step'>ಎಡ ಬದಿಯ ಮೆನುವಿನಲ್ಲಿ <b>"AI Plant Doctor"</b> ಕ್ಲಿಕ್ ಮಾಡಿ.</div>
+<div class='manual-section-title'>📸 ಗಿಡವನ್ನು ಪರೀಕ್ಷಿಸುವುದು ಹೇಗೆ — ಹಂತ ಹಂತವಾಗಿ</div>
+<div class='manual-step'><b>ಹಂತ 1:</b> ರೋಗಿಷ್ಟ ಎಲೆಯನ್ನು ಬಿಸಿಲಿನಲ್ಲಿ ಹತ್ತಿರದಿಂದ ಸ್ಪಷ್ಟ ಫೋಟೋ ತೆಗೆಯಿರಿ.</div>
+<div class='manual-step'><b>ಹಂತ 2:</b> ಎಡ ಮೆನುವಿನಲ್ಲಿ <b>"AI Plant Doctor"</b> ಕ್ಲಿಕ್ ಮಾಡಿ.</div>
+<div class='manual-step'><b>ಹಂತ 3:</b> <b>"Browse files"</b> ನಿಂದ ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ.</div>
+<div class='manual-step'><b>ಹಂತ 4:</b> ಗಿಡದ ಹೆಸರು ಆಯ್ಕೆ ಮಾಡಿ (ಉದಾ. ಟೊಮಾಟೊ, ಗೋಧಿ, ಗುಲಾಬಿ).</div>
+<div class='manual-step'><b>ಹಂತ 5:</b> <b>"Diagnose Plant"</b> ಒತ್ತಿ — ಕೆಲವೇ ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಫಲಿತಾಂಶ ಬರುತ್ತದೆ.</div>
+<div class='manual-step'><b>ಹಂತ 6:</b> ಕೆಳಗೆ ಸ್ಕ್ರೋಲ್ ಮಾಡಿ — ಔಷಧ ಹೆಸರು, ಪ್ರಮಾಣ, ಬಳಸುವ ವಿಧಾನ ಎಲ್ಲ ಕಾಣಿಸುತ್ತದೆ.</div>
 
-<div class='manual-section-title'>📤 ಹಂತ 3 — ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ</div>
-<div class='manual-step'><b>"Browse files"</b> ಬಟನ್ ಒತ್ತಿ ನಿಮ್ಮ ಫೋಟೋ ಆಯ್ಕೆ ಮಾಡಿ.</div>
-
-<div class='manual-section-title'>🌱 ಹಂತ 4 — ಗಿಡ ಆಯ್ಕೆ ಮಾಡಿ</div>
-<div class='manual-step'>ಪಟ್ಟಿಯಿಂದ ನಿಮ್ಮ ಗಿಡದ ಹೆಸರು ಆಯ್ಕೆ ಮಾಡಿ (ಉದಾ. ಟೊಮಾಟೊ, ಗೋಧಿ, ಗುಲಾಬಿ).</div>
-
-<div class='manual-section-title'>✅ ಹಂತ 5 — ಫಲಿತಾಂಶ ನೋಡಿ</div>
-<div class='manual-step'><b>"Diagnose Plant"</b> ಒತ್ತಿ. ಕೆಲವು ಸೆಕೆಂಡುಗಳಲ್ಲಿ ರೋಗದ ಹೆಸರು ಮತ್ತು ಚಿಕಿತ್ಸೆ ಕಾಣಿಸುತ್ತದೆ.</div>
-
-<div class='manual-section-title'>💊 ಹಂತ 6 — ಚಿಕಿತ್ಸೆ ನೋಡಿ</div>
-<div class='manual-step'>ಕೆಳಗೆ ಸ್ಕ್ರೋಲ್ ಮಾಡಿ — ಔಷಧದ ಹೆಸರು, ಎಷ್ಟು ಬಳಸಬೇಕು, ಹೇಗೆ ಹಾಕಬೇಕು — ಎಲ್ಲ ಕಾಣಿಸುತ್ತದೆ.</div>
-
-<div class='manual-tip'>💡 ಯಾವುದೇ ಕೃಷಿ ಪ್ರಶ್ನೆಗೆ <b>KisanAI Assistant</b> ಪುಟಕ್ಕೆ ಹೋಗಿ.</div>
+<div class='manual-tip'>💡 ಮೊದಲು AI Plant Doctor ಚಲಾಯಿಸಿ — KisanAI ಮತ್ತು Cost Calculator ಅದರ ಫಲಿತಾಂಶಗಳನ್ನು ಬಳಸುತ್ತವೆ.</div>
 <div class='manual-warning'>⚠️ ಔಷಧ ಬಳಸುವ ಮುಂಚೆ ಲೇಬಲ್ ಓದಿ. ತೀವ್ರ ಸಂದರ್ಭದಲ್ಲಿ ಕೃಷಿ ತಜ್ಞರನ್ನು ಸಂಪರ್ಕಿಸಿ.</div>
 </div>
 """,
@@ -2480,29 +2452,25 @@ if page == "📖 User Manual":
 "বাংলা (Bengali)": """
 <div class='manual-card'>
 <div class='manual-lang-badge'>🇧🇩 বাংলা</div>
+
 <div class='manual-section-title'>🌿 AI Plant Doctor কী?</div>
-<p>AI Plant Doctor একটি বিনামূল্যের সরঞ্জাম। আপনার গাছের ছবি দেখে বলে দেয় কোন রোগ হয়েছে এবং কীভাবে চিকিৎসা করতে হবে। কম্পিউটার বা AI সম্পর্কে কিছু না জানলেও ব্যবহার করা যাবে।</p>
+<p>AI Plant Doctor একটি বিনামূল্যের সরঞ্জাম। গাছের ছবি দেখে রোগ ও চিকিৎসা বলে দেয়। কম্পিউটার জ্ঞান দরকার নেই।</p>
 
-<div class='manual-section-title'>📸 ধাপ ১ — স্পষ্ট ছবি তুলুন</div>
-<div class='manual-step'><b>অসুস্থ পাতা বা গাছের অংশের কাছ থেকে ছবি তুলুন।</b> ছবি স্পষ্ট ও আলোকিত হওয়া উচিত।</div>
-<div class='manual-tip'>💡 পরামর্শ: রোদে ছবি তুলুন — সেরা ফলাফল পাবেন।</div>
+<div class='manual-section-title'>📱 চারটি পাতা — কী কাজ করে</div>
+<div class='manual-step'><b>🌿 AI Plant Doctor</b> — অসুস্থ গাছের ছবি আপলোড করুন, গাছের নাম বেছে নিন, কয়েক সেকেন্ডে রোগ ও সম্পূর্ণ চিকিৎসা পান।</div>
+<div class='manual-step'><b>🤖 KisanAI Assistant</b> — সহজ কথায় যেকোনো কৃষি প্রশ্ন করুন। যেমন: "টমেটোতে কোন সার দেব?" বা "পোকা কীভাবে তাড়াব?"</div>
+<div class='manual-step'><b>🌱 Crop Rotation Advisor</b> — আপনার ফসল ও জমির আকার লিখুন। মাটির স্বাস্থ্য রক্ষায় ৩ বছরের ফসল পরিবর্তন পরিকল্পনা পান।</div>
+<div class='manual-step'><b>💰 Cost Calculator & ROI</b> — চিকিৎসার মোট খরচ এবং সময়মতো চিকিৎসা করলে কত টাকা সাশ্রয় হবে তা দেখুন।</div>
 
-<div class='manual-section-title'>🔍 ধাপ ২ — AI Plant Doctor খুলুন</div>
-<div class='manual-step'>বাম দিকের মেনুতে <b>"AI Plant Doctor"</b> তে ক্লিক করুন।</div>
+<div class='manual-section-title'>📸 গাছ পরীক্ষা করবেন কীভাবে — ধাপে ধাপে</div>
+<div class='manual-step'><b>ধাপ ১:</b> অসুস্থ পাতার কাছ থেকে রোদে স্পষ্ট ছবি তুলুন।</div>
+<div class='manual-step'><b>ধাপ ২:</b> বাম মেনুতে <b>"AI Plant Doctor"</b> তে ক্লিক করুন।</div>
+<div class='manual-step'><b>ধাপ ৩:</b> <b>"Browse files"</b> দিয়ে ছবি আপলোড করুন।</div>
+<div class='manual-step'><b>ধাপ ৪:</b> তালিকা থেকে গাছের নাম বেছে নিন (যেমন টমেটো, গম, গোলাপ)।</div>
+<div class='manual-step'><b>ধাপ ৫:</b> <b>"Diagnose Plant"</b> চাপুন — কয়েক সেকেন্ডে ফলাফল আসবে।</div>
+<div class='manual-step'><b>ধাপ ৬:</b> নিচে স্ক্রোল করুন — ওষুধের নাম, পরিমাণ, প্রয়োগ পদ্ধতি সব দেখাবে।</div>
 
-<div class='manual-section-title'>📤 ধাপ ৩ — ছবি আপলোড করুন</div>
-<div class='manual-step'><b>"Browse files"</b> বাটনে ক্লিক করুন এবং আপনার ছবি বেছে নিন।</div>
-
-<div class='manual-section-title'>🌱 ধাপ ৪ — গাছ বেছে নিন</div>
-<div class='manual-step'>তালিকা থেকে আপনার গাছের নাম বেছে নিন (যেমন টমেটো, গম, গোলাপ)।</div>
-
-<div class='manual-section-title'>✅ ধাপ ৫ — ফলাফল দেখুন</div>
-<div class='manual-step'><b>"Diagnose Plant"</b> চাপুন। কয়েক সেকেন্ডে রোগের নাম ও চিকিৎসা দেখাবে।</div>
-
-<div class='manual-section-title'>💊 ধাপ ৬ — চিকিৎসা দেখুন</div>
-<div class='manual-step'>নিচে স্ক্রোল করুন — ওষুধের নাম, কতটুকু ব্যবহার করবেন, কীভাবে দেবেন — সব দেখাবে।</div>
-
-<div class='manual-tip'>💡 যেকোনো কৃষি প্রশ্নের জন্য <b>KisanAI Assistant</b> পেজে যান।</div>
+<div class='manual-tip'>💡 আগে AI Plant Doctor চালান — KisanAI ও Cost Calculator সেই ফলাফল ব্যবহার করে।</div>
 <div class='manual-warning'>⚠️ ওষুধ ব্যবহারের আগে লেবেল পড়ুন। গুরুতর ক্ষেত্রে কৃষি বিশেষজ্ঞের পরামর্শ নিন।</div>
 </div>
 """,
@@ -2510,29 +2478,25 @@ if page == "📖 User Manual":
 "ગુજરાતી (Gujarati)": """
 <div class='manual-card'>
 <div class='manual-lang-badge'>🌾 ગુજરાતી</div>
+
 <div class='manual-section-title'>🌿 AI Plant Doctor શું છે?</div>
-<p>AI Plant Doctor એક મફત સાધન છે. તમારા છોડની ફોટો જોઈને કહે છે કે કઈ બીમારી છે અને ઈલાજ કેવી રીતે કરવો. કોમ્પ્યુટર કે AI વિશે કંઈ ન જાણો તો પણ ઉપયોગ કરી શકો.</p>
+<p>AI Plant Doctor એક મફત સાધન છે. છોડની ફોટો જોઈ બીમારી અને ઈલાજ બતાવે છે. કોમ્પ્યુટર જ્ઞાન જરૂરી નથી.</p>
 
-<div class='manual-section-title'>📸 પગલું 1 — સ્પષ્ટ ફોટો લો</div>
-<div class='manual-step'><b>બીમાર પાન અથવા છોડના ભાગનો નજીકથી ફોટો લો.</b> ફોટો સ્પષ્ટ અને પ્રકાશમાં હોવો જોઈએ.</div>
-<div class='manual-tip'>💡 સૂચન: તડકામાં ફોટો લો — સૌથી સારો પરિણામ મળશે.</div>
+<div class='manual-section-title'>📱 ચાર પાના — શું કામ કરે છે</div>
+<div class='manual-step'><b>🌿 AI Plant Doctor</b> — બીમાર છોડની ફોટો અપલોડ કરો, છોડનું નામ પસંદ કરો, થોડી સેકન્ડમાં બીમારી અને સંપૂર્ણ ઈલાજ મેળવો.</div>
+<div class='manual-step'><b>🤖 KisanAI Assistant</b> — સરળ ભાષામાં કોઈ પણ ખેતી સવાલ પૂછો. ઉદા: "ટામેટાને ક્યું ખાતર?" અથવા "જીવાત કેવી રીતે ભગાડવી?"</div>
+<div class='manual-step'><b>🌱 Crop Rotation Advisor</b> — તમારો પાક અને ખેતરનો આકાર નાખો. જમીન સ્વસ્થ રાખવા 3 વર્ષની પાક ફેરબદલ યોજના મેળવો.</div>
+<div class='manual-step'><b>💰 Cost Calculator & ROI</b> — ઈલાજનો કુલ ખર્ચ અને સમયસર ઈલાજ કરવાથી કેટલા પૈસા બચશે — બધું જોઓ.</div>
 
-<div class='manual-section-title'>🔍 પગલું 2 — AI Plant Doctor ખોલો</div>
-<div class='manual-step'>ડાબી બાજુના મેનૂમાં <b>"AI Plant Doctor"</b> પર ક્લિક કરો.</div>
+<div class='manual-section-title'>📸 છોડની તપાસ કેવી રીતે કરવી — પગલે પગલે</div>
+<div class='manual-step'><b>પગલું 1:</b> બીમાર પાનની તડકામાં નજીકથી સ્પષ્ટ ફોટો લો.</div>
+<div class='manual-step'><b>પગલું 2:</b> ડાબી બાજુ મેનૂમાં <b>"AI Plant Doctor"</b> ક્લિક કરો.</div>
+<div class='manual-step'><b>પગલું 3:</b> <b>"Browse files"</b> થી ફોટો અપલોડ કરો.</div>
+<div class='manual-step'><b>પગલું 4:</b> યાદીમાંથી છોડનું નામ પસંદ કરો (ઉદા. ટામેટા, ઘઉં, ગુલાબ).</div>
+<div class='manual-step'><b>પગલું 5:</b> <b>"Diagnose Plant"</b> દબાવો — થોડી સેકન્ડમાં પરિણામ આવશે.</div>
+<div class='manual-step'><b>પગલું 6:</b> નીચે સ્ક્રોલ કરો — દવાનું નામ, માત્રા, વાપરવાની રીત — બધું દેખાશે.</div>
 
-<div class='manual-section-title'>📤 પગલું 3 — ફોટો અપલોડ કરો</div>
-<div class='manual-step'><b>"Browse files"</b> બટન પર ક્લિક કરો અને તમારો ફોટો પસંદ કરો.</div>
-
-<div class='manual-section-title'>🌱 પગલું 4 — છોડ પસંદ કરો</div>
-<div class='manual-step'>યાદીમાંથી તમારા છોડનું નામ પસંદ કરો (દા.ત. ટામેટા, ઘઉં, ગુલાબ).</div>
-
-<div class='manual-section-title'>✅ પગલું 5 — પરિણામ જુઓ</div>
-<div class='manual-step'><b>"Diagnose Plant"</b> બટન દબાવો. થોડી સેકન્ડમાં બીમારીનું નામ અને ઈલાજ દેખાશે.</div>
-
-<div class='manual-section-title'>💊 પગલું 6 — ઈલાજ જુઓ</div>
-<div class='manual-step'>નીચે સ્ક્રોલ કરો — દવાનું નામ, કેટલી માત્રા, કેવી રીતે આપવી — બધું દેખાશે.</div>
-
-<div class='manual-tip'>💡 ખેતીના કોઈ પણ સવાલ માટે <b>KisanAI Assistant</b> પેજ પર જાઓ.</div>
+<div class='manual-tip'>💡 પહેલાં AI Plant Doctor ચલાવો — KisanAI અને Cost Calculator એ જ પરિણામ વાપરે છે.</div>
 <div class='manual-warning'>⚠️ દવા વાપરતા પહેલા લેબલ વાંચો. ગંભીર કેસમાં કૃષિ નિષ્ણાત પાસે જાઓ.</div>
 </div>
 """
@@ -2541,7 +2505,7 @@ if page == "📖 User Manual":
     st.markdown(_manuals.get(_manual_lang, _manuals["English"]), unsafe_allow_html=True)
 
 # --- AI Plant Doctor ---
-if page == "AI Plant Doctor":
+elif page == "AI Plant Doctor":
     col_plant, col_upload = st.columns([1, 2])
     with col_plant:
         st.markdown("<div class='upload-container'>", unsafe_allow_html=True)
