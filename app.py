@@ -15,7 +15,6 @@ import os
 import json
 from datetime import datetime
 import re
-import socket
 
 st.set_page_config(
     page_title="🌿 AI Plant Doctor - Smart Edition",
@@ -1182,55 +1181,7 @@ def _is_quota_err(e):
     s = str(e).lower()
     return any(x in s for x in ["429", "quota", "rate limit", "resource_exhausted",
                                   "too many", "overloaded", "capacity"])
-# ============ OFFLINE MODE: INTERNET + OLLAMA DETECTION ============
 
-def _has_internet(timeout: int = 3) -> bool:
-    try:
-        import urllib.request as _ur
-        _ur.urlopen("https://www.google.com", timeout=timeout)
-        return True
-    except Exception:
-        return False
-
-def _is_ollama_running() -> bool:
-    try:
-        import urllib.request as _ur
-        _ur.urlopen("http://localhost:11434/api/tags", timeout=2)
-        return True
-    except Exception:
-        return False
-
-def _ollama_vision(parts: list) -> str:
-    import base64 as _b64, io as _io, json as _json, urllib.request as _ur
-    images_b64, prompt_text = [], ""
-    for part in parts:
-        if isinstance(part, str):
-            prompt_text += part + "\n"
-        else:
-            buf = _io.BytesIO()
-            part.save(buf, format="PNG")
-            images_b64.append(_b64.b64encode(buf.getvalue()).decode())
-    payload = _json.dumps({
-        "model": "qwen2.5vl", "prompt": prompt_text,
-        "images": images_b64, "stream": False,
-        "options": {"temperature": 0.1, "num_predict": 3000}
-    }).encode()
-    req = _ur.Request("http://localhost:11434/api/generate", data=payload,
-                      headers={"Content-Type": "application/json"}, method="POST")
-    with _ur.urlopen(req, timeout=120) as resp:
-        return _json.loads(resp.read()).get("response", "")
-
-def _ollama_text(prompt: str) -> str:
-    import json as _json, urllib.request as _ur
-    payload = _json.dumps({
-        "model": "qwen2.5:7b", "prompt": prompt, "stream": False,
-        "options": {"temperature": 0.3, "num_predict": 2048}
-    }).encode()
-    req = _ur.Request("http://localhost:11434/api/generate", data=payload,
-                      headers={"Content-Type": "application/json"}, method="POST")
-    with _ur.urlopen(req, timeout=90) as resp:
-        return _json.loads(resp.read()).get("response", "")
-        
 def _retry_generate(model_id: str, parts: list, max_retries: int = 3):
     """Single model call with exponential back-off on transient/quota errors."""
     import time as _time
@@ -1265,21 +1216,6 @@ def gemini_vision_with_fallback(parts: list, prefer_pro: bool = False):
       4. OpenRouter Qwen2.5-VL (free, no key required beyond OR key)
     Each model gets up to 3 auto-retries with exponential back-off.
     """
-        # ── OFFLINE CHECK: if no internet, route to local Ollama ─────────────
-    if not _has_internet():
-        if _is_ollama_running():
-            try:
-                text = _ollama_vision(parts)
-                if text.strip():
-                    return text, "Ollama/qwen2.5vl [OFFLINE]"
-            except Exception as _oe:
-                raise RuntimeError(f"📴 Offline mode — Ollama error: {_oe}\nRun: ollama serve")
-        else:
-            raise RuntimeError(
-                "📴 No internet and Ollama not running.\n"
-                "Run: ollama serve  (setup: ollama pull qwen2.5vl)"
-            )
-    # ── ONLINE MODE: original chain unchanged ─────────────────────────────
     chain = VISION_MODEL_CHAIN.copy()
     if prefer_pro:
         chain = ["gemini-2.5-pro"] + chain
@@ -1342,21 +1278,6 @@ def gemini_text_with_fallback(prompt: str):
       4. Gemini 2.5 Flash → 1.5 Flash → 1.5 Flash-8B
     Each provider gets auto-retries with back-off.
     """
-        # ── OFFLINE CHECK: if no internet, route to local Ollama ─────────────
-    if not _has_internet():
-        if _is_ollama_running():
-            try:
-                text = _ollama_text(prompt)
-                if text.strip():
-                    return text, "Ollama/qwen2.5:7b [OFFLINE]"
-            except Exception as _oe:
-                raise RuntimeError(f"📴 Offline mode — Ollama error: {_oe}\nRun: ollama serve")
-        else:
-            raise RuntimeError(
-                "📴 No internet and Ollama not running.\n"
-                "Run: ollama serve  (setup: ollama pull qwen2.5:7b)"
-            )
-    # ── ONLINE MODE: original chain unchanged ─────────────────────────────
     import time as _time
 
     # 1. Groq — fastest + highest free quota
@@ -2214,56 +2135,8 @@ with st.sidebar:
     # ── Navigation ────────────────────────────────────────────────
     page = st.radio(
         "📂 Pages",
-        ["AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"],
+        ["📖 User Manual", "AI Plant Doctor", "KisanAI Assistant", "Crop Rotation Advisor", "Cost Calculator & ROI"],
     )
-    st.markdown("---")
-        # ── Connection Status Badge ───────────────────────────────────
-    _inet_up = _has_internet()
-    _ollama_up = _is_ollama_running()
-    if _inet_up:
-        _conn_color, _conn_bg, _conn_border, _conn_msg = (
-            "#7af0a0", "#1a3a1e", "#2ecc6e", "🌐 ONLINE MODE — Cloud AI"
-        )
-    elif _ollama_up:
-        _conn_color, _conn_bg, _conn_border, _conn_msg = (
-            "#7af0a0", "#1a3010", "#2ecc6e", "📴 OFFLINE — Local AI Active"
-        )
-    else:
-        _conn_color, _conn_bg, _conn_border, _conn_msg = (
-            "#f89090", "#3a1010", "#f05c5c", "⚠️ OFFLINE — Run: ollama serve"
-        )
-    st.markdown(
-        f"<div style='background:{_conn_bg};border:1px solid {_conn_border};"
-        f"border-radius:8px;padding:8px 14px;color:{_conn_color};font-size:0.78rem;"
-        f"font-weight:800;letter-spacing:0.08em;text-align:center;margin-bottom:8px'>"
-        f"{_conn_msg}</div>",
-        unsafe_allow_html=True
-    )
-
-    # ── API Status row ────────────────────────────────────────────
-    st.markdown(
-        "<p style='font-size:0.72rem;font-weight:800;color:#8fbf9a;"
-        "letter-spacing:0.14em;text-transform:uppercase;margin-bottom:8px'>API Status</p>",
-        unsafe_allow_html=True
-    )
-    # Always re-resolve from cache_resource on each render
-    _groq_live   = _get_groq_client()
-    _or_live     = _get_openrouter_client()
-    _status_items = [
-        ("Gemini", True, "#2ecc6e"),
-        ("Groq",        bool(_groq_live), "#2ecc6e" if _groq_live else "#f05c5c"),
-        ("OpenRouter",  bool(_or_live),   "#2ecc6e" if _or_live   else "#f0b040"),
-    ]
-    _status_html = "<div style='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px'>"
-    for _name, _ok, _col in _status_items:
-        _icon = "✅" if _ok else ("⚠️" if _name == "Groq" else "○")
-        _status_html += (
-            f"<span style='background:rgba(30,30,30,0.6);border:1px solid {_col}44;"
-            f"border-radius:20px;padding:3px 10px;font-size:0.73rem;"
-            f"color:{_col};white-space:nowrap'>{_icon} {_name}</span>"
-        )
-    _status_html += f"<span style='background:rgba(92,168,240,0.12);border:1px solid #5ca8f044;"                     f"border-radius:20px;padding:3px 10px;font-size:0.73rem;color:#5ca8f0;white-space:nowrap'>"                     f"⚡ {len(_RESPONSE_CACHE)} cached</span></div>"
-    st.markdown(_status_html, unsafe_allow_html=True)
     st.markdown("---")
 
     # ── 🔭 Vision Model selector ──────────────────────────────────
@@ -2307,6 +2180,365 @@ if "model_choice" not in st.session_state:
 # debug_mode / show_tips / confidence_min managed by sidebar
 
 # ============ MAIN PAGES ============
+
+# --- User Manual ---
+if page == "📖 User Manual":
+
+    st.markdown("""
+    <div class="page-header">
+        <div class="page-title">📖 User Manual</div>
+        <div class="page-subtitle">How to use AI Plant Doctor — सरल मार्गदर्शिका</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Language selector
+    _manual_lang = st.selectbox(
+        "🌐 Select Language / भाषा चुनें",
+        ["English", "हिंदी (Hindi)", "ਪੰਜਾਬੀ (Punjabi)", "मराठी (Marathi)",
+         "தமிழ் (Tamil)", "తెలుగు (Telugu)", "ಕನ್ನಡ (Kannada)", "বাংলা (Bengali)", "ગુજરાતી (Gujarati)"],
+        key="manual_lang_select"
+    )
+
+    _manual_css = """
+    <style>
+    .manual-card {
+        background: linear-gradient(135deg, #0c1610 0%, #0e1c12 100%);
+        border: 1px solid rgba(74,200,95,0.18);
+        border-radius: 16px;
+        padding: 28px 32px;
+        margin: 14px 0;
+        font-family: 'Noto Sans', 'Plus Jakarta Sans', Arial, sans-serif;
+        line-height: 1.85;
+    }
+    .manual-section-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #2ecc6e;
+        letter-spacing: 0.04em;
+        margin-bottom: 10px;
+        margin-top: 4px;
+        border-bottom: 1px solid rgba(46,204,110,0.18);
+        padding-bottom: 6px;
+    }
+    .manual-step {
+        background: rgba(46,204,110,0.06);
+        border-left: 3px solid #2ecc6e;
+        border-radius: 0 8px 8px 0;
+        padding: 10px 16px;
+        margin: 8px 0;
+        color: #c8e6cc;
+        font-size: 0.97rem;
+    }
+    .manual-step b { color: #7af0a0; }
+    .manual-tip {
+        background: rgba(240,192,64,0.07);
+        border-left: 3px solid #f0c040;
+        border-radius: 0 8px 8px 0;
+        padding: 10px 16px;
+        margin: 8px 0;
+        color: #fde9a2;
+        font-size: 0.93rem;
+    }
+    .manual-warning {
+        background: rgba(240,92,92,0.07);
+        border-left: 3px solid #f05c5c;
+        border-radius: 0 8px 8px 0;
+        padding: 10px 16px;
+        margin: 8px 0;
+        color: #ffa0a0;
+        font-size: 0.93rem;
+    }
+    .manual-card p, .manual-card li { color: #c8e6cc; font-size: 0.97rem; }
+    .manual-lang-badge {
+        display: inline-block;
+        background: rgba(46,204,110,0.12);
+        border: 1px solid rgba(46,204,110,0.35);
+        border-radius: 20px;
+        padding: 3px 14px;
+        font-size: 0.75rem;
+        color: #7af0a0;
+        font-weight: 700;
+        margin-bottom: 16px;
+        letter-spacing: 0.08em;
+    }
+    </style>
+    """
+    st.markdown(_manual_css, unsafe_allow_html=True)
+
+    _manuals = {
+
+"English": """
+<div class='manual-card'>
+<div class='manual-lang-badge'>🇬🇧 ENGLISH</div>
+<div class='manual-section-title'>🌿 What is AI Plant Doctor?</div>
+<p>AI Plant Doctor is a free tool that looks at a photo of your plant and tells you what disease it has and how to treat it. You do not need to know anything about computers or AI to use it.</p>
+
+<div class='manual-section-title'>📸 Step 1 — Take a Clear Photo</div>
+<div class='manual-step'><b>Take a close photo</b> of the sick leaf or plant part. Make sure the photo is clear and bright. Avoid blurry or dark photos.</div>
+<div class='manual-tip'>💡 Tip: Take the photo in sunlight for best results.</div>
+
+<div class='manual-section-title'>🔍 Step 2 — Open AI Plant Doctor</div>
+<div class='manual-step'>Click on <b>"AI Plant Doctor"</b> in the left side menu.</div>
+
+<div class='manual-section-title'>📤 Step 3 — Upload the Photo</div>
+<div class='manual-step'>Click the <b>"Browse files"</b> button and select your photo from your phone or computer.</div>
+
+<div class='manual-section-title'>🌱 Step 4 — Select Your Plant</div>
+<div class='manual-step'>Choose your plant name from the dropdown list (e.g. Tomato, Wheat, Rose).</div>
+
+<div class='manual-section-title'>✅ Step 5 — Get Your Result</div>
+<div class='manual-step'>Click <b>"Diagnose Plant"</b>. In a few seconds you will see the disease name, how serious it is, and how to treat it with both organic and chemical options.</div>
+
+<div class='manual-section-title'>💊 Step 6 — Get Treatment Plan</div>
+<div class='manual-step'>Scroll down to see the full treatment. You will see medicine names, how much to use, and how to apply.</div>
+
+<div class='manual-tip'>💡 Use the <b>KisanAI Assistant</b> page to ask any farming question in your own words.</div>
+<div class='manual-warning'>⚠️ Always read the medicine label before use. Consult a local agronomist for severe cases.</div>
+</div>
+""",
+
+"हिंदी (Hindi)": """
+<div class='manual-card'>
+<div class='manual-lang-badge'>🇮🇳 हिंदी</div>
+<div class='manual-section-title'>🌿 AI Plant Doctor क्या है?</div>
+<p>AI Plant Doctor एक मुफ़्त उपकरण है जो आपके पौधे की फ़ोटो देखकर बताता है कि उसे कौन सी बीमारी है और उसका इलाज कैसे करें। आपको कंप्यूटर या AI के बारे में कुछ जानने की ज़रूरत नहीं है।</p>
+
+<div class='manual-section-title'>📸 कदम 1 — साफ़ फ़ोटो लें</div>
+<div class='manual-step'><b>बीमार पत्ते या पौधे के हिस्से की पास से फ़ोटो लें।</b> फ़ोटो साफ़ और रोशनी में होनी चाहिए।</div>
+<div class='manual-tip'>💡 सुझाव: धूप में फ़ोटो लें — सबसे अच्छा परिणाम मिलेगा।</div>
+
+<div class='manual-section-title'>🔍 कदम 2 — AI Plant Doctor खोलें</div>
+<div class='manual-step'>बाईं तरफ़ के मेनू में <b>"AI Plant Doctor"</b> पर क्लिक करें।</div>
+
+<div class='manual-section-title'>📤 कदम 3 — फ़ोटो अपलोड करें</div>
+<div class='manual-step'><b>"Browse files"</b> बटन पर क्लिक करें और अपनी फ़ोटो चुनें।</div>
+
+<div class='manual-section-title'>🌱 कदम 4 — पौधा चुनें</div>
+<div class='manual-step'>सूची में से अपने पौधे का नाम चुनें (जैसे टमाटर, गेहूँ, गुलाब)।</div>
+
+<div class='manual-section-title'>✅ कदम 5 — परिणाम देखें</div>
+<div class='manual-step'><b>"Diagnose Plant"</b> बटन दबाएँ। कुछ सेकंड में बीमारी का नाम, कितनी गंभीर है, और इलाज दिखेगा।</div>
+
+<div class='manual-section-title'>💊 कदम 6 — इलाज देखें</div>
+<div class='manual-step'>नीचे स्क्रॉल करें — दवाई का नाम, कितनी मात्रा लेनी है, और कैसे लगाएँ — सब दिखेगा।</div>
+
+<div class='manual-tip'>💡 किसी भी खेती के सवाल के लिए <b>KisanAI Assistant</b> पेज पर जाएँ।</div>
+<div class='manual-warning'>⚠️ दवाई इस्तेमाल करने से पहले लेबल ज़रूर पढ़ें। गंभीर मामलों में कृषि विशेषज्ञ से मिलें।</div>
+</div>
+""",
+
+"ਪੰਜਾਬੀ (Punjabi)": """
+<div class='manual-card'>
+<div class='manual-lang-badge'>🌾 ਪੰਜਾਬੀ</div>
+<div class='manual-section-title'>🌿 AI Plant Doctor ਕੀ ਹੈ?</div>
+<p>AI Plant Doctor ਇੱਕ ਮੁਫ਼ਤ ਸੰਦ ਹੈ ਜੋ ਤੁਹਾਡੇ ਪੌਦੇ ਦੀ ਫ਼ੋਟੋ ਦੇਖ ਕੇ ਦੱਸਦਾ ਹੈ ਕਿ ਉਸਨੂੰ ਕਿਹੜੀ ਬਿਮਾਰੀ ਹੈ ਅਤੇ ਇਲਾਜ ਕਿਵੇਂ ਕਰਨਾ ਹੈ। ਤੁਹਾਨੂੰ ਕੰਪਿਊਟਰ ਬਾਰੇ ਕੁਝ ਜਾਣਨ ਦੀ ਲੋੜ ਨਹੀਂ।</p>
+
+<div class='manual-section-title'>📸 ਕਦਮ 1 — ਸਾਫ਼ ਫ਼ੋਟੋ ਲਓ</div>
+<div class='manual-step'><b>ਬਿਮਾਰ ਪੱਤੇ ਦੀ ਨੇੜੇ ਤੋਂ ਫ਼ੋਟੋ ਲਓ।</b> ਫ਼ੋਟੋ ਸਾਫ਼ ਅਤੇ ਚਮਕਦਾਰ ਰੋਸ਼ਨੀ ਵਿੱਚ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ।</div>
+<div class='manual-tip'>💡 ਸੁਝਾਅ: ਧੁੱਪ ਵਿੱਚ ਫ਼ੋਟੋ ਲਓ — ਸਭ ਤੋਂ ਵਧੀਆ ਨਤੀਜਾ ਮਿਲੇਗਾ।</div>
+
+<div class='manual-section-title'>🔍 ਕਦਮ 2 — AI Plant Doctor ਖੋਲ੍ਹੋ</div>
+<div class='manual-step'>ਖੱਬੇ ਪਾਸੇ ਦੇ ਮੀਨੂ ਵਿੱਚ <b>"AI Plant Doctor"</b> ਤੇ ਕਲਿੱਕ ਕਰੋ।</div>
+
+<div class='manual-section-title'>📤 ਕਦਮ 3 — ਫ਼ੋਟੋ ਅਪਲੋਡ ਕਰੋ</div>
+<div class='manual-step'><b>"Browse files"</b> ਬਟਨ ਤੇ ਕਲਿੱਕ ਕਰੋ ਅਤੇ ਆਪਣੀ ਫ਼ੋਟੋ ਚੁਣੋ।</div>
+
+<div class='manual-section-title'>🌱 ਕਦਮ 4 — ਪੌਦਾ ਚੁਣੋ</div>
+<div class='manual-step'>ਸੂਚੀ ਵਿੱਚੋਂ ਆਪਣੇ ਪੌਦੇ ਦਾ ਨਾਮ ਚੁਣੋ (ਜਿਵੇਂ ਟਮਾਟਰ, ਕਣਕ, ਗੁਲਾਬ)।</div>
+
+<div class='manual-section-title'>✅ ਕਦਮ 5 — ਨਤੀਜਾ ਦੇਖੋ</div>
+<div class='manual-step'><b>"Diagnose Plant"</b> ਬਟਨ ਦਬਾਓ। ਕੁਝ ਸਕਿੰਟਾਂ ਵਿੱਚ ਬਿਮਾਰੀ ਦਾ ਨਾਮ ਅਤੇ ਇਲਾਜ ਦਿਖੇਗਾ।</div>
+
+<div class='manual-section-title'>💊 ਕਦਮ 6 — ਇਲਾਜ ਦੇਖੋ</div>
+<div class='manual-step'>ਹੇਠਾਂ ਸਕ੍ਰੋਲ ਕਰੋ — ਦਵਾਈ ਦਾ ਨਾਮ, ਕਿੰਨੀ ਮਾਤਰਾ, ਅਤੇ ਕਿਵੇਂ ਲਗਾਉਣੀ ਹੈ — ਸਭ ਦਿਖੇਗਾ।</div>
+
+<div class='manual-tip'>💡 ਕਿਸੇ ਵੀ ਖੇਤੀ ਸਵਾਲ ਲਈ <b>KisanAI Assistant</b> ਪੇਜ ਤੇ ਜਾਓ।</div>
+<div class='manual-warning'>⚠️ ਦਵਾਈ ਵਰਤਣ ਤੋਂ ਪਹਿਲਾਂ ਲੇਬਲ ਜ਼ਰੂਰ ਪੜ੍ਹੋ। ਗੰਭੀਰ ਮਾਮਲਿਆਂ ਵਿੱਚ ਖੇਤੀ ਮਾਹਰ ਤੋਂ ਮਦਦ ਲਓ।</div>
+</div>
+""",
+
+"मराठी (Marathi)": """
+<div class='manual-card'>
+<div class='manual-lang-badge'>🇮🇳 मराठी</div>
+<div class='manual-section-title'>🌿 AI Plant Doctor म्हणजे काय?</div>
+<p>AI Plant Doctor हे एक मोफत साधन आहे जे तुमच्या झाडाचा फोटो पाहून सांगते की त्याला कोणता रोग आहे आणि उपचार कसे करायचे. संगणक किंवा AI बद्दल काहीही माहित असणे गरजेचे नाही.</p>
+
+<div class='manual-section-title'>📸 पायरी 1 — स्पष्ट फोटो काढा</div>
+<div class='manual-step'><b>आजारी पान किंवा झाडाच्या भागाचा जवळून फोटो काढा.</b> फोटो स्पष्ट आणि प्रकाशात असावा.</div>
+<div class='manual-tip'>💡 सूचना: उन्हात फोटो काढा — सर्वोत्तम परिणाम मिळेल.</div>
+
+<div class='manual-section-title'>🔍 पायरी 2 — AI Plant Doctor उघडा</div>
+<div class='manual-step'>डाव्या बाजूच्या मेनूमध्ये <b>"AI Plant Doctor"</b> वर क्लिक करा.</div>
+
+<div class='manual-section-title'>📤 पायरी 3 — फोटो अपलोड करा</div>
+<div class='manual-step'><b>"Browse files"</b> बटणावर क्लिक करा आणि तुमचा फोटो निवडा.</div>
+
+<div class='manual-section-title'>🌱 पायरी 4 — झाड निवडा</div>
+<div class='manual-step'>यादीतून तुमच्या झाडाचे नाव निवडा (उदा. टोमॅटो, गहू, गुलाब).</div>
+
+<div class='manual-section-title'>✅ पायरी 5 — निकाल पहा</div>
+<div class='manual-step'><b>"Diagnose Plant"</b> बटण दाबा. काही सेकंदात रोगाचे नाव आणि उपचार दिसेल.</div>
+
+<div class='manual-section-title'>💊 पायरी 6 — उपचार पहा</div>
+<div class='manual-step'>खाली स्क्रोल करा — औषधाचे नाव, किती प्रमाण, आणि कसे वापरायचे — सर्व दिसेल.</div>
+
+<div class='manual-tip'>💡 शेतीच्या कोणत्याही प्रश्नासाठी <b>KisanAI Assistant</b> पेजवर जा.</div>
+<div class='manual-warning'>⚠️ औषध वापरण्यापूर्वी लेबल वाचा. गंभीर प्रकरणात कृषी तज्ञाचा सल्ला घ्या.</div>
+</div>
+""",
+
+"தமிழ் (Tamil)": """
+<div class='manual-card'>
+<div class='manual-lang-badge'>🌿 தமிழ்</div>
+<div class='manual-section-title'>🌿 AI Plant Doctor என்றால் என்ன?</div>
+<p>AI Plant Doctor என்பது ஒரு இலவச கருவி. உங்கள் செடியின் புகைப்படத்தை பார்த்து, அதற்கு என்ன நோய் என்று கூறும், சிகிச்சை எப்படி செய்வது என்றும் சொல்லும். கணினி அல்லது AI பற்றி எதுவும் தெரியாமலும் பயன்படுத்தலாம்.</p>
+
+<div class='manual-section-title'>📸 படி 1 — தெளிவான புகைப்படம் எடுக்கவும்</div>
+<div class='manual-step'><b>நோய்வாய்ப்பட்ட இலை அல்லது செடியின் அருகில் இருந்து படம் எடுக்கவும்.</b> படம் தெளிவாகவும் நன்கு வெளிச்சத்திலும் இருக்க வேண்டும்.</div>
+<div class='manual-tip'>💡 குறிப்பு: வெயிலில் படம் எடுக்கவும் — சிறந்த முடிவு கிடைக்கும்.</div>
+
+<div class='manual-section-title'>🔍 படி 2 — AI Plant Doctor திறக்கவும்</div>
+<div class='manual-step'>இடது பக்க மெனுவில் <b>"AI Plant Doctor"</b> என்பதை கிளிக் செய்யவும்.</div>
+
+<div class='manual-section-title'>📤 படி 3 — புகைப்படம் பதிவேற்றவும்</div>
+<div class='manual-step'><b>"Browse files"</b> பொத்தானை கிளிக் செய்து உங்கள் படத்தை தேர்ந்தெடுக்கவும்.</div>
+
+<div class='manual-section-title'>🌱 படி 4 — செடியை தேர்ந்தெடுக்கவும்</div>
+<div class='manual-step'>பட்டியலில் இருந்து உங்கள் செடியின் பெயரை தேர்ந்தெடுக்கவும் (எ.கா. தக்காளி, கோதுமை, ரோஜா).</div>
+
+<div class='manual-section-title'>✅ படி 5 — முடிவைப் பார்க்கவும்</div>
+<div class='manual-step'><b>"Diagnose Plant"</b> பொத்தானை அழுத்தவும். சில நொடிகளில் நோயின் பெயரும் சிகிச்சையும் தெரியும்.</div>
+
+<div class='manual-section-title'>💊 படி 6 — சிகிச்சை பார்க்கவும்</div>
+<div class='manual-step'>கீழே உருட்டவும் — மருந்தின் பெயர், எவ்வளவு பயன்படுத்தவும், எப்படி தெளிக்கவும் — அனைத்தும் தெரியும்.</div>
+
+<div class='manual-tip'>💡 எந்த விவசாய கேள்விக்கும் <b>KisanAI Assistant</b> பக்கத்திற்கு செல்லவும்.</div>
+<div class='manual-warning'>⚠️ மருந்து உபயோகிக்கும் முன் லேபிளை படிக்கவும். தீவிர நிலையில் வேளாண் நிபுணரை அணுகவும்.</div>
+</div>
+""",
+
+"తెలుగు (Telugu)": """
+<div class='manual-card'>
+<div class='manual-lang-badge'>🌾 తెలుగు</div>
+<div class='manual-section-title'>🌿 AI Plant Doctor అంటే ఏమిటి?</div>
+<p>AI Plant Doctor ఒక ఉచిత సాధనం. మీ మొక్క ఫోటో చూసి, దానికి ఏ వ్యాధి ఉందో చెప్పి, చికిత్స ఎలా చేయాలో కూడా చెప్తుంది. కంప్యూటర్ లేదా AI గురించి ఏమీ తెలియకపోయినా వాడవచ్చు.</p>
+
+<div class='manual-section-title'>📸 దశ 1 — స్పష్టమైన ఫోటో తీయండి</div>
+<div class='manual-step'><b>జబ్బుపడిన ఆకు లేదా మొక్క భాగాన్ని దగ్గరగా ఫోటో తీయండి.</b> ఫోటో స్పష్టంగా మరియు వెలుతురులో ఉండాలి.</div>
+<div class='manual-tip'>💡 సూచన: ఎండలో ఫోటో తీయండి — అత్యుత్తమ ఫలితం వస్తుంది.</div>
+
+<div class='manual-section-title'>🔍 దశ 2 — AI Plant Doctor తెరవండి</div>
+<div class='manual-step'>ఎడమ వైపు మెనూలో <b>"AI Plant Doctor"</b> క్లిక్ చేయండి.</div>
+
+<div class='manual-section-title'>📤 దశ 3 — ఫోటో అప్‌లోడ్ చేయండి</div>
+<div class='manual-step'><b>"Browse files"</b> బటన్ నొక్కి మీ ఫోటో ఎంచుకోండి.</div>
+
+<div class='manual-section-title'>🌱 దశ 4 — మొక్క ఎంచుకోండి</div>
+<div class='manual-step'>జాబితా నుండి మీ మొక్క పేరు ఎంచుకోండి (ఉదా. టమోటా, గోధుమ, గులాబి).</div>
+
+<div class='manual-section-title'>✅ దశ 5 — ఫలితం చూడండి</div>
+<div class='manual-step'><b>"Diagnose Plant"</b> నొక్కండి. కొన్ని సెకన్లలో వ్యాధి పేరు మరియు చికిత్స కనిపిస్తుంది.</div>
+
+<div class='manual-section-title'>💊 దశ 6 — చికిత్స చూడండి</div>
+<div class='manual-step'>కిందకు స్క్రోల్ చేయండి — మందు పేరు, ఎంత వాడాలి, ఎలా వేయాలి — అన్నీ కనిపిస్తాయి.</div>
+
+<div class='manual-tip'>💡 ఏ వ్యవసాయ సందేహానికైనా <b>KisanAI Assistant</b> పేజీకి వెళ్ళండి.</div>
+<div class='manual-warning'>⚠️ మందు వాడే ముందు లేబుల్ చదవండి. తీవ్రమైన సందర్భాల్లో వ్యవసాయ నిపుణుడిని సంప్రదించండి.</div>
+</div>
+""",
+
+"ಕನ್ನಡ (Kannada)": """
+<div class='manual-card'>
+<div class='manual-lang-badge'>🌿 ಕನ್ನಡ</div>
+<div class='manual-section-title'>🌿 AI Plant Doctor ಎಂದರೇನು?</div>
+<p>AI Plant Doctor ಒಂದು ಉಚಿತ ಸಾಧನ. ನಿಮ್ಮ ಗಿಡದ ಫೋಟೋ ನೋಡಿ ಅದಕ್ಕೆ ಯಾವ ರೋಗ ಇದೆ ಎಂದು ಹೇಳುತ್ತದೆ ಮತ್ತು ಚಿಕಿತ್ಸೆ ಹೇಗೆ ಮಾಡಬೇಕು ಎಂದೂ ತಿಳಿಸುತ್ತದೆ. ಕಂಪ್ಯೂಟರ್ ಬಗ್ಗೆ ಏನೂ ತಿಳಿಯದಿದ್ದರೂ ಬಳಸಬಹುದು.</p>
+
+<div class='manual-section-title'>📸 ಹಂತ 1 — ಸ್ಪಷ್ಟ ಫೋಟೋ ತೆಗೆಯಿರಿ</div>
+<div class='manual-step'><b>ರೋಗಿಷ್ಟ ಎಲೆ ಅಥವಾ ಗಿಡದ ಭಾಗವನ್ನು ಹತ್ತಿರದಿಂದ ಫೋಟೋ ತೆಗೆಯಿರಿ.</b> ಫೋಟೋ ಸ್ಪಷ್ಟ ಮತ್ತು ಬೆಳಕಿನಲ್ಲಿ ಇರಬೇಕು.</div>
+<div class='manual-tip'>💡 ಸಲಹೆ: ಬಿಸಿಲಿನಲ್ಲಿ ಫೋಟೋ ತೆಗೆಯಿರಿ — ಉತ್ತಮ ಫಲಿತಾಂಶ ಸಿಗುತ್ತದೆ.</div>
+
+<div class='manual-section-title'>🔍 ಹಂತ 2 — AI Plant Doctor ತೆರೆಯಿರಿ</div>
+<div class='manual-step'>ಎಡ ಬದಿಯ ಮೆನುವಿನಲ್ಲಿ <b>"AI Plant Doctor"</b> ಕ್ಲಿಕ್ ಮಾಡಿ.</div>
+
+<div class='manual-section-title'>📤 ಹಂತ 3 — ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ</div>
+<div class='manual-step'><b>"Browse files"</b> ಬಟನ್ ಒತ್ತಿ ನಿಮ್ಮ ಫೋಟೋ ಆಯ್ಕೆ ಮಾಡಿ.</div>
+
+<div class='manual-section-title'>🌱 ಹಂತ 4 — ಗಿಡ ಆಯ್ಕೆ ಮಾಡಿ</div>
+<div class='manual-step'>ಪಟ್ಟಿಯಿಂದ ನಿಮ್ಮ ಗಿಡದ ಹೆಸರು ಆಯ್ಕೆ ಮಾಡಿ (ಉದಾ. ಟೊಮಾಟೊ, ಗೋಧಿ, ಗುಲಾಬಿ).</div>
+
+<div class='manual-section-title'>✅ ಹಂತ 5 — ಫಲಿತಾಂಶ ನೋಡಿ</div>
+<div class='manual-step'><b>"Diagnose Plant"</b> ಒತ್ತಿ. ಕೆಲವು ಸೆಕೆಂಡುಗಳಲ್ಲಿ ರೋಗದ ಹೆಸರು ಮತ್ತು ಚಿಕಿತ್ಸೆ ಕಾಣಿಸುತ್ತದೆ.</div>
+
+<div class='manual-section-title'>💊 ಹಂತ 6 — ಚಿಕಿತ್ಸೆ ನೋಡಿ</div>
+<div class='manual-step'>ಕೆಳಗೆ ಸ್ಕ್ರೋಲ್ ಮಾಡಿ — ಔಷಧದ ಹೆಸರು, ಎಷ್ಟು ಬಳಸಬೇಕು, ಹೇಗೆ ಹಾಕಬೇಕು — ಎಲ್ಲ ಕಾಣಿಸುತ್ತದೆ.</div>
+
+<div class='manual-tip'>💡 ಯಾವುದೇ ಕೃಷಿ ಪ್ರಶ್ನೆಗೆ <b>KisanAI Assistant</b> ಪುಟಕ್ಕೆ ಹೋಗಿ.</div>
+<div class='manual-warning'>⚠️ ಔಷಧ ಬಳಸುವ ಮುಂಚೆ ಲೇಬಲ್ ಓದಿ. ತೀವ್ರ ಸಂದರ್ಭದಲ್ಲಿ ಕೃಷಿ ತಜ್ಞರನ್ನು ಸಂಪರ್ಕಿಸಿ.</div>
+</div>
+""",
+
+"বাংলা (Bengali)": """
+<div class='manual-card'>
+<div class='manual-lang-badge'>🇧🇩 বাংলা</div>
+<div class='manual-section-title'>🌿 AI Plant Doctor কী?</div>
+<p>AI Plant Doctor একটি বিনামূল্যের সরঞ্জাম। আপনার গাছের ছবি দেখে বলে দেয় কোন রোগ হয়েছে এবং কীভাবে চিকিৎসা করতে হবে। কম্পিউটার বা AI সম্পর্কে কিছু না জানলেও ব্যবহার করা যাবে।</p>
+
+<div class='manual-section-title'>📸 ধাপ ১ — স্পষ্ট ছবি তুলুন</div>
+<div class='manual-step'><b>অসুস্থ পাতা বা গাছের অংশের কাছ থেকে ছবি তুলুন।</b> ছবি স্পষ্ট ও আলোকিত হওয়া উচিত।</div>
+<div class='manual-tip'>💡 পরামর্শ: রোদে ছবি তুলুন — সেরা ফলাফল পাবেন।</div>
+
+<div class='manual-section-title'>🔍 ধাপ ২ — AI Plant Doctor খুলুন</div>
+<div class='manual-step'>বাম দিকের মেনুতে <b>"AI Plant Doctor"</b> তে ক্লিক করুন।</div>
+
+<div class='manual-section-title'>📤 ধাপ ৩ — ছবি আপলোড করুন</div>
+<div class='manual-step'><b>"Browse files"</b> বাটনে ক্লিক করুন এবং আপনার ছবি বেছে নিন।</div>
+
+<div class='manual-section-title'>🌱 ধাপ ৪ — গাছ বেছে নিন</div>
+<div class='manual-step'>তালিকা থেকে আপনার গাছের নাম বেছে নিন (যেমন টমেটো, গম, গোলাপ)।</div>
+
+<div class='manual-section-title'>✅ ধাপ ৫ — ফলাফল দেখুন</div>
+<div class='manual-step'><b>"Diagnose Plant"</b> চাপুন। কয়েক সেকেন্ডে রোগের নাম ও চিকিৎসা দেখাবে।</div>
+
+<div class='manual-section-title'>💊 ধাপ ৬ — চিকিৎসা দেখুন</div>
+<div class='manual-step'>নিচে স্ক্রোল করুন — ওষুধের নাম, কতটুকু ব্যবহার করবেন, কীভাবে দেবেন — সব দেখাবে।</div>
+
+<div class='manual-tip'>💡 যেকোনো কৃষি প্রশ্নের জন্য <b>KisanAI Assistant</b> পেজে যান।</div>
+<div class='manual-warning'>⚠️ ওষুধ ব্যবহারের আগে লেবেল পড়ুন। গুরুতর ক্ষেত্রে কৃষি বিশেষজ্ঞের পরামর্শ নিন।</div>
+</div>
+""",
+
+"ગુજરાતી (Gujarati)": """
+<div class='manual-card'>
+<div class='manual-lang-badge'>🌾 ગુજરાતી</div>
+<div class='manual-section-title'>🌿 AI Plant Doctor શું છે?</div>
+<p>AI Plant Doctor એક મફત સાધન છે. તમારા છોડની ફોટો જોઈને કહે છે કે કઈ બીમારી છે અને ઈલાજ કેવી રીતે કરવો. કોમ્પ્યુટર કે AI વિશે કંઈ ન જાણો તો પણ ઉપયોગ કરી શકો.</p>
+
+<div class='manual-section-title'>📸 પગલું 1 — સ્પષ્ટ ફોટો લો</div>
+<div class='manual-step'><b>બીમાર પાન અથવા છોડના ભાગનો નજીકથી ફોટો લો.</b> ફોટો સ્પષ્ટ અને પ્રકાશમાં હોવો જોઈએ.</div>
+<div class='manual-tip'>💡 સૂચન: તડકામાં ફોટો લો — સૌથી સારો પરિણામ મળશે.</div>
+
+<div class='manual-section-title'>🔍 પગલું 2 — AI Plant Doctor ખોલો</div>
+<div class='manual-step'>ડાબી બાજુના મેનૂમાં <b>"AI Plant Doctor"</b> પર ક્લિક કરો.</div>
+
+<div class='manual-section-title'>📤 પગલું 3 — ફોટો અપલોડ કરો</div>
+<div class='manual-step'><b>"Browse files"</b> બટન પર ક્લિક કરો અને તમારો ફોટો પસંદ કરો.</div>
+
+<div class='manual-section-title'>🌱 પગલું 4 — છોડ પસંદ કરો</div>
+<div class='manual-step'>યાદીમાંથી તમારા છોડનું નામ પસંદ કરો (દા.ત. ટામેટા, ઘઉં, ગુલાબ).</div>
+
+<div class='manual-section-title'>✅ પગલું 5 — પરિણામ જુઓ</div>
+<div class='manual-step'><b>"Diagnose Plant"</b> બટન દબાવો. થોડી સેકન્ડમાં બીમારીનું નામ અને ઈલાજ દેખાશે.</div>
+
+<div class='manual-section-title'>💊 પગલું 6 — ઈલાજ જુઓ</div>
+<div class='manual-step'>નીચે સ્ક્રોલ કરો — દવાનું નામ, કેટલી માત્રા, કેવી રીતે આપવી — બધું દેખાશે.</div>
+
+<div class='manual-tip'>💡 ખેતીના કોઈ પણ સવાલ માટે <b>KisanAI Assistant</b> પેજ પર જાઓ.</div>
+<div class='manual-warning'>⚠️ દવા વાપરતા પહેલા લેબલ વાંચો. ગંભીર કેસમાં કૃષિ નિષ્ણાત પાસે જાઓ.</div>
+</div>
+"""
+    }
+
+    st.markdown(_manuals.get(_manual_lang, _manuals["English"]), unsafe_allow_html=True)
 
 # --- AI Plant Doctor ---
 if page == "AI Plant Doctor":
