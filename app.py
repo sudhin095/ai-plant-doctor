@@ -1186,12 +1186,10 @@ def _is_quota_err(e):
 
 def _has_internet(timeout: int = 3) -> bool:
     try:
-        socket.setdefaulttimeout(timeout)
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(("8.8.8.8", 53))
-        s.close()
+        import urllib.request as _ur
+        _ur.urlopen("https://www.google.com", timeout=timeout)
         return True
-    except OSError:
+    except Exception:
         return False
 
 def _is_ollama_running() -> bool:
