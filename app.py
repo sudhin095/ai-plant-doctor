@@ -2187,7 +2187,7 @@ if page == "📖 User Manual":
     st.markdown("""
     <div class="page-header">
         <div class="page-title">📖 User Manual</div>
-        <div class="page-subtitle">How to use AI Plant Doctor — सरल मार्गदर्शिका</div>
+        <div class="page-subtitle">How to use AI Plant Doctorा</div>
     </div>
     """, unsafe_allow_html=True)
 
